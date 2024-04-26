@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:checkableBehavior="single" >
+
+        <item
+            android:id="@+id/action_home"
+            android:icon="@drawable/location_map"
+            android:title="首頁" />
+
+        <item
+            android:id="@+id/action_book"
+            android:icon="@drawable/bookmark"
+            android:title="書籤" />
+
+        <item
+            android:id="@+id/action_history"
+            android:icon="@drawable/clock"
+            android:title="歷史紀錄" />
+
+        <item
+            android:id="@+id/action_setting"
+            android:icon="@drawable/setting"
+            android:title="設定" />
+    </group>
+
+</menu>

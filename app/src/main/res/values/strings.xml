@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Fragment_map_leftlist_test3</string>
+    <string name="drawer_open">Drawer_opened</string>
+    <string name="drawer_close">Drawer_closed</string>
+    <string name="google_maps_key" translatable="false">AIzaSyCbpeVvXVw2iTtAS_Fe-CS8_v8RHq2kX3k</string>
+
+</resources>
