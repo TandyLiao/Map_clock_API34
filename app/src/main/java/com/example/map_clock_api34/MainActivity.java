@@ -1,30 +1,14 @@
 package com.example.map_clock_api34;
-import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -32,11 +16,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
-    private MapsFragment mapsFragment;
+    private HomeFragment homeFragment;
     private BookFragment bookFragment;
 
     private HistoryFragment historyFragment;
@@ -78,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         //初始化地圖(第一個頁面是MAP)
-        mapsFragment = new MapsFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container,mapsFragment,"map").commit();
+        homeFragment = new HomeFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, homeFragment,"map").commit();
         //選單點擊
         navigation_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -94,9 +75,9 @@ public class MainActivity extends AppCompatActivity {
                 // 依照id判斷點了哪個項目並做相應事件
                 if (id == R.id.action_home) {
 
-                    mapsFragment = new MapsFragment();
+                    homeFragment = new HomeFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,mapsFragment,"map").commit();
+                            .replace(R.id.fl_container, homeFragment,"map").commit();
                     Toast.makeText(MainActivity.this, "Dora map", Toast.LENGTH_SHORT).show();
                     return true;
 
