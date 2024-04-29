@@ -24,11 +24,11 @@ public class SharedViewModel extends ViewModel {
         return destinationName[j];
     }
 
-    public double getLatitude() {
-        return latitude[i];
+    public double getLatitude(int j) {
+        return latitude[j];
     }
 
-    public double getLongitude() {
-        return longitude[i];
+    public double getLongitude(int j) {
+        return longitude[j];
     }
 }

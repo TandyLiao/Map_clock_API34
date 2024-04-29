@@ -66,19 +66,19 @@ public class MapsFragment extends Fragment {
 
         @SuppressLint("MissingPermission")
         public void onMapReady(GoogleMap googleMap) {
+
             mMap=googleMap;
 
             //一直更新目前位置
             //locationManager.requestLocationUpdates(commandStr,1000,0,locationListener);
-
+            // 跑出藍色定位點
+            mMap.setMyLocationEnabled(true);
             //取得最後的定位位置
             lastLocation = locationManager.getLastKnownLocation(commandstr);
-            if (lastLocation != null) {
-                // 跑出藍色定位點
-                mMap.setMyLocationEnabled(true);
-                // 移动地图视图到最后已知的位置
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
-            }
+
+            // 移动地图视图到最后已知的位置
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
+
 
 
             //點擊地圖會直接跑出標示
@@ -110,50 +110,44 @@ public class MapsFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        commandstr=LocationManager.GPS_PROVIDER;//NETWORK_PROVIDER;
+        View v =inflater.inflate(R.layout.fragment_maps, container, false);
 
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+        start_autocompleteSupportFragment = (AutocompleteSupportFragment) getChildFragmentManager()
+                .findFragmentById(R.id.start_autocomplete_fragment2);
+
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(callback);
+        }
+
+        iniAutocomplete();
+        //搜尋功能監聽器
+        start_autocompleteSupportFragment.setOnPlaceSelectedListener(start_autocomplete_Listener);
 
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+
+        return v;
 
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
-        start_autocompleteSupportFragment = (AutocompleteSupportFragment) getChildFragmentManager()
-                .findFragmentById(R.id.start_autocomplete_fragment2);
-
-
-        ImageView huButton = view.findViewById(R.id.huButton);
-        huButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawerLayout);
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-        });
-
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(callback);
-        }
-        iniAutocomplete();
-        //搜尋功能監聽器
-        start_autocompleteSupportFragment.setOnPlaceSelectedListener(start_autocomplete_Listener);
         toolbar = getActivity().findViewById(R.id.toolbar);
-
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
         ImageView micro = getActivity().findViewById(R.id.microphoneButton);
         micro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
                 sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
 

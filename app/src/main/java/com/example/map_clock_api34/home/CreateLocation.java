@@ -3,16 +3,24 @@ package com.example.map_clock_api34.home;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -22,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.mapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,9 +47,14 @@ public class CreateLocation extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         v = inflater.inflate(R.layout.fragment_creatlocation, container, false);
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        if(sharedViewModel.getI()!=-1){
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
 
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        if(sharedViewModel.getI()!=-1){
             for(int j =0; j<=sharedViewModel.getI(); j++){
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("number",String.format("%02d",  j + 1));
@@ -50,6 +64,14 @@ public class CreateLocation extends Fragment {
 
         }
 
+        ImageView huButton = v.findViewById(R.id.huButton);
+        huButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         Button btnA = v.findViewById(R.id.btn_addItem);
         btnA.setOnClickListener(new View.OnClickListener() {
@@ -80,7 +102,7 @@ public class CreateLocation extends Fragment {
             }
         });
 
-        Button btnD = v.findViewById(R.id.btn_DropItem);
+        Button btnD = v.findViewById(R.id.btn_dropItem);
         btnD.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,6 +116,30 @@ public class CreateLocation extends Fragment {
             }
         });
 
+        Button btnReset = v.findViewById(R.id.btn_reset);
+        btnReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initPopWindow(v,sharedViewModel);
+            }
+        });
+
+
+        Button btnmapping = v.findViewById(R.id.btn_sure);
+        btnmapping.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sharedViewModel.getI() >=0) {
+                    mapping mapping = new mapping();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, mapping);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }else{
+                    Toast.makeText(getActivity(), "你還沒有選擇地點",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         //設置RecycleView
         recyclerView = v.findViewById(R.id.recycleView);
@@ -131,7 +177,6 @@ public class CreateLocation extends Fragment {
             holder.tx2.setText(arrayList.get(position).get("data"));
             ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
             layoutParams.height = 150;
-
             holder.itemView.setLayoutParams(layoutParams);
 
         }
@@ -141,5 +186,42 @@ public class CreateLocation extends Fragment {
         public int getItemCount() {
             return arrayList.size();
         }
+    }
+
+    private void initPopWindow(View v,SharedViewModel sharedViewModel){
+
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow, null, false);
+
+        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        popupWindow.setWidth(700);
+
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(false);
+        popupWindow.setTouchable(true);
+
+        popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
+
+        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        BTNPopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        btnsure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                while(sharedViewModel.getI()>=0){
+                    arrayList.remove(sharedViewModel.getI());
+                    sharedViewModel.setI();
+                }
+                recyclerView.setAdapter(listAdapter);
+                popupWindow.dismiss();
+            }
+        });
     }
 }
