@@ -123,4 +123,3 @@ public class mapping extends Fragment {
     }
 
 }
-
