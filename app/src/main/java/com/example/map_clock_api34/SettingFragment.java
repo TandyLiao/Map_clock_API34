@@ -5,9 +5,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +23,7 @@ import androidx.fragment.app.Fragment;
 public class SettingFragment extends Fragment {
     private TextView tx1;
     private Toolbar toolbar;
+    private Button interface_Button,remind_Button,language_Button;
 
     @Nullable
     @Override
@@ -30,12 +33,51 @@ public class SettingFragment extends Fragment {
         return view;
     }
 
+    public void onViewCreated2(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // 初始化按钮
+        interface_Button = view.findViewById(R.id.interface_Button);
+        remind_Button = view.findViewById(R.id.remind_Button);
+        language_Button = view.findViewById(R.id.language_Button);
+
+        // 为每个按钮设置点击事件监听器
+        interface_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 启动 SettingInterfaceActivity
+                startActivity(new Intent(requireContext(), SettingInterfaceActivity.class));
+            }
+        });
+
+        remind_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 启动其他 Activity 或执行其他操作
+                startActivity(new Intent(requireContext(), SettingRemind.class));
+            }
+        });
+
+        language_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 启动其他 Activity 或执行其他操作
+                startActivity(new Intent(requireContext(), SettingLanguage.class));
+            }
+        });
+
+        // 在此处添加其他现有代码...
+    }
+
+
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         tx1 = view.findViewById(R.id.textView);
         toolbar = getActivity().findViewById(R.id.toolbar);
         // 初始化 toolbar
+        onViewCreated2(view, savedInstanceState);
     }
 
     @Override

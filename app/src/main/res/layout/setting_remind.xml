@@ -1,60 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Your text here" />
-
-    <View
-        android:id="@+id/line2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/remind_Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <Button
-        android:id="@+id/interface_Button"
-        android:layout_width="200dp"
-        android:layout_height="82dp"
-        android:background="@drawable/oval_button_background"
-        android:elevation="20dp"
-        android:gravity="center"
-        android:onClick="ringDevice"
-        android:text="介面"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@+id/line2"
-        app:layout_constraintTop_toTopOf="@+id/line1" />
-
-    <View
-        android:id="@+id/line1"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/interface_Button"
-        app:layout_constraintTop_toBottomOf="@id/interface_Button" />
-
-    <Button
-        android:id="@+id/remind_Button"
+        android:id="@+id/ring_setting"
         android:layout_width="200dp"
         android:layout_height="82dp"
         android:elevation="20dp"
         android:gravity="center"
-        android:text="提醒"
+        android:text="鈴聲"
         android:background="@drawable/oval_button_background"
         android:textColor="@color/black"
         android:textSize="16sp"
@@ -63,49 +18,98 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="ringDevice" />
+        />
     <View
-        android:id="@+id/line3"
+        android:id="@+id/line1"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
         android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-
-        app:layout_constraintBottom_toBottomOf="@id/remind_Button"
-
-        app:layout_constraintTop_toTopOf="@id/language_Button"
-        />
+        app:layout_constraintBottom_toBottomOf="@id/ring_setting"/>
+    <View
+        android:id="@+id/line2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/black"
+        app:layout_constraintTop_toTopOf="@id/ring_setting"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/language_Button"
+        android:id="@+id/choose_setting"
         android:layout_width="200dp"
         android:layout_height="82dp"
         android:background="@drawable/oval_button_background"
         android:elevation="20dp"
         android:gravity="center"
-        android:onClick="ringDevice"
-        android:text="語言"
+        android:text="選擇鈴聲"
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/line3"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/line3"
-        app:layout_constraintTop_toTopOf="@+id/line4"/>
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/line1"
+        app:layout_constraintVertical_bias="0.0"
+  />
+
+    <View
+        android:id="@+id/line3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="160dp"
+        android:background="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ring_setting" />
+    <Button
+        android:id="@+id/vibrate_setting"
+        android:layout_width="200dp"
+        android:layout_height="82dp"
+        android:background="@drawable/oval_button_background"
+        android:elevation="20dp"
+        android:gravity="center"
+        android:text="震動"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/line3"
+        app:layout_constraintVertical_bias="0.0"
+      />
 
     <View
         android:id="@+id/line4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="80dp"
         android:background="@color/black"
-
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vibrate_setting" />
 
-        app:layout_constraintBottom_toBottomOf="@id/language_Button"
-        app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/back"
+        android:layout_width="200dp"
+        android:layout_height="82dp"
+        android:background="@drawable/oval_button_background"
+        android:elevation="20dp"
+        android:gravity="center"
+        android:text="回上一頁"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
