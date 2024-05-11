@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +34,7 @@ import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.mapping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class CreateLocation extends Fragment {
@@ -72,6 +74,15 @@ public class CreateLocation extends Fragment {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
         });
+        ImageView test = v.findViewById(R.id.imageView_weather);
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    Toast.makeText(getActivity(), arrayList.toString(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
 
         Button btnA = v.findViewById(R.id.btn_addItem);
         btnA.setOnClickListener(new View.OnClickListener() {
@@ -148,8 +159,10 @@ public class CreateLocation extends Fragment {
         listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
 
+        recyclerViewAction();
 
         return v;
+
     }
 
     //ListAdapter的class
@@ -187,6 +200,45 @@ public class CreateLocation extends Fragment {
             return arrayList.size();
         }
     }
+    private void recyclerViewAction(){
+            ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView,RecyclerView.ViewHolder viewHolder) {
+                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN ,0); //這裡是告訴RecyclerView你想開啟哪些操作
+            }
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                int position_dragged = viewHolder.getAdapterPosition();
+                int position_target = target.getAdapterPosition();
+                Collections.swap(arrayList, position_dragged, position_target);
+                listAdapter.notifyItemMoved(position_dragged, position_target);
+
+
+
+                return true;//管理上下拖曳
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+                int position = viewHolder.getAdapterPosition();
+                switch (direction) {
+                    case ItemTouchHelper.LEFT:
+                    case ItemTouchHelper.RIGHT:
+                        arrayList.remove(position);
+                        listAdapter.notifyItemRemoved(position);
+                        break;
+                //管理滑動情形
+            }
+            }
+
+
+        });
+            helper.attachToRecyclerView(recyclerView);
+    }
+
+
 
     private void initPopWindow(View v,SharedViewModel sharedViewModel){
 
