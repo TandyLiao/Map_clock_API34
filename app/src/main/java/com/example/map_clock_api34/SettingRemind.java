@@ -115,6 +115,8 @@ public class SettingRemind extends AppCompatActivity {
                 // 延迟3秒后停止播放
                 new Handler().postDelayed(new Runnable() {
                     @Override
+
+
                     public void run() {
                         stopRingtone();
                     }
