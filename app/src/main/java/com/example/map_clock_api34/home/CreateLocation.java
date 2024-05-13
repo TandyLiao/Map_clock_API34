@@ -2,6 +2,7 @@ package com.example.map_clock_api34.home;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,12 +28,15 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class CreateLocation extends Fragment {
     private View v;
@@ -158,6 +162,7 @@ public class CreateLocation extends Fragment {
 
         recyclerViewAction();
 
+
         return v;
 
     }
@@ -199,8 +204,10 @@ public class CreateLocation extends Fragment {
             ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
             @Override
             public int getMovementFlags(RecyclerView recyclerView,RecyclerView.ViewHolder viewHolder) {
-                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN ,0); //這裡是告訴RecyclerView你想開啟哪些操作
+                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN , ItemTouchHelper.LEFT );
+                //這裡是告訴RecyclerView你想開啟哪些操作
             }
+
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -213,7 +220,7 @@ public class CreateLocation extends Fragment {
                 return true;//管理上下拖曳
             }
 
-            @Override
+
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
                 int position = viewHolder.getAdapterPosition();
@@ -221,14 +228,26 @@ public class CreateLocation extends Fragment {
                     case ItemTouchHelper.LEFT:
                     case ItemTouchHelper.RIGHT:
                         arrayList.remove(position);
+                        sharedViewModel.delet(position);
                         listAdapter.notifyItemRemoved(position);
                         break;
                 //管理滑動情形
+                }
             }
-            }
+                @Override
+                public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                    new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                            .addBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.holo_red_dark))
+                            .addActionIcon(R.drawable.baseline_delete_24)
+                            .create()
+                            .decorate();
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                }
 
 
-        });
+            });
+
+
             helper.attachToRecyclerView(recyclerView);
     }
 

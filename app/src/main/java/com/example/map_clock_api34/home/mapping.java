@@ -91,7 +91,7 @@ public class mapping extends Fragment {
 
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0],startLocation.getLatitude(),startLocation.getLongitude())/1000;
             time =(int)Math.round(trip_distance/4*60);
-            txtTime.setText("公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
+            txtTime.setText("目的:"+destinationName[0]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
 
 
         }

@@ -30,6 +30,17 @@ public class SharedViewModel extends ViewModel {
         destinationName[start] = destinationName[end];
         destinationName[end] = stemp;
     }
+    public void delet(int position){
+
+        while(position!=i){
+            swap(position,position+1);
+            position++;
+        }
+        i--;
+
+    }
+
+
     public int getI(){
         return i;
     }
