@@ -38,9 +38,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SettingInterfaceActivity"></activity>
-        <activity android:name=".SettingLanguage" />
-        <activity android:name=".SettingRemind" />
+        <activity android:name=".setting.SettingInterfaceActivity"></activity>
+        <activity android:name=".setting.SettingLanguage" />
+        <activity android:name=".setting.SettingRemind" />
 
 
     </application>
