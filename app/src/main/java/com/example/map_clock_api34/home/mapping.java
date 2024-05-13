@@ -11,13 +11,18 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
+import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.home.CreateLocation;
@@ -38,10 +43,17 @@ public class mapping extends Fragment {
     private String commandstr = LocationManager.GPS_PROVIDER;
     Location lastLocation;
     private GoogleMap mMap;
+    TextView txtTime;
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
-    int j;
+    int j,i=0, count=0, totalTime=0;
+    double pre_distance, last_distance, speed, time;
+    Location startLocation;
+    LatLngBounds.Builder builder;
+    LatLng destiantion_LatLng;
+    LatLngBounds bounds;
+    View v;
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
@@ -49,49 +61,124 @@ public class mapping extends Fragment {
             mMap=googleMap;
 
             //一直更新目前位置
-            //locationManager.requestLocationUpdates(commandStr,1000,0,locationListener);
+            locationManager.requestLocationUpdates(commandstr,10000,0,locationListener);
 
             //取得最後的定位位置
             lastLocation = locationManager.getLastKnownLocation(commandstr);
 
-            LatLng[] destiantion_LatLng= new LatLng[7];
-
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder = new LatLngBounds.Builder();
 
             // 添加起點和目的地的位置
             builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-            for(int k=0 ; k<j ; k++){
-                destiantion_LatLng[k]= new LatLng(latitude[k],longitude[k]);
-                //在地圖上標示Marker
-                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng[k]).title(destinationName[k]));
-                builder.include(new LatLng(latitude[k], longitude[k]));
-            }
-
+            startLocation = locationManager.getLastKnownLocation(commandstr);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startLocation.getLatitude(),startLocation.getLongitude()),15));
 
             //跑出藍色定位點
             mMap.setMyLocationEnabled(true);
 
-
+            destiantion_LatLng= new LatLng(latitude[i],longitude[i]);
+            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[i]));
+            builder.include(new LatLng(latitude[i], longitude[i]));
 
             // 構建LatLngBounds對象
-            LatLngBounds bounds = builder.build();
+            bounds = builder.build();
 
             // 計算將這個邊界框移動到地圖中心所需的偏移量
             int padding = 100; // 偏移量（以像素為單位）
             // 移动地图视图到最后已知的位置
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
 
+
+            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0],startLocation.getLatitude(),startLocation.getLongitude())/1000;
+            time =(int)Math.round(trip_distance/4*60);
+            txtTime.setText("公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
+
+
         }
     };
+    public LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location nowLocation) {
 
+            pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(),startLocation.getLongitude(),nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
+            if(pre_distance>0.020){
+                last_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
+                speed =Math.round(pre_distance/totalTime/60*1000)/1000;
+                time=(int)Math.round(last_distance/speed);
+                txtTime.setText("目的地:"+destinationName[i]+"Pre_Km: "+pre_distance+"\n剩公里為: "+last_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
+            }
+            else{
+                totalTime-=10;
+            }
+
+            totalTime++;
+
+            if(last_distance<0.2 && time<5){
+                initPopWindow();
+            }
+
+        }
+    };
+    private void initPopWindow(){
+
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow, null, false);
+
+        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        popupWindow.setWidth(700);
+
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(false);
+        popupWindow.setTouchable(true);
+
+        popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
+
+        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        BTNPopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+        startLocation.setLatitude(latitude[i]);
+        startLocation.setLongitude(longitude[i]);
+        i++;
+
+        mMap.clear();
+        builder = new LatLngBounds.Builder();
+
+        // 添加起點和目的地的位置
+        builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+
+        destiantion_LatLng= new LatLng(latitude[i],longitude[i]);
+        mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[i]));
+        builder.include(new LatLng(latitude[i], longitude[i]));
+
+        // 構建LatLngBounds對象
+        bounds = builder.build();
+        // 計算將這個邊界框移動到地圖中心所需的偏移量
+        int padding = 100; // 偏移量（以像素為單位）
+        // 移动地图视图到最后已知的位置
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        Button btnSure = v.findViewById(R.id.btn_sure);
+        btnSure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+    }
+
+    @SuppressLint("MissingPermission")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.mapping, container, false);
+        v = inflater.inflate(R.layout.mapping, container, false);
 
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -99,6 +186,8 @@ public class mapping extends Fragment {
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapp);
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+        txtTime = v.findViewById(R.id.txtTime);
 
         Button btnBack = v.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(new View.OnClickListener() {

@@ -14,6 +14,22 @@ public class SharedViewModel extends ViewModel {
 
     }
 
+    public void swap(int start, int end){
+        double temp;
+        String stemp;
+
+        temp = latitude[start];
+        latitude[start] = latitude[end];
+        latitude[end] = temp;
+
+        temp = longitude[start];
+        longitude[start] = longitude[end];
+        longitude[end] = temp;
+
+        stemp = destinationName[start];
+        destinationName[start] = destinationName[end];
+        destinationName[end] = stemp;
+    }
     public int getI(){
         return i;
     }

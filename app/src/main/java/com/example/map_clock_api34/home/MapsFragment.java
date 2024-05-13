@@ -165,15 +165,6 @@ public class MapsFragment extends Fragment {
             }
         });
 
-        ImageView micro = getActivity().findViewById(R.id.microphoneButton);
-        micro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                
-            }
-        });
-
-
     }
 
 

@@ -38,6 +38,7 @@ public class CreateLocation extends Fragment {
     private View v;
     RecyclerView recyclerView;
     ListAdapter listAdapter;
+    SharedViewModel sharedViewModel;
 
     //新增一個HashMap存放每筆資料
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
@@ -51,12 +52,11 @@ public class CreateLocation extends Fragment {
             actionBar.hide();
         }
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         if(sharedViewModel.getI()!=-1){
             for(int j =0; j<=sharedViewModel.getI(); j++){
                 HashMap<String, String> hashMap = new HashMap<>();
-                hashMap.put("number",String.format("%02d",  j + 1));
                 hashMap.put("data",sharedViewModel.getDestinationName(j));
                 arrayList.add(hashMap);
             }
@@ -169,7 +169,6 @@ public class CreateLocation extends Fragment {
             private TextView tx1,tx2;
             public ViewHolder(View itemView) {
                 super(itemView);
-                tx1 = itemView.findViewById(R.id.txtVID);
                 tx2 = itemView.findViewById(R.id.textVLocateionName);
             }
         }
@@ -183,7 +182,6 @@ public class CreateLocation extends Fragment {
         //從HashMap中抓取資料並將其印出
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.tx1.setText(arrayList.get(position).get("number"));
             holder.tx2.setText(arrayList.get(position).get("data"));
             ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
             layoutParams.height = 150;
@@ -211,8 +209,7 @@ public class CreateLocation extends Fragment {
                 Collections.swap(arrayList, position_dragged, position_target);
                 listAdapter.notifyItemMoved(position_dragged, position_target);
 
-
-
+                sharedViewModel.swap(position_dragged,position_target);
                 return true;//管理上下拖曳
             }
 
