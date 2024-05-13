@@ -82,7 +82,7 @@ public class CreateLocation extends Fragment {
                 if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
 
-                    if(sharedViewModel.getI()<7){
+                    if(sharedViewModel.getI()<6){
 
                         MapsFragment mapFragment = new MapsFragment();
                         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();

@@ -169,15 +169,7 @@ public class MapsFragment extends Fragment {
         micro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-                sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
-
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                
             }
         });
 

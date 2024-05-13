@@ -54,21 +54,23 @@ public class mapping extends Fragment {
 
             LatLng[] destiantion_LatLng= new LatLng[7];
 
-            for(int k=0 ; k<=j ; k++){
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+            // 添加起點和目的地的位置
+            builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+
+            for(int k=0 ; k<j ; k++){
                 destiantion_LatLng[k]= new LatLng(latitude[k],longitude[k]);
                 //在地圖上標示Marker
-                Marker destiantion_Marker=mMap.addMarker(new MarkerOptions().position(destiantion_LatLng[k]).title(destinationName[0]));
+                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng[k]).title(destinationName[k]));
+                builder.include(new LatLng(latitude[k], longitude[k]));
             }
 
 
             //跑出藍色定位點
             mMap.setMyLocationEnabled(true);
 
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
-            // 添加起點和目的地的位置
-            builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-            builder.include(new LatLng(latitude[0], longitude[0]));
 
             // 構建LatLngBounds對象
             LatLngBounds bounds = builder.build();
