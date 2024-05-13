@@ -8,12 +8,18 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 
+import com.example.map_clock_api34.home.CreateLocation;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -115,6 +121,17 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+    }
+    @Override
+    public void onBackPressed() {
+        //有紅線別理他，它可以鎖定返回鍵，現在所有頁面按返回都不會有反應，除了設定內頁
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
 
     }
 

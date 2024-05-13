@@ -1,97 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <Button
-        android:id="@+id/ring_setting"
-        android:layout_width="200dp"
-        android:layout_height="82dp"
-        android:elevation="20dp"
-        android:gravity="center"
+
+
+    <Switch
+        android:id="@+id/switch_Ring"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="204dp"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/back" />
+
+    <TextView
+        android:id="@+id/text_RING"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginRight="28dp"
         android:text="鈴聲"
-        android:background="@drawable/oval_button_background"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="24dp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-    <View
-        android:id="@+id/line1"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/ring_setting"/>
-    <View
-        android:id="@+id/line2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/black"
-        app:layout_constraintTop_toTopOf="@id/ring_setting"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintRight_toLeftOf="@+id/switch_Ring"
+        app:layout_constraintTop_toTopOf="@+id/switch_Ring" />
 
     <Button
         android:id="@+id/choose_setting"
         android:layout_width="200dp"
         android:layout_height="82dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="36dp"
         android:background="@drawable/oval_button_background"
         android:elevation="20dp"
         android:gravity="center"
         android:text="選擇鈴聲"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="24dp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/line1"
-        app:layout_constraintVertical_bias="0.0"
-  />
+        app:layout_constraintLeft_toLeftOf="@id/text_VIBRATE"
+        app:layout_constraintTop_toBottomOf="@id/text_VIBRATE" />
 
-    <View
-        android:id="@+id/line3"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="160dp"
-        android:background="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ring_setting" />
-    <Button
-        android:id="@+id/vibrate_setting"
-        android:layout_width="200dp"
-        android:layout_height="82dp"
-        android:background="@drawable/oval_button_background"
-        android:elevation="20dp"
-        android:gravity="center"
+    <!-- Text_VIBRATE -->
+
+    <!-- Button_回上一頁 -->
+
+    <Switch
+        android:id="@+id/switch_VIBRATE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
+        android:layout_marginTop="36dp"
+        app:layout_constraintLeft_toLeftOf="@+id/switch_Ring"
+
+        app:layout_constraintTop_toBottomOf="@+id/text_RING"
+        />
+
+    <TextView
+        android:id="@+id/text_VIBRATE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
         android:text="震動"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="24dp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/line3"
-        app:layout_constraintVertical_bias="0.0"
-      />
+        app:layout_constraintLeft_toLeftOf="@+id/text_RING"
 
-    <View
-        android:id="@+id/line4"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="80dp"
-        android:background="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/vibrate_setting" />
+        app:layout_constraintTop_toBottomOf="@+id/text_RING" />
 
     <Button
         android:id="@+id/back"
@@ -104,12 +85,10 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
