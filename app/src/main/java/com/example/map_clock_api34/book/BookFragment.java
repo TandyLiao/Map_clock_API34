@@ -1,15 +1,14 @@
-package com.example.map_clock_api34;
+package com.example.map_clock_api34.book;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,56 +19,21 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-public class SettingFragment extends Fragment {
+import com.example.map_clock_api34.R;
+
+public class BookFragment extends Fragment {
+
     private TextView tx1;
     private Toolbar toolbar;
-    private Button interface_Button,remind_Button,language_Button;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_setting, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_book, container, false);
 
         return view;
     }
-
-    public void onViewCreated2(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        // 初始化按钮
-        interface_Button = view.findViewById(R.id.interface_Button);
-        remind_Button = view.findViewById(R.id.remind_Button);
-        language_Button = view.findViewById(R.id.language_Button);
-
-        // 为每个按钮设置点击事件监听器
-        interface_Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 启动 SettingInterfaceActivity
-                startActivity(new Intent(requireContext(), SettingInterfaceActivity.class));
-            }
-        });
-
-        remind_Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 启动其他 Activity 或执行其他操作
-                startActivity(new Intent(requireContext(), SettingRemind.class));
-            }
-        });
-
-        language_Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 启动其他 Activity 或执行其他操作
-                startActivity(new Intent(requireContext(), SettingLanguage.class));
-            }
-        });
-
-        // 在此处添加其他现有代码...
-    }
-
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -77,20 +41,22 @@ public class SettingFragment extends Fragment {
         tx1 = view.findViewById(R.id.textView);
         toolbar = getActivity().findViewById(R.id.toolbar);
         // 初始化 toolbar
-        onViewCreated2(view, savedInstanceState);
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        tx1.setText("wakuwaku");
+        tx1.setText("Book Fragment");
 
         //建立CardView在toolbar
         CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,
+                ActionBar.LayoutParams.MATCH_PARENT));
+
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewtitle.setBackground(drawable);
+
         //建立LinearLayout在CardView等等放圖案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
@@ -100,36 +66,36 @@ public class SettingFragment extends Fragment {
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
         //
-        ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.setting);
+        ImageView bookmark = new ImageView(requireContext());
+        bookmark.setImageResource(R.drawable.bookmark);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
         );
         params.setMarginStart(10); // 设置左边距
-        mark.setLayoutParams(params);
+        bookmark.setLayoutParams(params);
 
         // 創建TextView
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("設定");
+        bookTitle.setText("書籤");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
 
-        linearLayout.addView(mark);
+        linearLayout.addView(bookmark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
 
         // 將cardview新增到actionBar
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
+            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 宽度设置为 WRAP_CONTENT
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 高度设置为 WRAP_CONTENT
-                    Gravity.END)); // 将包含 TextView 的 CardView 设置为自定义视图
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    Gravity.END));
             actionBar.show();
         }
     }
@@ -143,4 +109,5 @@ public class SettingFragment extends Fragment {
             actionBar.setCustomView(null);
         }
     }
+
 }

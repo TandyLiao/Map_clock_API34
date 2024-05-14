@@ -1,13 +1,15 @@
-package com.example.map_clock_api34;
+package com.example.map_clock_api34.setting;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,18 +20,58 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-public class HistoryFragment extends Fragment {
+import com.example.map_clock_api34.R;
 
+public class SettingFragment extends Fragment {
     private TextView tx1;
     private Toolbar toolbar;
+    private Button interface_Button,remind_Button,language_Button;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_history, container, false);
+        View view = inflater.inflate(R.layout.fragment_setting, container, false);
 
         return view;
     }
+
+    public void onViewCreated2(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // 初始化按钮
+        interface_Button = view.findViewById(R.id.interface_Button);
+        remind_Button = view.findViewById(R.id.remind_Button);
+        language_Button = view.findViewById(R.id.language_Button);
+
+        // 为每个按钮设置点击事件监听器
+        interface_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 启动 SettingInterfaceActivity
+                startActivity(new Intent(requireContext(), SettingInterfaceActivity.class));
+            }
+        });
+
+        remind_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 启动其他 Activity 或执行其他操作
+                startActivity(new Intent(requireContext(), SettingRemind.class));
+            }
+        });
+
+        language_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 启动其他 Activity 或执行其他操作
+                startActivity(new Intent(requireContext(), SettingLanguage.class));
+            }
+        });
+
+        // 在此处添加其他现有代码...
+    }
+
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -37,13 +79,14 @@ public class HistoryFragment extends Fragment {
         tx1 = view.findViewById(R.id.textView);
         toolbar = getActivity().findViewById(R.id.toolbar);
         // 初始化 toolbar
+        onViewCreated2(view, savedInstanceState);
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        tx1.setText("HISTORY Fragment");
+        tx1.setText("wakuwaku");
 
         //建立CardView在toolbar
         CardView cardViewtitle = new CardView(requireContext());
@@ -60,7 +103,7 @@ public class HistoryFragment extends Fragment {
 
         //
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.clock);
+        mark.setImageResource(R.drawable.setting);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
@@ -71,7 +114,7 @@ public class HistoryFragment extends Fragment {
 
         // 創建TextView
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("歷史紀錄");
+        bookTitle.setText("設定");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距

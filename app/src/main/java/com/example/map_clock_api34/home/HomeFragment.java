@@ -1,4 +1,4 @@
-package com.example.map_clock_api34;
+package com.example.map_clock_api34.home;
 
 
 import androidx.annotation.NonNull;
@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.home.CreateLocation;
 //此頁面為中繼頁面
 //目的是為了在地圖頁面和排行程頁面中轉換
