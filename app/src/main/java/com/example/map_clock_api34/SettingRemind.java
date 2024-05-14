@@ -101,7 +101,6 @@ public class SettingRemind extends AppCompatActivity {
             }
         });
 
-        // 在此处添加其他操作...
     }
 
     // 播放铃声的方法
@@ -124,7 +123,7 @@ public class SettingRemind extends AppCompatActivity {
             }
         } else {
             // 如果没有保存的铃声 URI，则提示用户选择铃声
-            selectRingtone();
+            mRingtone.play();
         }
     }
     private Uri loadRingtoneUri() {
