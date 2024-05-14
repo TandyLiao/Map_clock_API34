@@ -125,6 +125,8 @@ public class SettingRemind extends AppCompatActivity {
         } else {
             // 如果没有保存的铃声 URI，则提示用户选择铃声
             mRingtone.play();
+
+            
         }
     }
     private Uri loadRingtoneUri() {
