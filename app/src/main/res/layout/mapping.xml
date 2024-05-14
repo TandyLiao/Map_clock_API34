@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".mapping">
+    tools:context=".home.mapping">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -43,6 +43,16 @@
             android:text="取消導航"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/txtTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text=""
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/locatetionTitle" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

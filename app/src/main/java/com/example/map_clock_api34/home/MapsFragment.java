@@ -16,12 +16,17 @@ import androidx.lifecycle.ViewModelProvider;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.map_clock_api34.SharedViewModel;
@@ -42,6 +47,8 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
 import android.Manifest;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -61,6 +68,7 @@ public class MapsFragment extends Fragment {
     double destination_latitude, destination_longitude;
     String destiantion_Name;
 
+    private boolean isPopupShowing = false;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -92,8 +100,10 @@ public class MapsFragment extends Fragment {
                     markerOptions.position(latLng);
                     // Set title of marker
                     markerOptions.title(latLng.latitude+" : "+latLng.longitude);
+                    String placeName = "我們仍未知道哪天google能看見的地名";
                     // Remove all marker
                     mMap.clear();
+                    showPopupWindow(placeName, latLng.latitude, latLng.longitude);
                     // Animating to zoom the marker
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
                     // Add marker on map
@@ -123,6 +133,7 @@ public class MapsFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
+        fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction(); // 初始化 FragmentTransaction
 
         iniAutocomplete();
         //搜尋功能監聽器
@@ -143,26 +154,29 @@ public class MapsFragment extends Fragment {
 
         toolbar = getActivity().findViewById(R.id.toolbar);
 
-        ImageView micro = getActivity().findViewById(R.id.microphoneButton);
-        micro.setOnClickListener(new View.OnClickListener() {
+        ImageView returnButton = getActivity().findViewById(R.id.returnpage);
+        returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-                sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
-
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                // 关闭弹出窗口
+                closePopupWindow();
+                // 返回上一个 Fragment
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 
     }
 
+
     public void onResume() {
         super.onResume();
+        Fragment createLocationFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+        // 如果 CreateLocation Fragment 存在并且是 CreateLocation 的实例
+        if (createLocationFragment instanceof CreateLocation) {
+            // 清除数据
+            //((CreateLocation) createLocationFragment).clearData();
+        }
 
         //建立CardView在toolbar
        /* CardView cardmap = new CardView(requireContext());
@@ -212,6 +226,12 @@ public class MapsFragment extends Fragment {
         // 將cardview新增到actionBar
 
     }
+    public void clearData() {
+        // 清除地点信息
+        //destinationNameTextView.setText("");
+        //destinationLatitudeTextView.setText("");
+        //destinationLongitudeTextView.setText("");
+    }
     private void iniAutocomplete(){
 
         String apiKey="AIzaSyCf6tnPO_VbhDJ_EreXXRZes48c7X5giSM";
@@ -247,12 +267,87 @@ public class MapsFragment extends Fragment {
 
             LatLng destiantion_LatLng;
             destiantion_LatLng= new LatLng(place.getLatLng().latitude,place.getLatLng().longitude);
-            //在地圖上標示Marker
+            //在地圖上標示Marker和彈跳地點資訊
             destiantion_Marker=mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(place.getName()));
+            if (destiantion_Marker != null) {
+                showPopupWindow(destiantion_Name, destination_latitude, destination_longitude);
+            }
             //把相機移動到選取地點
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destiantion_LatLng,15));
         }
     };
-    
+    private PopupWindow popupWindow;
+    private FragmentTransaction fragmentTransaction;
+
+    private void showPopupWindow(String destiantion_Name,double destination_latitude,double destination_longitude) {
+        if (popupWindow != null && popupWindow.isShowing()) {
+            popupWindow.dismiss();
+        }
+        // Get layout inflater service
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // Inflate the popup layout
+        View popupView = inflater.inflate(R.layout.popview, null);
+
+        // Set the content of the popup window
+        TextView destinationNameTextView = popupView.findViewById(R.id.DestinationName);
+        TextView destination_latitudeTextView = popupView.findViewById(R.id.destination_latitude);
+        TextView destination_longitudeTextView = popupView.findViewById(R.id.destination_longitude);
+
+        Button btnCancel = popupView.findViewById(R.id.btnCancel);
+        Button btnNext = popupView.findViewById(R.id.btnNext);
+
+        // Set the destination name
+        destinationNameTextView.setText(destiantion_Name);
+        destination_latitudeTextView.setText(String.valueOf( destination_latitude));
+        destination_longitudeTextView.setText(String.valueOf(destination_longitude));
+
+        // Set button click event to navigate to the next page
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Close the popup window
+                closePopupWindow();
+                // Navigate to the next page
+                SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+                sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
+
+                CreateLocation createFragment = new CreateLocation();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, createFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Remove the marker from the map
+                // Close the popup window
+                closePopupWindow();
+            }
+        });
+
+        // Create the popup window object
+        popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        // Show the popup window
+        popupWindow.showAtLocation(getView(), Gravity.BOTTOM, 0, 0);
+    }
+
+    private void closePopupWindow() {
+        if (popupWindow != null && popupWindow.isShowing()) {
+            popupWindow.dismiss();
+            // 关闭弹窗时将 isPopupShowing 置为 false
+            isPopupShowing = false;
+            destiantion_Name = null;
+            destination_latitude = 0;
+            destination_longitude = 0;
+        }
+    }
+
+
+
+
 
 }

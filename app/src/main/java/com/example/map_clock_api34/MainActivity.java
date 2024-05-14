@@ -14,6 +14,10 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
 
+import com.example.map_clock_api34.book.BookFragment;
+import com.example.map_clock_api34.history.HistoryFragment;
+import com.example.map_clock_api34.home.HomeFragment;
+import com.example.map_clock_api34.setting.SettingFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -87,8 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
                     bookFragment = new BookFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,bookFragment,"book").commit();
-                    Toast.makeText(MainActivity.this, "book", Toast.LENGTH_SHORT).show();
+                            .replace(R.id.fl_container,bookFragment, "com/example/map_clock_api34/book").commit();
+                    Toast.makeText(MainActivity.this, "com/example/map_clock_api34/book", Toast.LENGTH_SHORT).show();
                     return true;
 
 
@@ -98,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
                     historyFragment=new HistoryFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,historyFragment,"history").commit();
+                            .replace(R.id.fl_container,historyFragment, "com/example/map_clock_api34/history").commit();
                     Toast.makeText(MainActivity.this, "歷史紀錄", Toast.LENGTH_SHORT).show();
 
                     return true;
@@ -106,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 else if (id == R.id.action_setting) {
                     settingFragment=new SettingFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,settingFragment,"setting").commit();
+                            .replace(R.id.fl_container,settingFragment, "com/example/map_clock_api34/setting").commit();
                     Toast.makeText(MainActivity.this, "設定", Toast.LENGTH_SHORT).show();
 
                     return true;
@@ -115,6 +119,17 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+    }
+    @Override
+    public void onBackPressed() {
+        //有紅線別理他，它可以鎖定返回鍵，現在所有頁面按返回都不會有反應，除了設定內頁
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
 
     }
 
