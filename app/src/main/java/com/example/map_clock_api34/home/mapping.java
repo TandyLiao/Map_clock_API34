@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
@@ -47,8 +48,8 @@ public class mapping extends Fragment {
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
-    int j,i=0, count=0, totalTime=0;
-    double pre_distance, last_distance, speed, time;
+    int j,i=0;
+    double pre_distance, last_distance, speed, time, totalTime=0;
     Location startLocation;
     LatLngBounds.Builder builder;
     LatLng destiantion_LatLng;
@@ -90,7 +91,7 @@ public class mapping extends Fragment {
 
 
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0],startLocation.getLatitude(),startLocation.getLongitude())/1000;
-            time =(int)Math.round(trip_distance/4*60);
+            time = Math.round(trip_distance/4*60);
             txtTime.setText("目的:"+destinationName[0]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
 
 
@@ -100,20 +101,20 @@ public class mapping extends Fragment {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
 
+            totalTime=totalTime+10;
             pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(),startLocation.getLongitude(),nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
+            last_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
             if(pre_distance>0.020){
-                last_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
-                speed =Math.round(pre_distance/totalTime/60*1000)/1000;
-                time=(int)Math.round(last_distance/speed);
-                txtTime.setText("目的地:"+destinationName[i]+"Pre_Km: "+pre_distance+"\n剩公里為: "+last_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
+
+                speed =pre_distance/(totalTime/60/60);
+                time=Math.round(last_distance/speed*60);
+                txtTime.setText("目的地:"+destinationName[i]+"\nSpeed:"+speed+"\nPre_Km: "+pre_distance+"\n剩公里為: "+last_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
             }
             else{
                 totalTime-=10;
             }
 
-            totalTime++;
-
-            if(last_distance<0.2 && time<5){
+            if(last_distance<0.05 && time<3){
                 initPopWindow();
             }
 
@@ -122,9 +123,17 @@ public class mapping extends Fragment {
     private void initPopWindow(){
 
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow, null, false);
-
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        TextView txt = view.findViewById(R.id.txtNote);
 
+        startLocation.setLatitude(latitude[i]);
+        startLocation.setLongitude(longitude[i]);
+        i++;
+        if(i<j){
+            txt.setText("你到目的地囉\n記得做事...\n下個地點嗎?");
+        }else{
+            txt.setText("你到目的地囉\n記得做事...\n沒地點了");
+        }
         popupWindow.setWidth(700);
 
         popupWindow.setFocusable(true);
@@ -141,30 +150,36 @@ public class mapping extends Fragment {
             }
         });
 
-        startLocation.setLatitude(latitude[i]);
-        startLocation.setLongitude(longitude[i]);
-        i++;
-
-        mMap.clear();
-        builder = new LatLngBounds.Builder();
-
-        // 添加起點和目的地的位置
-        builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-        destiantion_LatLng= new LatLng(latitude[i],longitude[i]);
-        mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[i]));
-        builder.include(new LatLng(latitude[i], longitude[i]));
-
-        // 構建LatLngBounds對象
-        bounds = builder.build();
-        // 計算將這個邊界框移動到地圖中心所需的偏移量
-        int padding = 100; // 偏移量（以像素為單位）
-        // 移动地图视图到最后已知的位置
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
-        Button btnSure = v.findViewById(R.id.btn_sure);
+        Button btnSure = view.findViewById(R.id.Popupsure);
         btnSure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(i<j){
+
+                    mMap.clear();
+                    builder = new LatLngBounds.Builder();
+
+                    // 添加起點和目的地的位置
+                    builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+
+                    destiantion_LatLng= new LatLng(latitude[i],longitude[i]);
+                    mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[i]));
+                    builder.include(new LatLng(latitude[i], longitude[i]));
+
+                    // 構建LatLngBounds對象
+                    bounds = builder.build();
+                    // 計算將這個邊界框移動到地圖中心所需的偏移量
+                    int padding = 100; // 偏移量（以像素為單位）
+                    // 移动地图视图到最后已知的位置
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+
+                    double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],startLocation.getLatitude(),startLocation.getLongitude())/1000;
+                    time = Math.round(trip_distance/4*60);
+                    txtTime.setText("目的:"+destinationName[i]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
+                }else{
+
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
                 popupWindow.dismiss();
             }
         });
