@@ -1,31 +1,32 @@
 package com.example.map_clock_api34.setting;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.widget.Button;
-import androidx.appcompat.app.AppCompatActivity;
-import android.widget.Switch;
-import android.widget.CompoundButton;
-import android.net.Uri;
-import android.widget.Toast;
-import android.os.Vibrator;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.os.Build;
-import android.provider.Settings;
-
 import android.content.Intent;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
-
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.os.Vibrator;
 import com.example.map_clock_api34.R;
 
 public class SettingRemind extends AppCompatActivity {
 
+    private MediaPlayer mMediaPlayer;
+    private Handler mHandler = new Handler();
     private Ringtone mRingtone;
     private AudioManager mAudioManager;
     private static final int PERMISSION_REQUEST_CODE = 1001;
@@ -34,25 +35,23 @@ public class SettingRemind extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.setting_remind); // 加载 XML 布局文件
+        setContentView(R.layout.setting_remind);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        // 查找 XML 文件中的按钮
         Button chooseButton = findViewById(R.id.choose_setting);
         Button backButton = findViewById(R.id.back);
+        Button ringTest = findViewById(R.id.ring_test);
+        Button vibrateTest = findViewById(R.id.vibrate_testt);
 
-        // 查找 XML 文件中的開關
         Switch switchRing = findViewById(R.id.switch_Ring);
         Switch switchVibrate = findViewById(R.id.switch_VIBRATE);
 
         switchRing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // 在這裡執行開關狀態發生變化時的操作
                 if (isChecked) {
                     playRingtone();
                     if (isSilentMode()) {
-                        // 如果当前是静音模式，向用户显示提示
                         Toast.makeText(SettingRemind.this, "現在您是靜音模式，請打開以聽到鈴聲", Toast.LENGTH_SHORT).show();
                     }
                 } else {
@@ -64,81 +63,126 @@ public class SettingRemind extends AppCompatActivity {
         chooseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 在按钮点击时执行的操作
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                // 设置类型为默认铃声
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-                // 设置标题
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "选择铃声");
-                // 设置默认的铃声 URI
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
-                // 启动选择铃声的活动
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
             }
         });
 
+        ringTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playRingtoneWithIncreasingVolume();
+            }
+        });
+        vibrateTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+                if (vibrator == null || !vibrator.hasVibrator()) {
+                    Toast.makeText(SettingRemind.this, "您的设备不支持震动功能", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                
+                final long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000}; // {等待, 震动1秒, 等待1秒, 震动2秒, 等待1秒, 震动3秒}
+
+                // Vibrate pattern array: { delay before start, vibrate duration, delay, vibrate duration, ...}
+                // 0 - start immediately, 1000 - vibrate 1 second, 1000 - delay 1 second, 2000 - vibrate 2 seconds, etc.
+
+                vibrator.vibrate(vibrationPattern, -1); // -1 means don't repeat
+            }
+        });
 
         switchVibrate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // 在这里执行开关状态发生变化时的操作
                 if (isChecked) {
-                    // 如果开关被打开，执行震动操作
                     startVibrate();
                 } else {
-                    // 如果开关被关闭，停止震动
                     stopVibrate();
                 }
             }
         });
 
-
-
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 返回到上一个活动
                 finish();
             }
         });
-
     }
 
-    // 播放铃声的方法
     private void playRingtone() {
-        Uri ringtoneUri = loadRingtoneUri(); // 加载保存的铃声 URI
+        Uri ringtoneUri = loadRingtoneUri();
         if (ringtoneUri != null) {
             mRingtone = RingtoneManager.getRingtone(getApplicationContext(), ringtoneUri);
             if (mRingtone != null) {
-                // 如果获取铃声成功，则播放铃声，并设置播放时长为3秒
                 mRingtone.play();
-                // 延迟3秒后停止播放
                 new Handler().postDelayed(new Runnable() {
                     @Override
-
-
                     public void run() {
                         stopRingtone();
                     }
-                }, 3000); // 3000 毫秒 = 3 秒
+                }, 3000);
             }
         } else {
-            // 如果没有保存的铃声 URI，则提示用户选择铃声
-            mRingtone.play();
-
-            
+            Toast.makeText(this, "请先选择铃声", Toast.LENGTH_SHORT).show();
         }
     }
+
     private Uri loadRingtoneUri() {
-        // 获取 SharedPreferences 实例
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // 从 SharedPreferences 中加载铃声 URI
         String uriString = preferences.getString("ringtone_uri", null);
-        if (uriString != null) {
-            return Uri.parse(uriString);
-        } else {
-            return null;
+        return uriString != null ? Uri.parse(uriString) : null;
+    }
+
+    private void playRingtoneWithIncreasingVolume() {
+        Uri ringtoneUri = loadRingtoneUri(); // Load the saved ringtone URI
+
+        final int duration = 3000;
+        final int intervals = 3;
+        final float volumeIncrement = 1.0f / intervals;
+
+        mMediaPlayer = MediaPlayer.create(this, ringtoneUri);
+
+        if (mMediaPlayer == null) {
+            return;
         }
+        mMediaPlayer.setLooping(false);
+
+        for (int i = 0; i < intervals; i++) {
+            final int iteration = i;
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mMediaPlayer.setVolume(volumeIncrement * (iteration + 1), volumeIncrement * (iteration + 1));
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.seekTo(0);
+                    } else {
+                        mMediaPlayer.start();
+                    }
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mMediaPlayer.pause();
+                        }
+                    }, duration);
+                }
+            }, i * (duration + 1000));
+        }
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mMediaPlayer != null) {
+                    mMediaPlayer.stop();
+                    mMediaPlayer.release();
+                    mMediaPlayer = null;
+                }
+            }
+        }, intervals * (duration + 1000));
     }
 
     private void selectRingtone() {
@@ -154,6 +198,7 @@ public class SettingRemind extends AppCompatActivity {
             proceedToRingtoneSelection();
         }
     }
+
     private void proceedToRingtoneSelection() {
         Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
@@ -161,65 +206,57 @@ public class SettingRemind extends AppCompatActivity {
         startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
     }
 
-
-    // 停止播放铃声的方法
     private void stopRingtone() {
         if (mRingtone != null && mRingtone.isPlaying()) {
-            // 停止播放铃声
             mRingtone.stop();
         }
     }
+
     private void startVibrate() {
-        // 在这里执行震动操作
-        // 使用系统服务获取震动器实例
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        // 检查设备是否支持震动
-        if (vibrator.hasVibrator()) {
-            // 设置震动模式，这里设置震动1秒钟
+        if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.vibrate(1000);
         }
     }
 
-    // 停止震动的方法
     private void stopVibrate() {
-        // 在这里执行停止震动的操作
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        // 停止震动
-        vibrator.cancel();
+        if (vibrator != null) {
+            vibrator.cancel();
+        }
     }
-    // 检查设备是否处于静音模式的方法
+
     private boolean isSilentMode() {
         int ringerMode = mAudioManager.getRingerMode();
         return ringerMode == AudioManager.RINGER_MODE_SILENT || ringerMode == AudioManager.RINGER_MODE_VIBRATE;
     }
 
-    // 定义与 app:onClick 属性匹配的方法
-    public void ringDevice(View view) {
-        // 在按钮点击时执行的操作
-    }
-    // 在 SettingRemind 类中的其他方法之后添加
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            // 获取用户选择的铃声 URI
+        if (resultCode == RESULT_OK && requestCode == RINGTONE_PICKER_REQUEST_CODE) {
             Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-            // 将选择的铃声设置为当前铃声
             if (uri != null) {
+                saveRingtoneUri(uri);
                 mRingtone = RingtoneManager.getRingtone(getApplicationContext(), uri);
-                saveRingtoneUri(uri); // 保存用户选择的铃声 URI
+            }
+        } else if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Settings.System.canWrite(this)) {
+                    proceedToRingtoneSelection();
+                } else {
+                    Toast.makeText(this, "需要权限来更改铃声设置", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
 
     private void saveRingtoneUri(Uri ringtoneUri) {
-        // 获取 SharedPreferences 实例
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // 使用 SharedPreferences.Editor 保存铃声 URI
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("ringtone_uri", ringtoneUri.toString());
         editor.apply();
         Log.d("SettingRemind", "Saved ringtone URI: " + ringtoneUri.toString());
     }
-
 }
+
