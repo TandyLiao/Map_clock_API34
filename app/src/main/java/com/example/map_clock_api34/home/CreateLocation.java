@@ -58,14 +58,6 @@ public class CreateLocation extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        if(sharedViewModel.getI()!=-1){
-            for(int j =0; j<=sharedViewModel.getI(); j++){
-                HashMap<String, String> hashMap = new HashMap<>();
-                hashMap.put("data",sharedViewModel.getDestinationName(j));
-                arrayList.add(hashMap);
-            }
-
-        }
 
         ImageView huButton = v.findViewById(R.id.huButton);
         huButton.setOnClickListener(new View.OnClickListener() {
@@ -251,6 +243,22 @@ public class CreateLocation extends Fragment {
             helper.attachToRecyclerView(recyclerView);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        resetData();
+    }
+    private void resetData() {
+        arrayList.clear();
+        if (sharedViewModel.getI() != -1) {
+            for (int j = 0; j <= sharedViewModel.getI(); j++) {
+                HashMap<String, String> hashMap = new HashMap<>();
+                hashMap.put("data", sharedViewModel.getDestinationName(j));
+                arrayList.add(hashMap);
+            }
+        }
+        listAdapter.notifyDataSetChanged();
+    }
 
 
     private void initPopWindow(View v,SharedViewModel sharedViewModel){
