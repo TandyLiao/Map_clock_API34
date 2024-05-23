@@ -36,10 +36,26 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+//設定組新增
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.os.Build;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 
 
 public class mapping extends Fragment {
 
+    private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
+    private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
     Location lastLocation;
@@ -97,29 +113,93 @@ public class mapping extends Fragment {
 
         }
     };
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Destination Alert Channel";
+            String description = "Channel for destination alerts";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }//設定組新增此方法
+    private void sendNotification(String message) {
+        if (!NotificationManagerCompat.from(getActivity()).areNotificationsEnabled()) {
+            Toast.makeText(getActivity(), "未啟用通知權限", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            Intent intent = new Intent(getActivity(), getActivity().getClass());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle("地圖鬧鐘")
+                    .setContentText(message)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
+            notificationManager.notify(0, builder.build());
+        } catch (SecurityException e) {
+            Toast.makeText(getActivity(), "無法發送通知，請求被拒絕", Toast.LENGTH_SHORT).show();
+        }
+    }//設定組新增此方法
+
     public LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) //這個if設定組加的
+            {
+                totalTime = totalTime + 10;
+                pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                if (pre_distance > 0.020) {
 
-            totalTime=totalTime+10;
-            pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(),startLocation.getLongitude(),nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
-            last_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],nowLocation.getLatitude(),nowLocation.getLongitude())/1000;
-            if(pre_distance>0.020){
+                    speed = pre_distance / (totalTime / 60 / 60);
+                    time = Math.round(last_distance / speed * 60);
+                    txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
+                } else {
+                    totalTime -= 10;
+                }
 
-                speed =pre_distance/(totalTime/60/60);
-                time=Math.round(last_distance/speed*60);
-                txtTime.setText("目的地:"+destinationName[i]+"\nSpeed:"+speed+"\nPre_Km: "+pre_distance+"\n剩公里為: "+last_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
+                if (last_distance < 0.05 && time < 3) {
+                    initPopWindow();
+                }
+
+                //設定組新增
+                if (time < 3 || last_distance < 1) {
+                    sendNotification("快到了!");
+                }
+                //設定組新增
+                if (last_distance < 0.05 && time < 3) {
+                    initPopWindow();
+                }
             }
-            else{
-                totalTime-=10;
-            }
-
-            if(last_distance<0.05 && time<3){
-                initPopWindow();
-            }
-
         }
     };
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0) {
+                boolean locationPermissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean notificationsPermissionGranted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+                if (locationPermissionGranted && notificationsPermissionGranted) {
+                    startLocationUpdates();
+                } else {
+                    Toast.makeText(getActivity(), "需要定位和通知权限才能正常运行", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }//此方法設定組加
+
     private void initPopWindow(){
 
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow, null, false);
@@ -226,8 +306,29 @@ public class mapping extends Fragment {
             longitude[j]=sharedViewModel.getLongitude(j);
         }
 
+        createNotificationChannel();//這行設定組新增
+        checkAndRequestPermissions();//這行設定組新增
+
         return v;
 
     }
+    private void checkAndRequestPermissions() {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.POST_NOTIFICATIONS
+            }, NOTIFICATION_PERMISSION_CODE);
+        } else {
+            startLocationUpdates();
+        }
+    }//這方法設定組新增
+
+    @SuppressLint("MissingPermission")
+    private void startLocationUpdates() {
+        locationManager.requestLocationUpdates(commandstr, 10000, 0, locationListener);
+        lastLocation = locationManager.getLastKnownLocation(commandstr);
+    }//這方法設定組新增
 
 }

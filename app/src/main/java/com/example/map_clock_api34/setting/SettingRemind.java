@@ -86,7 +86,7 @@ public class SettingRemind extends AppCompatActivity {
                     return;
                 }
 
-                
+
                 final long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000}; // {等待, 震动1秒, 等待1秒, 震动2秒, 等待1秒, 震动3秒}
 
                 // Vibrate pattern array: { delay before start, vibrate duration, delay, vibrate duration, ...}
