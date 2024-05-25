@@ -56,6 +56,8 @@ public class mapping extends Fragment {
 
     private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
     private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
+    private boolean notificationSent = false; // 新增的变量(by設定組)
+
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
     Location lastLocation;
@@ -125,6 +127,7 @@ public class mapping extends Fragment {
             notificationManager.createNotificationChannel(channel);
         }
     }//設定組新增此方法
+
     private void sendNotification(String message) {
         if (!NotificationManagerCompat.from(getActivity()).areNotificationsEnabled()) {
             Toast.makeText(getActivity(), "未啟用通知權限", Toast.LENGTH_SHORT).show();
@@ -146,6 +149,8 @@ public class mapping extends Fragment {
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
             notificationManager.notify(0, builder.build());
+            notificationSent = true; // 设置标记为 true
+
         } catch (SecurityException e) {
             Toast.makeText(getActivity(), "無法發送通知，請求被拒絕", Toast.LENGTH_SHORT).show();
         }
@@ -173,13 +178,11 @@ public class mapping extends Fragment {
                 }
 
                 //設定組新增
-                if (time < 3 || last_distance < 1) {
+                if ((time < 3 || last_distance < 1) && !notificationSent) {
                     sendNotification("快到了!");
                 }
                 //設定組新增
-                if (last_distance < 0.05 && time < 3) {
-                    initPopWindow();
-                }
+
             }
         }
     };
@@ -194,7 +197,7 @@ public class mapping extends Fragment {
                 if (locationPermissionGranted && notificationsPermissionGranted) {
                     startLocationUpdates();
                 } else {
-                    Toast.makeText(getActivity(), "需要定位和通知权限才能正常运行", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "需要定位和通知權限才可以喔!", Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -295,6 +298,7 @@ public class mapping extends Fragment {
                 transaction.commit();
             }
         });
+        resetNotificationSent();//設定組新增
 
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
@@ -331,4 +335,7 @@ public class mapping extends Fragment {
         lastLocation = locationManager.getLastKnownLocation(commandstr);
     }//這方法設定組新增
 
+    public void resetNotificationSent() {
+        notificationSent = false;
+    }
 }
