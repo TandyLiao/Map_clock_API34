@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -43,7 +44,7 @@ public class CreateLocation extends Fragment {
     RecyclerView recyclerView;
     ListAdapter listAdapter;
     SharedViewModel sharedViewModel;
-
+    private ItemTouchHelper itemTouchHelper;
     //新增一個HashMap存放每筆資料
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
@@ -158,15 +159,26 @@ public class CreateLocation extends Fragment {
         return v;
 
     }
-
     //ListAdapter的class
     private class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            private TextView tx1,tx2;
+            private TextView tx2;
+            private ImageView dragHandle;
             public ViewHolder(View itemView) {
                 super(itemView);
                 tx2 = itemView.findViewById(R.id.textVLocateionName);
+                dragHandle = itemView.findViewById(R.id.dragHandle);
+                dragHandle.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            // 當觸摸ImageView時開始拖曳項目
+                            itemTouchHelper.startDrag(ViewHolder.this);
+                        }
+                        return false;
+                    }
+                });
             }
         }
         @Override
@@ -193,13 +205,15 @@ public class CreateLocation extends Fragment {
         }
     }
     private void recyclerViewAction(){
-            ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+        ItemTouchHelper.Callback callback = new ItemTouchHelper.Callback() {
             @Override
-            public int getMovementFlags(RecyclerView recyclerView,RecyclerView.ViewHolder viewHolder) {
-                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN , ItemTouchHelper.LEFT );
-                //這裡是告訴RecyclerView你想開啟哪些操作
+            public boolean isLongPressDragEnabled() {
+                return false;
             }
-
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT);
+            }
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -208,39 +222,31 @@ public class CreateLocation extends Fragment {
                 Collections.swap(arrayList, position_dragged, position_target);
                 listAdapter.notifyItemMoved(position_dragged, position_target);
 
-                sharedViewModel.swap(position_dragged,position_target);
-                return true;//管理上下拖曳
+                sharedViewModel.swap(position_dragged, position_target);
+                return true;
             }
 
-
+            @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
                 int position = viewHolder.getAdapterPosition();
-                switch (direction) {
-                    case ItemTouchHelper.LEFT:
-                    case ItemTouchHelper.RIGHT:
-                        arrayList.remove(position);
-                        sharedViewModel.delet(position);
-                        listAdapter.notifyItemRemoved(position);
-                        break;
-                //管理滑動情形
-                }
+                arrayList.remove(position);
+                sharedViewModel.delet(position);
+                listAdapter.notifyItemRemoved(position);
             }
-                @Override
-                public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                    new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                            .addBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.holo_red_dark))
-                            .addActionIcon(R.drawable.baseline_delete_24)
-                            .create()
-                            .decorate();
-                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-                }
 
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.holo_red_dark))
+                        .addActionIcon(R.drawable.baseline_delete_24)
+                        .create()
+                        .decorate();
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
 
-            });
-
-
-            helper.attachToRecyclerView(recyclerView);
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override

@@ -30,7 +30,7 @@
                 android:textSize="20dp" />
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/dragHandle"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
