@@ -1,0 +1,101 @@
+<!-- activity_main.xml -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textViewLocation1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location 1"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"/>
+
+    <EditText
+        android:id="@+id/editTextLocation1Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewLocation1"
+        android:layout_marginTop="8dp"
+        android:hint="Location Name"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/editTextLocation1Latitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextLocation1Name"
+        android:layout_marginTop="8dp"
+        android:hint="Latitude"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/editTextLocation1Longitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextLocation1Latitude"
+        android:layout_marginTop="8dp"
+        android:hint="Longitude"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
+
+    <TextView
+        android:id="@+id/textViewLocation2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location 2"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_below="@id/editTextLocation1Longitude"
+        android:layout_marginTop="16dp"/>
+
+    <EditText
+        android:id="@+id/editTextLocation2Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewLocation2"
+        android:layout_marginTop="8dp"
+        android:hint="Location Name"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/editTextLocation2Latitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextLocation2Name"
+        android:layout_marginTop="8dp"
+        android:hint="Latitude"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/editTextLocation2Longitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextLocation2Latitude"
+        android:layout_marginTop="8dp"
+        android:hint="Longitude"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
+
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:layout_below="@id/editTextLocation2Longitude"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/btn_change"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change"
+        android:layout_below="@+id/buttonSave"/>
+
+</RelativeLayout>
