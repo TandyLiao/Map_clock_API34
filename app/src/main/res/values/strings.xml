@@ -3,5 +3,10 @@
     <string name="drawer_open">Drawer_opened</string>
     <string name="drawer_close">Drawer_closed</string>
     <string name="google_maps_key" translatable="false">AIzaSyCbpeVvXVw2iTtAS_Fe-CS8_v8RHq2kX3k</string>
+    <string name="CreateBookmark">建立書籤</string>
+    <string name="SaveBookmark">套用書籤</string>
+    <string name="ModifyBookmark">修改書籤</string>
+    <string name="AddRoute">新增路線</string>
+    <string name="cancel_button">取消</string>
 
 </resources>
