@@ -2,7 +2,6 @@ package com.example.map_clock_api34.home;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -49,6 +48,11 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.app.Service;
+import android.location.Location;
+import android.os.IBinder;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 
 
 
@@ -73,6 +77,15 @@ public class mapping extends Fragment {
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
     View v;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 啟動 backgroundRun Service
+        Intent serviceIntent = new Intent(getActivity(), backgroundRun.class);
+        getActivity().startService(serviceIntent);
+    }//設定組新增 用來協助背景執行
+
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
@@ -178,8 +191,10 @@ public class mapping extends Fragment {
                 }
 
                 //設定組新增
-                if ((time < 3 || last_distance < 1) && !notificationSent) {
+                if ((last_distance < 0.05 && time < 3) && !notificationSent) {
                     sendNotification("快到了!");
+                    resetNotificationSent(); // 新增重製通知(6/2新增)
+
                 }
                 //設定組新增
 
@@ -338,4 +353,12 @@ public class mapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
+    public void onDestroy() {
+        super.onDestroy();
+
+        // 停止 backgroundRun Service
+        Intent serviceIntent = new Intent(getActivity(), backgroundRun.class);
+        getActivity().stopService(serviceIntent);
+    }//停止serivce
+
 }
