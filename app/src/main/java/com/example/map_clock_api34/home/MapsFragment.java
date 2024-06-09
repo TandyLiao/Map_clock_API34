@@ -68,6 +68,9 @@ public class MapsFragment extends Fragment {
     double destination_latitude, destination_longitude;
     String destiantion_Name;
 
+    private View overlayView;
+
+
     private boolean isPopupShowing = false;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -322,17 +325,36 @@ public class MapsFragment extends Fragment {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Remove the marker from the map
                 // Close the popup window
                 closePopupWindow();
+
+
             }
         });
 
         // Create the popup window object
         popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
 
+        popupWindow.setFocusable(false);
+        popupWindow.setOutsideTouchable(false);
+
         // Show the popup window
         popupWindow.showAtLocation(getView(), Gravity.BOTTOM, 0, 0);
+
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setClickable(true);
+        ((ViewGroup) getView()).addView(overlayView);
+
+        // 禁用与底层视图的交互
+        overlayView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 什么也不做，以防止点击覆盖视图时关闭弹出窗口
+            }
+        });
+
     }
 
     private void closePopupWindow() {
@@ -343,8 +365,12 @@ public class MapsFragment extends Fragment {
             destiantion_Name = null;
             destination_latitude = 0;
             destination_longitude = 0;
+            if (overlayView != null && overlayView.getParent() != null) {
+                ((ViewGroup) overlayView.getParent()).removeView(overlayView);
+            }
         }
     }
+
 
 
 
