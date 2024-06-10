@@ -92,6 +92,7 @@ public class MapsFragment extends Fragment {
 
 
 
+
             //點擊地圖會直接跑出標示
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override

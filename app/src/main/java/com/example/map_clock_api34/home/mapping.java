@@ -53,7 +53,7 @@ import android.location.Location;
 import android.os.IBinder;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
-
+import androidx.fragment.app.Fragment;
 
 
 public class mapping extends Fragment {
@@ -77,15 +77,6 @@ public class mapping extends Fragment {
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
     View v;
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // 啟動 backgroundRun Service
-        Intent serviceIntent = new Intent(getActivity(), backgroundRun.class);
-        getActivity().startService(serviceIntent);
-    }//設定組新增 用來協助背景執行
-
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
@@ -353,12 +344,22 @@ public class mapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
-    public void onDestroy() {
-        super.onDestroy();
+    @Override
+    public void onStart() {
+        super.onStart();
 
-        // 停止 backgroundRun Service
-        Intent serviceIntent = new Intent(getActivity(), backgroundRun.class);
+        // 启动前台服务
+        Intent serviceIntent = new Intent(getContext(), LocationService.class);
+        ContextCompat.startForegroundService(getContext(), serviceIntent);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // 停止前台服務
+        Intent serviceIntent = new Intent(getActivity(), LocationService.class);
         getActivity().stopService(serviceIntent);
-    }//停止serivce
+    }
 
 }
