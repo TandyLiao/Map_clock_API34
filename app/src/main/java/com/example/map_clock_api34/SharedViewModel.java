@@ -3,6 +3,7 @@ import androidx.lifecycle.ViewModel;
 
 public class SharedViewModel extends ViewModel {
     private String[] destinationName = new String[7];
+    private String[] destinationCapital = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
     private int i=-1;
@@ -13,7 +14,12 @@ public class SharedViewModel extends ViewModel {
         this.longitude[i] = longitude;
 
     }
-
+    public void setCapital(String capital){
+        this.destinationCapital[i]=capital;
+    }
+    public String getCapital(int j){
+        return destinationCapital[j];
+    }
     public void swap(int start, int end){
         double temp;
         String stemp;

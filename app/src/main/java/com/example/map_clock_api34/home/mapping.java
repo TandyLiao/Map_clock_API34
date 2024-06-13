@@ -2,6 +2,7 @@ package com.example.map_clock_api34.home;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -48,6 +49,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 import android.app.Service;
 import android.location.Location;
 import android.os.IBinder;
@@ -344,7 +346,7 @@ public class mapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
-    @Override
+    /*@Override
     public void onStart() {
         super.onStart();
 
@@ -361,5 +363,5 @@ public class mapping extends Fragment {
         Intent serviceIntent = new Intent(getActivity(), LocationService.class);
         getActivity().stopService(serviceIntent);
     }
-
+*/
 }

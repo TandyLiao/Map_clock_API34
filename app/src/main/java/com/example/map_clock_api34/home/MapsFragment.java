@@ -17,6 +17,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -51,7 +53,10 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import com.example.map_clock_api34.R;
 
@@ -59,15 +64,15 @@ public class MapsFragment extends Fragment {
 
     private Toolbar toolbar;
     private AutocompleteSupportFragment start_autocompleteSupportFragment;
-
+    private SharedViewModel sharedViewModel;
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
     Location lastLocation;
     private Marker destiantion_Marker;
     private GoogleMap mMap;
     double destination_latitude, destination_longitude;
-    String destiantion_Name;
-
+    String destiantion_Name,cityName;
+    private Geocoder geocoder;
     private View overlayView;
 
 
@@ -97,6 +102,7 @@ public class MapsFragment extends Fragment {
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
+
                     // When clicked on map
                     // Initialize marker options
                     MarkerOptions markerOptions=new MarkerOptions();
@@ -104,6 +110,7 @@ public class MapsFragment extends Fragment {
                     markerOptions.position(latLng);
                     // Set title of marker
                     markerOptions.title(latLng.latitude+" : "+latLng.longitude);
+
                     String placeName = "我們仍未知道哪天google能看見的地名";
                     // Remove all marker
                     mMap.clear();
@@ -112,12 +119,12 @@ public class MapsFragment extends Fragment {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
                     // Add marker on map
                     mMap.addMarker(markerOptions);
+
                 }
             });
 
         }
     };
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -128,6 +135,8 @@ public class MapsFragment extends Fragment {
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        geocoder = new Geocoder(requireContext(), Locale.getDefault());
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
@@ -271,11 +280,32 @@ public class MapsFragment extends Fragment {
 
             LatLng destiantion_LatLng;
             destiantion_LatLng= new LatLng(place.getLatLng().latitude,place.getLatLng().longitude);
+
+            Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+            List<Address> addresses = null;
+
+            try {
+                addresses = geocoder.getFromLocation(destiantion_LatLng.latitude, destiantion_LatLng.longitude, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address address = addresses.get(0);
+
+                    cityName = String.valueOf(address.getAdminArea()); // Get the city name
+                    if(cityName.contains("台")){
+                        cityName=cityName.replace("台","臺");
+                    }
+                } else {
+                    Log.e("Geocoder", "No address found for the location");
+                }
+            } catch (IOException e) {
+                Log.e("Geocoder", "IOException while getting address", e);
+            }
+
             //在地圖上標示Marker和彈跳地點資訊
             destiantion_Marker=mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(place.getName()));
             if (destiantion_Marker != null) {
                 showPopupWindow(destiantion_Name, destination_latitude, destination_longitude);
             }
+
             //把相機移動到選取地點
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destiantion_LatLng,15));
         }
@@ -312,8 +342,9 @@ public class MapsFragment extends Fragment {
                 // Close the popup window
                 closePopupWindow();
                 // Navigate to the next page
-                SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
                 sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
+                sharedViewModel.setCapital(cityName);
 
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -371,10 +402,5 @@ public class MapsFragment extends Fragment {
             }
         }
     }
-
-
-
-
-
 
 }
