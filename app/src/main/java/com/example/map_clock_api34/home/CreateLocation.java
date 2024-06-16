@@ -1,8 +1,12 @@
 package com.example.map_clock_api34.home;
 
 import android.Manifest;
+import android.content.ClipData;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -12,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,10 +24,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -33,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherService;
+import com.example.map_clock_api34.note.Note;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +54,11 @@ import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 public class CreateLocation extends Fragment {
     private View v;
     RecyclerView recyclerView;
+    RecyclerView recyclerView2;
     ListAdapter listAdapter;
+
+    ListAdapter listAdapter2;
+    private ArrayList<ClipData.Item> itemList;
     SharedViewModel sharedViewModel;
     private ItemTouchHelper itemTouchHelper;
     //新增一個HashMap存放每筆資料
@@ -59,22 +71,38 @@ public class CreateLocation extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         v = inflater.inflate(R.layout.fragment_creatlocation, container, false);
 
+        recyclerView2 = v.findViewById(R.id.recycleView2);
+        recyclerView2.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+
+        ArrayList<HashMap<String, String>> arrayList2 = new ArrayList<>();
+        HashMap<String, String> item1 = new HashMap<>();
+        item1.put("data", "記事");
+        arrayList2.add(item1);
+        HashMap<String, String> item2 = new HashMap<>();
+        item2.put("data", "天氣");
+        arrayList2.add(item2);
+        HashMap<String, String> item3 = new HashMap<>();
+        item3.put("data", "震動");
+        arrayList2.add(item3);
+        HashMap<String, String> item4 = new HashMap<>();
+        item4.put("data", "鈴聲");
+        arrayList2.add(item4);
+
+
+        ListAdapter2 listAdapter2 = new ListAdapter2(arrayList2);
+        recyclerView2.setAdapter(listAdapter2);
+
+
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
+            actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
+
         }
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
 
-        ImageView weatherBTN = v.findViewById(R.id.imageView_weather);
-        weatherBTN.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getWeatherAdvice();
-
-            }
-        });
 
         ImageView huButton = v.findViewById(R.id.huButton);
         huButton.setOnClickListener(new View.OnClickListener() {
@@ -114,19 +142,6 @@ public class CreateLocation extends Fragment {
             }
         });
 
-        Button btnD = v.findViewById(R.id.btn_dropItem);
-        btnD.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(sharedViewModel.getI()>=0){
-
-                    arrayList.remove(sharedViewModel.getI());
-                    sharedViewModel.setI();
-                    recyclerView.setAdapter(listAdapter);
-                }
-
-            }
-        });
 
         Button btnReset = v.findViewById(R.id.btn_reset);
         btnReset.setOnClickListener(new View.OnClickListener() {
@@ -305,7 +320,63 @@ public class CreateLocation extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        CardView cardViewtitle = new CardView(requireContext());
+        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,
+                ActionBar.LayoutParams.MATCH_PARENT));
+
+        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
+        cardViewtitle.setBackground(drawable);
+
+        //建立LinearLayout在CardView等等放圖案和文字
+        LinearLayout linearLayout = new LinearLayout(requireContext());
+        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+        ));
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        //
+        ImageView bookmark = new ImageView(requireContext());
+        bookmark.setImageResource(R.drawable.anya062516);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                100, // 设置宽度为 100 像素
+                100 // 设置高度为 100 像素
+        );
+        params.setMarginStart(10); // 设置左边距
+        bookmark.setLayoutParams(params);
+
+        // 創建TextView
+        TextView bookTitle = new TextView(requireContext());
+        bookTitle.setText("路線規劃");
+        bookTitle.setTextSize(15);
+        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
+        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+
+        linearLayout.addView(bookmark);
+        linearLayout.addView(bookTitle);
+        cardViewtitle.addView(linearLayout);
+
+        // 將cardview新增到actionBar
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
+            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    Gravity.END));
+            actionBar.show();
+        }
         resetData();
+    }
+    public void onPause() {
+        super.onPause();
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowCustomEnabled(false);
+            actionBar.setCustomView(null);
+        }
     }
     private void resetData() {
         arrayList.clear();
@@ -334,11 +405,22 @@ public class CreateLocation extends Fragment {
 
         popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
 
+        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        //View rootView = getActivity().getWindow().getDecorView().getRootView();
+        //rootView.setAlpha(0.1f);有bug
+
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
         BTNPopup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 popupWindow.dismiss();
+                /*if (popupWindow != null && popupWindow.isShowing()) {
+                    popupWindow.dismiss();
+                    rootView.setAlpha(1.0f);
+                }*/
+
             }
         });
 
@@ -353,6 +435,10 @@ public class CreateLocation extends Fragment {
                 }
                 recyclerView.setAdapter(listAdapter);
                 popupWindow.dismiss();
+                /*if (popupWindow != null && popupWindow.isShowing()) {
+                    popupWindow.dismiss();
+                    rootView.setAlpha(1.0f);
+                }*/
             }
         });
     }
@@ -409,6 +495,102 @@ public class CreateLocation extends Fragment {
             }
         }).start();
     }
+    public class ListAdapter2 extends RecyclerView.Adapter<ListAdapter2.ViewHolder> {
+        private ArrayList<HashMap<String, String>> arrayList;
+
+        public ListAdapter2(ArrayList<HashMap<String, String>> arrayList) {
+            this.arrayList = arrayList;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            private TextView horecycleName;
+            private ImageView horecycleimageView;
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+                horecycleName = itemView.findViewById(R.id.horecycle_Name);
+                horecycleimageView = itemView.findViewById(R.id.horecycle_imageView);
+
+                horecycleimageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int position = getAdapterPosition();
+                        handleImageClick(v.getContext(), position);
+                    }
+                });
+
+                horecycleName.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int position = getAdapterPosition();
+                    }
+                });
+            }
+
+            private void handleImageClick(Context context, int position) {
+                if (position == 0) {
+                    // 跳到記事Fragment
+                    Note notesFragment = new Note();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, notesFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                } else if (position == 1) {
+
+                    getWeatherAdvice();
+                }
+                else if (position == 2) {
+
+                    getWeatherAdvice();
+                }
+                else if (position == 3) {
+
+                    getWeatherAdvice();
+                }
+
+                // 可以继续添加其他条目的点击处理逻辑
+            }
+
+
+
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.horizontal_recyclerview_item, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            // 获取对应位置的数据
+            HashMap<String, String> item = arrayList.get(position);
+            String data = item.get("data");
+            holder.horecycleName.setText(data);
+
+            // 根据数据内容设置不同的图标
+            if (data.equals("記事")) {
+                holder.horecycleimageView.setImageResource(R.drawable.bookmark);
+            }
+            else if (data.equals("天氣")) {
+                holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+            }
+            else if (data.equals("震動")) {
+                holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+            }
+            else if (data.equals("鈴聲")) {
+                holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+            }
+            // 可以继续添加其他条目的处理逻辑
+        }
+
+        @Override
+        public int getItemCount() {
+            return arrayList.size();
+        }
+    }
+
 
 
 }
