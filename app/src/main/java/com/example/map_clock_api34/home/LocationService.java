@@ -97,6 +97,8 @@ public class LocationService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(serviceChannel);
         }
+
+        
     }
 
     private void handleLocationUpdate(Location nowLocation) {
