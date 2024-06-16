@@ -16,12 +16,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.Vibrator;
 import com.example.map_clock_api34.R;
+import android.content.res.Configuration;
+
+
+
+import java.util.Locale;
 
 public class SettingRemind extends AppCompatActivity {
 
@@ -31,6 +37,15 @@ public class SettingRemind extends AppCompatActivity {
     private AudioManager mAudioManager;
     private static final int PERMISSION_REQUEST_CODE = 1001;
     private static final int RINGTONE_PICKER_REQUEST_CODE = 1002;
+    private Button backButton;
+    private Button chooseButton;
+    private Button ringTest;
+    private Button vibrateTest;
+    private Switch switchRing;
+    private Switch switchVibrate;
+    private TextView ring;
+    private TextView vibrate;
+    private TextView texttt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +53,18 @@ public class SettingRemind extends AppCompatActivity {
         setContentView(R.layout.setting_remind);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        Button chooseButton = findViewById(R.id.choose_setting);
-        Button backButton = findViewById(R.id.back);
-        Button ringTest = findViewById(R.id.ring_test);
-        Button vibrateTest = findViewById(R.id.vibrate_testt);
+        chooseButton = findViewById(R.id.choose_setting);
+        backButton = findViewById(R.id.back);
+        ringTest = findViewById(R.id.ring_test);
+        vibrateTest = findViewById(R.id.vibrate_testt);
+         switchRing = findViewById(R.id.switch_Ring);
+         switchVibrate = findViewById(R.id.switch_VIBRATE);
+        ring=findViewById(R.id.text_RING);
+        vibrate=findViewById(R.id.text_VIBRATE);
+        texttt=findViewById(R.id.texttt);
 
-        Switch switchRing = findViewById(R.id.switch_Ring);
-        Switch switchVibrate = findViewById(R.id.switch_VIBRATE);
+        loadLocale(); // 加载语言设置
+
 
         switchRing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -52,7 +72,7 @@ public class SettingRemind extends AppCompatActivity {
                 if (isChecked) {
                     playRingtone();
                     if (isSilentMode()) {
-                        Toast.makeText(SettingRemind.this, "現在您是靜音模式，請打開以聽到鈴聲", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SettingRemind.this, "現在您是靜音模式，請打開才可聽到鈴聲", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     stopRingtone();
@@ -65,7 +85,7 @@ public class SettingRemind extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "选择铃声");
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "選擇鈴聲");
                 startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
             }
         });
@@ -82,7 +102,7 @@ public class SettingRemind extends AppCompatActivity {
                 final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
                 if (vibrator == null || !vibrator.hasVibrator()) {
-                    Toast.makeText(SettingRemind.this, "您的设备不支持震动功能", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SettingRemind.this, "設備不支持震動功能", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -113,6 +133,8 @@ public class SettingRemind extends AppCompatActivity {
                 finish();
             }
         });
+        updateButtonLabels(); // 初始化时更新按钮文本
+
     }
 
     private void playRingtone() {
@@ -129,7 +151,7 @@ public class SettingRemind extends AppCompatActivity {
                 }, 3000);
             }
         } else {
-            Toast.makeText(this, "请先选择铃声", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "請先選擇鈴聲", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -202,7 +224,7 @@ public class SettingRemind extends AppCompatActivity {
     private void proceedToRingtoneSelection() {
         Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "选择铃声");
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "選擇鈴聲");
         startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
     }
 
@@ -245,7 +267,7 @@ public class SettingRemind extends AppCompatActivity {
                 if (Settings.System.canWrite(this)) {
                     proceedToRingtoneSelection();
                 } else {
-                    Toast.makeText(this, "需要权限来更改铃声设置", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "請打開權限", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -258,5 +280,71 @@ public class SettingRemind extends AppCompatActivity {
         editor.apply();
         Log.d("SettingRemind", "Saved ringtone URI: " + ringtoneUri.toString());
     }
+    private void updateButtonLabels() {
+        chooseButton.setText(getButtonText("Choose Ring"));
+        ringTest.setText(getButtonText("Test Ring"));
+        backButton.setText(getButtonText("Back"));
+
+        vibrateTest.setText(getButtonText("Test vibrate"));
+        ring.setText(getButtonText("ring"));
+        vibrate.setText(getButtonText("vibrate"));
+        texttt.setText(getButtonText("now we will show how to ring and vibrate"));
+    }
+
+    private String getButtonText(String text) {
+        // 检查当前语言并返回相应的翻译
+        SharedPreferences prefs = getSharedPreferences("settings", Context.MODE_PRIVATE);
+        String language = prefs.getString("app_lang", "zh");
+
+        if ("zh".equals(language)) {
+            return translateToChinese(text);
+        } else {
+            return text; // 默认返回英文
+        }
+    }
+
+    private String translateToChinese(String text) {
+        switch (text) {
+            case "Choose Ring":
+                return "選擇鈴聲";
+            case "Test vibrate":
+                return "點我示範震動";
+            case "Test Ring":
+                return "點我示範鈴聲";
+            case "Back":
+                return "回上一頁";
+            case "vibrate":
+                return "震動";
+            case "ring":
+                return "鈴聲";
+            case "now we will show how to ring and vibrate":
+                return "以下將示範鈴聲與震動的觸發";
+            default:
+                return text;
+        }
+    }
+
+    private void loadLocale() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String language = prefs.getString("app_lang", "zh");
+        setLocale(language);
+    }
+
+    private void setLocale(String lang) {
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+    }
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateButtonLabels(); // 确保返回活动时更新文本
+    }
+
 }
 

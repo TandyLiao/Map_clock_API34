@@ -339,14 +339,18 @@ public class mapping extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        locationManager.requestLocationUpdates(commandstr, 10000, 0, locationListener);
-        lastLocation = locationManager.getLastKnownLocation(commandstr);
-    }//這方法設定組新增
+        Intent serviceIntent = new Intent(getActivity(), LocationService.class);
+        serviceIntent.putExtra("latitude", latitude);
+        serviceIntent.putExtra("longitude", longitude);
+        serviceIntent.putExtra("destinationName", destinationName);
+        ContextCompat.startForegroundService(getActivity(), serviceIntent); }//這方法設定組新增
 
     public void resetNotificationSent() {
         notificationSent = false;
     }
-    /*@Override
+
+}
+/*@Override
     public void onStart() {
         super.onStart();
 
@@ -364,4 +368,3 @@ public class mapping extends Fragment {
         getActivity().stopService(serviceIntent);
     }
 */
-}

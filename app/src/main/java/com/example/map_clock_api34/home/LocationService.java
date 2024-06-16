@@ -100,6 +100,10 @@ public class LocationService extends Service {
     }
 
     private void handleLocationUpdate(Location nowLocation) {
+        if (startLocation == null) {
+            startLocation = nowLocation;
+        }
+
         totalTime += 10;
         pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
         last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
