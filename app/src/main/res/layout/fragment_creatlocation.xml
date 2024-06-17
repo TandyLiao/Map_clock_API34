@@ -4,7 +4,7 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/lightyellow"
     android:theme="@style/NoTheme"
     tools:context=".home.MapsFragment">
 
@@ -22,21 +22,9 @@
             android:padding="10dp"
             android:src="@drawable/hubutton"
             app:layout_constraintStart_toStartOf="parent"
-
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/temp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="8dp"
-            android:adjustViewBounds="true"
-            android:maxWidth="45dp"
-            android:maxHeight="45dp"
-            android:src="@drawable/microphone"
-            app:layout_constraintBottom_toTopOf="@+id/recycleView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycleView"
@@ -46,184 +34,62 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/huButton" />
 
-        <TextView
-            android:id="@+id/routeTitle"
-            android:layout_width="97dp"
-            android:layout_height="62dp"
-            android:gravity="center_vertical"
-            android:text="  路線規劃"
-            android:textColor="@color/black"
-            android:textSize="20dp"
-            app:layout_constraintStart_toEndOf="@+id/huButton"
-            app:layout_constraintTop_toTopOf="parent" />
+
 
         <Button
             android:id="@+id/btn_addItem"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/btn_additem"
             android:padding="0dp"
-            android:text="+"
-            android:textColor="@color/black"
+            android:text="新增"
+            android:textColor="@color/green"
+            app:backgroundTint="@null"
             android:textSize="15dp"
-            app:layout_constraintEnd_toStartOf="@+id/btn_dropItem"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/recycleView2"
             app:layout_constraintTop_toBottomOf="@+id/recycleView" />
 
         <Button
-            android:id="@+id/btn_dropItem"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:id="@+id/btn_reset"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
             android:background="@drawable/btn_additem"
-            android:padding="0dp"
-            android:textStyle="bold"
-            android:text="-"
-            android:textColor="@color/black"
+            android:text="重置"
+            android:textColor="@color/green"
+            app:backgroundTint="@null"
             android:textSize="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/recycleView2"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recycleView" />
 
-        <View
-            android:id="@+id/toolview"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleView2"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="@drawable/recyclerview"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_addItem" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="其他提醒&#038;設定"
-            android:textSize="15dp"
-            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/toolview" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_addItem"
+            app:layout_constraintBottom_toTopOf="@id/btn_sure" _toBottomOf="@+id/btn_addItem"
+            />
 
         <Button
             android:id="@+id/btn_sure"
             android:layout_width="120dp"
             android:layout_height="60dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="140dp"
+            android:layout_marginEnd="151dp"
             android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_additem"
             android:text="確定"
-            android:textColor="@color/black"
-            android:background="@drawable/btn_additem"
+            android:textColor="@color/darkgreen"
             android:textSize="20dp"
+            app:backgroundTint="@null"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <Button
-            android:id="@+id/btn_reset"
-            android:layout_width="120dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="重置"
-            android:textColor="@color/black"
-            android:background="@drawable/btn_additem"
-            android:textSize="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/white"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/toolview"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/toolview"
-            app:strokeColor="@color/gray"
-            app:strokeWidth="3dp">
-
-            <ImageView
-                android:id="@+id/imageView_thing"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/baseline_bookmark_24" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/toolview"
-            app:layout_constraintEnd_toEndOf="@+id/toolview"
-            app:layout_constraintStart_toStartOf="@+id/toolview"
-            app:layout_constraintTop_toTopOf="@+id/toolview"
-            app:strokeColor="@color/gray"
-            app:strokeWidth="3dp">
-
-            <ImageView
-                android:id="@+id/imageView_vibrate"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/baseline_bookmark_24" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/white"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/toolview"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/toolview"
-            app:strokeColor="@color/gray"
-            app:strokeWidth="3dp">
-
-            <ImageView
-                android:id="@+id/imageView_weather"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/baseline_bookmark_24" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:id="@+id/txt_thing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="27dp"
-            android:layout_marginTop="8dp"
-            android:text="記事"
-            android:textSize="20dp"
-            android:textColor="@color/black"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/materialCardView" />
-
-        <TextView
-            android:id="@+id/txt_vibrate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="震動"
-            android:textSize="20dp"
-            android:textColor="@color/black"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/materialCardView2" />
-
-        <TextView
-            android:id="@+id/txt_weather"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="27dp"
-            android:text="天氣"
-            android:textSize="20dp"
-            android:textColor="@color/black"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/materialCardView3" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
