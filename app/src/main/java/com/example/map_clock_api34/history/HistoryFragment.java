@@ -25,7 +25,6 @@ import com.example.map_clock_api34.R;
 
 public class HistoryFragment extends Fragment {
 
-    private TextView tx1;
     private Toolbar toolbar;
 
     @Nullable
@@ -57,7 +56,6 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        tx1 = view.findViewById(R.id.textView);
         toolbar = getActivity().findViewById(R.id.toolbar);
         // 初始化 toolbar
     }
@@ -65,8 +63,6 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        tx1.setText("HISTORY Fragment");
 
         //建立CardView在toolbar
         CardView cardViewtitle = new CardView(requireContext());
