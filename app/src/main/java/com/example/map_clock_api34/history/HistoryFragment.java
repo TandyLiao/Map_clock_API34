@@ -33,14 +33,14 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
-        // 新增對EditButton的引用和點擊事件
+        // 新增對EditButton的點擊事件
         Button editButton = view.findViewById(R.id.EditButton);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // 使用FragmentTransaction來替換當前的Fragment
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, new HistoryEditFragment()); // 假設你的fragment_container是你Activity的FrameLayout的ID
+                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
