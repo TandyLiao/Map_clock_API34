@@ -40,7 +40,7 @@ public class HistoryFragment extends Fragment {
             public void onClick(View v) {
                 // 使用FragmentTransaction來替換當前的Fragment
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
+                transaction.replace(R.id.fl_container, new HistoryEditFragment());
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
