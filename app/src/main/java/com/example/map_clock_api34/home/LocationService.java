@@ -98,7 +98,7 @@ public class LocationService extends Service {
             manager.createNotificationChannel(serviceChannel);
         }
 
-        
+
     }
 
     private void handleLocationUpdate(Location nowLocation) {

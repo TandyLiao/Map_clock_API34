@@ -53,38 +53,52 @@
         android:id="@+id/remind_Button"
         android:layout_width="200dp"
         android:layout_height="82dp"
+        android:background="@drawable/oval_button_background"
         android:elevation="20dp"
         android:gravity="center"
+        android:onClick="ringDevice"
         android:text="提醒"
-        android:background="@drawable/oval_button_background"
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="ringDevice" />
+        app:layout_constraintVertical_bias="0.4" />
+
     <View
         android:id="@+id/line3"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
         android:background="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-
         app:layout_constraintBottom_toBottomOf="@id/remind_Button"
+        app:layout_constraintEnd_toEndOf="parent"
 
-        app:layout_constraintTop_toTopOf="@id/language_Button"
-        />
+
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/language_Button" />
+
+    <ImageView
+        android:id="@+id/myImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/setting_alarm_24"
+        app:layout_constraintTop_toTopOf="@+id/remind_Button"
+        app:layout_constraintBottom_toBottomOf="@+id/remind_Button"
+        app:layout_constraintEnd_toStartOf="@+id/remind_Button"
+
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <Button
         android:id="@+id/language_Button"
         android:layout_width="200dp"
         android:layout_height="82dp"
         android:background="@drawable/oval_button_background"
-        android:elevation="20dp"
+
         android:gravity="center"
         android:onClick="ringDevice"
         android:text="語言"
@@ -93,20 +107,21 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/line3"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="@id/line3"
-        app:layout_constraintTop_toTopOf="@+id/line4"/>
+        app:layout_constraintTop_toTopOf="@+id/line4" />
 
     <View
         android:id="@+id/line4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="4dp"
         android:background="@color/black"
 
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-
         app:layout_constraintBottom_toBottomOf="@id/language_Button"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

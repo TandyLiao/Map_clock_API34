@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -34,6 +35,7 @@ public class SettingFragment extends Fragment {
     private TextView tx1;
     private Toolbar toolbar;
     private Button interface_Button, remind_Button, language_Button;
+    private ImageView setting_clock;
 
     @Nullable
     @Override
@@ -44,7 +46,9 @@ public class SettingFragment extends Fragment {
         interface_Button = view.findViewById(R.id.interface_Button);
         remind_Button = view.findViewById(R.id.remind_Button);
         language_Button = view.findViewById(R.id.language_Button);
+        setting_clock=view.findViewById(R.id.myImageView);
 
+        setting_clock.setImageResource(R.drawable.setting_alarm_24);
         // 为每个按钮设置点击事件监听器
         interface_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,9 +81,9 @@ public class SettingFragment extends Fragment {
     }
 
     private void updateButtonLabels() {
-        interface_Button.setText(getButtonText("Adjust Font Size"));
-        remind_Button.setText(getButtonText("Remind Setting"));
-        language_Button.setText(getButtonText("Language Switch"));
+        interface_Button.setText(getButtonText("Interface"));
+        remind_Button.setText(getButtonText("Remind"));
+        language_Button.setText(getButtonText("Language"));
     }
 
     private String getButtonText(String text) {
@@ -96,12 +100,12 @@ public class SettingFragment extends Fragment {
 
     private String translateToChinese(String text) {
         switch (text) {
-            case "Adjust Font Size":
-                return "調整字體大小";
-            case "Remind Setting":
-                return "提醒設置";
-            case "Language Switch":
-                return "中英切換";
+            case "Interface":
+                return "介面";
+            case "Remind":
+                return "提醒";
+            case "Language":
+                return "語言";
             default:
                 return text;
         }
