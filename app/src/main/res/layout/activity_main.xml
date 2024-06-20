@@ -31,12 +31,13 @@
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
-        android:background="@color/white"
+        android:background="@color/lightyellow"
         android:layout_width="240dp"
         android:layout_gravity="start"
         android:layout_height="match_parent"
         app:headerLayout="@layout/navigation_header"
         app:menu="@menu/menu"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints"
+        app:itemTextColor="@color/green"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

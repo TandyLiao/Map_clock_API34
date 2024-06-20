@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Background color of the PopupWindow -->
+    <solid android:color="@color/lightyellow" />
+
+    <!-- Border width and color -->
+    <stroke
+        android:width="3dp"
+        android:color="@color/darkyellow" />
+
+    <!-- Optional: Corner radius for rounded corners -->
+    <corners android:topLeftRadius="20dp"
+        android:topRightRadius="20dp"
+        android:bottomLeftRadius="0dp"
+        android:bottomRightRadius="0dp" />
+
+</shape>

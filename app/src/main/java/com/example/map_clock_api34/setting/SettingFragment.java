@@ -16,26 +16,26 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.widget.Toolbar;
-
+import androidx.fragment.app.FragmentTransaction;
 import com.example.map_clock_api34.R;
-
 import java.util.Locale;
 
 public class SettingFragment extends Fragment {
-    private TextView tx1;
-    private Toolbar toolbar;
+
+    private androidx.appcompat.widget.Toolbar toolbar;
     private Button interface_Button, remind_Button, language_Button;
     private ImageView setting_clock;
+    private ActionBarDrawerToggle toggle;
+    private DrawerLayout drawerLayout; // 声明 DrawerLayout 对象
 
     @Nullable
     @Override
@@ -46,15 +46,20 @@ public class SettingFragment extends Fragment {
         interface_Button = view.findViewById(R.id.interface_Button);
         remind_Button = view.findViewById(R.id.remind_Button);
         language_Button = view.findViewById(R.id.language_Button);
-        setting_clock=view.findViewById(R.id.myImageView);
+        setting_clock = view.findViewById(R.id.myImageView);
 
         setting_clock.setImageResource(R.drawable.setting_alarm_24);
+
         // 为每个按钮设置点击事件监听器
         interface_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // 启动 SettingInterfaceActivity
-                startActivity(new Intent(requireContext(), SettingInterfaceActivity.class));
+                SettingInterfaceActivity settingInterfaceActivity = new SettingInterfaceActivity();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, settingInterfaceActivity);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
@@ -69,8 +74,12 @@ public class SettingFragment extends Fragment {
         language_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 启动 SettingLanguageActivity
-                startActivity(new Intent(requireContext(), SettingLanguage.class));
+                // 启动 SettingLanguage Fragment
+                SettingLanguage settingLanguage = new SettingLanguage();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, settingLanguage);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
@@ -114,7 +123,9 @@ public class SettingFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        tx1 = view.findViewById(R.id.textView);
+
+        // 通过 getActivity() 获取 MainActivity 中的 DrawerLayout
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
         toolbar = getActivity().findViewById(R.id.toolbar);
     }
 
@@ -122,52 +133,63 @@ public class SettingFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        tx1.setText("wakuwaku");
-
-        //建立CardView在toolbar
-        CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
-        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewtitle.setBackground(drawable);
-        //建立LinearLayout在CardView等等放圖案和文字
-        LinearLayout linearLayout = new LinearLayout(requireContext());
-        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-        //
-        ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.setting);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
-        );
-        params.setMarginStart(10); // 设置左边距
-        mark.setLayoutParams(params);
-
-        // 創建TextView
-        TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("設定");
-        bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
-
-        linearLayout.addView(mark);
-        linearLayout.addView(bookTitle);
-        cardViewtitle.addView(linearLayout);
-
-        // 将cardview新增到actionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        // 获取 ActionBar
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
+            // 设置漢堡選單觸發鍵的顏色
+            if (toggle == null) {
+                toggle = new ActionBarDrawerToggle(
+                        getActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+                drawerLayout.addDrawerListener(toggle);
+                toggle.syncState();
+            }
+            toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+
+            // 建立 CardView 在 toolbar
+            CardView cardViewtitle = new CardView(requireContext());
+            cardViewtitle.setLayoutParams(new CardView.LayoutParams(
+                    ActionBar.LayoutParams.MATCH_PARENT,
+                    ActionBar.LayoutParams.MATCH_PARENT));
+            Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
+            cardViewtitle.setBackground(drawable);
+
+            // 建立 LinearLayout 在 CardView 里放置图标和文字
+            LinearLayout linearLayout = new LinearLayout(requireContext());
+            linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT));
+            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+            // ImageView 放置图标
+            ImageView mark = new ImageView(requireContext());
+            mark.setImageResource(R.drawable.setting);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    100, // 设置宽度为 100 像素
+                    100 // 设置高度为 100 像素
+            );
+            params.setMarginStart(10); // 设置左边距
+            mark.setLayoutParams(params);
+
+            // 创建 TextView
+            TextView bookTitle = new TextView(requireContext());
+            bookTitle.setText("設定");
+            bookTitle.setTextSize(15);
+            bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
+            bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+
+            // 将 ImageView 和 TextView 添加到 LinearLayout
+            linearLayout.addView(mark);
+            linearLayout.addView(bookTitle);
+            cardViewtitle.addView(linearLayout);
+
+            // 设置自定义视图到 ActionBar
             actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
                     ActionBar.LayoutParams.WRAP_CONTENT, // 宽度设置为 WRAP_CONTENT
                     ActionBar.LayoutParams.WRAP_CONTENT, // 高度设置为 WRAP_CONTENT
-                    Gravity.END)); // 将包含 TextView 的 CardView 设置为自定义视图
+                    Gravity.END)); // 设置位置为右侧
+
             actionBar.show();
         }
 
@@ -178,10 +200,13 @@ public class SettingFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        // 清除 ActionBar 的自定义视图
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(false);
             actionBar.setCustomView(null);
+            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
         }
     }
 }

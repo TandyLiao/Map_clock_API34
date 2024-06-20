@@ -1,27 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="10dp"
     android:gravity="center">
 
-    <ImageView
-        android:id="@+id/horecycle_imageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:clickable="true"
-        android:gravity="center"/>
-
-    <TextView
-        android:id="@+id/horecycle_Name"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        android:padding="8dp"
-        android:layout_gravity="center"/>
+        android:clickable="true"
+        android:focusable="true"
+        android:checkable="true"
+        app:cardBackgroundColor="@color/lightyellow"
+        app:cardCornerRadius="20dp"
+        app:strokeColor="@color/darkyellow"
+        app:strokeWidth="2dp"
+        android:layout_margin="10dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/horecycle_imageView"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:clickable="true"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/horecycle_Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/green"
+                android:padding="8dp"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="160dp"
-    android:background="#619B8A"
+    android:background="@color/lightgreen"
     android:gravity="bottom"
     android:orientation="vertical">
 
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:paddingTop="4dp"
-        android:text="估狗在搞我"
-        android:textColor="#ffffff" />
+        android:text="地圖鬧鐘"
+        android:textColor="@color/darkgreen" />
 
 </LinearLayout>
