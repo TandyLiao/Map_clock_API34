@@ -3,17 +3,29 @@ package com.example.map_clock_api34.Database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import com.example.map_clock_api34.SharedViewModel;
+
 
 
 
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "bookmark";
+    private static final String DATABASE_NAME = "map_clock_database";
     private static final int DATABASE_VERSION = 1;
-
-    public AppDatabaseHelper(Context context) {
+    private SQLiteDatabase database;
+    public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.database = this.getWritableDatabase();
+        this.sharedViewModel = sharedViewModel;
+
+
+        // We now have the data from SharedViewModel
+        String[] names = sharedViewModel.getDestinationNameArray();
+        double[] latitudes = sharedViewModel.getLatitudeArray();
+        double[] longitudes = sharedViewModel.getLongitudeArray();
     }
+        // Now insert this data into the database as needed..
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
