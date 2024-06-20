@@ -24,9 +24,14 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SettingTable.CREATE_TABLE);
     }
 
-    @Override
+    @Override//吳俊廷加的，資料庫版本升級時，刪除現有的資料表並重新創建
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS " + HistoryTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + LocationTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + BookmarkTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + NoteTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + SettingTable.TABLE_NAME);
+        onCreate(db);
     }
 
     public static class HistoryTable {
@@ -43,7 +48,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_LOCATION_ID + " INTEGER,"
                         + COLUMN_ALARM_NAME + " TEXT,"
-                        + COLUMN_START_TIME + " DATETIME"
+                        + COLUMN_START_TIME + " DATETIME,"
+                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + ")"
                         + ")";
     }
 
@@ -55,13 +61,22 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LONGITUDE = "longitude";
         public static final String COLUMN_LATITUDE = "latitude";
         public static final String COLUMN_PLACE_NAME = "place_name";
+        public static final String COLUMN_NOTE_ID = "note_id";
+        public static final String COLUMN_SETTING_ID = "setting_id";
+        public static final String COLUMN_SORT_ID = "sort_id";
+
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_LOCATION_ID + " INTEGER,"
+                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_LONGITUDE + " REAL,"
                         + COLUMN_LATITUDE + " REAL,"
-                        + COLUMN_PLACE_NAME + " TEXT"
+                        + COLUMN_PLACE_NAME + " TEXT,"
+                        + COLUMN_NOTE_ID + " INTEGER,"
+                        + COLUMN_SETTING_ID + " INTEGER,"
+                        + COLUMN_SORT_ID + " INTEGER,"
+                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "),"
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + ")"
                         + ")";
     }
 
@@ -75,9 +90,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_BOOKMARK_ID + " INTEGER,"
+                        + COLUMN_BOOKMARK_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_BOOKMARK_NAME + " TEXT,"
-                        + COLUMN_ROUTE_ID + " INTEGER"
+                        + COLUMN_ROUTE_ID + " INTEGER,"
+                        + "FOREIGN KEY(" + COLUMN_ROUTE_ID + ") REFERENCES " + HistoryTable.TABLE_NAME + "(" + HistoryTable.COLUMN_ROUTE_ID + ")"
                         + ")";
     }
 
@@ -91,9 +107,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_NOTE_ID + " INTEGER,"
+                        + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_CONTENT + " TEXT,"
-                        + COLUMN_SETTING_ID + " INTEGER"
+                        + COLUMN_SETTING_ID + " INTEGER,"
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + ")"
                         + ")";
     }
 
