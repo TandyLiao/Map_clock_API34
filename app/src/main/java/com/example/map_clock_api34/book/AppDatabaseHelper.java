@@ -2,10 +2,13 @@ package com.example.map_clock_api34.book;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.example.map_clock_api34.SharedViewModel;
+
 public class AppDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "bookmark";
     private static final int DATABASE_VERSION = 1;
-    public AppDatabaseHelper(Context context) {
+    public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

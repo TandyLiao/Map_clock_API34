@@ -13,19 +13,25 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "map_clock_database";
     private static final int DATABASE_VERSION = 1;
     private SQLiteDatabase database;
+    private SharedViewModel sharedViewModel;
+
     public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.database = this.getWritableDatabase();
-        this.sharedViewModel = sharedViewModel; //123
+        this.sharedViewModel = sharedViewModel;
+
 
 
         // We now have the data from SharedViewModel
         String[] names = sharedViewModel.getDestinationNameArray();
         double[] latitudes = sharedViewModel.getLatitudeArray();
         double[] longitudes = sharedViewModel.getLongitudeArray();
-    }
+    }   //123
         // Now insert this data into the database as needed..
-
+        public AppDatabaseHelper(Context context) {
+            super(context, "database_name", null, 1);
+            // 這個建構子只接受 Context 參數
+        }
 
     @Override
     public void onCreate(SQLiteDatabase db) {

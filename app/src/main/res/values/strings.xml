@@ -11,6 +11,12 @@
     <string name="no_vibration_support">Your device does not support vibration</string>
     <string name="select_ringtone_first">Please select a ringtone first</string>
     <string name="adjust_font_size">Adjust Font Size</string>
+    <string name="CreateBookmark">建立書籤</string>
+    <string name="SaveBookmark">套用書籤</string>
+    <string name="ModifyBookmark">修改書籤</string>
+    <string name="AddRoute">新增路線</string>
+    <string name="cancel_button">取消</string>
+
 
 
 
