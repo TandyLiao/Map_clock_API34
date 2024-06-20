@@ -18,12 +18,12 @@ import com.example.map_clock_api34.book.AppDatabaseHelper;
 
 public class HistoryEditFragment extends Fragment {
 
-    private AppDatabaseHelper dbHelper;
+    private AppDatabaseHelper dbHelper; //123
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         SharedViewModel sharedViewModel = new ViewModelProvider(getActivity()).get(SharedViewModel.class);
-        dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel);
+        dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel); //123
 
 
         View view = inflater.inflate(R.layout.fragment_history_edit, container, false);

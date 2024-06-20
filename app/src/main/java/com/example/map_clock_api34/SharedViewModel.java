@@ -55,15 +55,15 @@ public class SharedViewModel extends ViewModel {
         return longitude[j];
     }
     public String[] getDestinationNameArray() {
-        return destinationName;
+        return destinationName; //123
     }
 
     public double[] getLatitudeArray() {
-        return latitude;
+        return latitude;  //123
     }
 
     public double[] getLongitudeArray() {
-        return longitude;
+        return longitude; //123
     }
 
 }

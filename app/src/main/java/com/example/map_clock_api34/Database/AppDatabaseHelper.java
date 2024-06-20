@@ -16,7 +16,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.database = this.getWritableDatabase();
-        this.sharedViewModel = sharedViewModel;
+        this.sharedViewModel = sharedViewModel; //123
 
 
         // We now have the data from SharedViewModel
