@@ -1,14 +1,17 @@
 package com.example.map_clock_api34.book;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.map_clock_api34.SharedViewModel;
+
 
 public class AppDatabaseHelper extends SQLiteOpenHelper {
+
     private static final String DATABASE_NAME = "bookmark";
     private static final int DATABASE_VERSION = 1;
-    public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
+
+    public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -23,13 +26,18 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
     }
+
     public static class HistoryTable {
+
         public static final String TABLE_NAME = "history";
+
         public static final String COLUMN_ROUTE_ID = "route_id";
         public static final String COLUMN_LOCATION_ID = "location_id";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
         public static final String COLUMN_START_TIME = "start_time";
+
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
                         + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
@@ -38,7 +46,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_START_TIME + " DATETIME"
                         + ")";
     }
-
 
     public static class LocationTable {
 

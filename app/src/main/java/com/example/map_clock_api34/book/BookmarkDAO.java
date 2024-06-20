@@ -9,7 +9,7 @@ public class BookmarkDAO{
     private AppDatabaseHelper appDatabaseHelper;
 
     public BookmarkDAO (Context context){
-        appDatabaseHelper = new AppDatabaseHelper(context, sharedViewModel);
+        appDatabaseHelper = new AppDatabaseHelper(context);
         db = appDatabaseHelper.getWritableDatabase();
     }
 
