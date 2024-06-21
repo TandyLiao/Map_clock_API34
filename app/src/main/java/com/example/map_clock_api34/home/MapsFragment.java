@@ -93,8 +93,13 @@ public class MapsFragment extends Fragment {
             lastLocation = locationManager.getLastKnownLocation(commandstr);
 
             // 移动地图视图到最后已知的位置
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
-
+            if (lastLocation != null) {
+                // 移动地图视图到最后已知的位置
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
+            } else {
+                // 处理 lastLocation 为 null 的情况
+                Toast.makeText(getContext(), "无法获取当前位置，请检查GPS设置", Toast.LENGTH_LONG).show();
+            }
 
 
 

@@ -4,18 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/lightyellow">
 
 
     <Switch
         android:id="@+id/switch_Ring"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_marginStart="204dp"
         android:thumb="@drawable/switch_thumb"
         android:track="@drawable/switch_track"
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/back" />
+
 
     <TextView
         android:id="@+id/text_RING"
@@ -53,13 +56,16 @@
     <Switch
         android:id="@+id/switch_VIBRATE"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:thumb="@drawable/switch_thumb"
         android:track="@drawable/switch_track"
         android:layout_marginTop="36dp"
         app:layout_constraintLeft_toLeftOf="@+id/switch_Ring"
 
         app:layout_constraintTop_toBottomOf="@+id/text_RING"
+        android:layout_height="48dp"
+
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp"
         />
 
     <TextView
