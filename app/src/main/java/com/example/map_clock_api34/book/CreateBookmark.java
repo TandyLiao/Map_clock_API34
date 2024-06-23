@@ -54,6 +54,7 @@ public class CreateBookmark extends Fragment {
 
     private BookmarkDAO bookmarkDAO;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.create_bookmark, container, false);
@@ -163,6 +164,10 @@ public class CreateBookmark extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        if (getActivity() == null)
+            return;
+        // Otherwise, bring the existing activity to the front
 
         //建立CardView在toolbar
         CardView cardViewTitle = new CardView(getActivity());
