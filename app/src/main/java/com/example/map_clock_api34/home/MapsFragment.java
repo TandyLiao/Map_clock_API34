@@ -188,68 +188,8 @@ public class MapsFragment extends Fragment {
 
     public void onResume() {
         super.onResume();
-        Fragment createLocationFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-
-        // 如果 CreateLocation Fragment 存在并且是 CreateLocation 的实例
-        if (createLocationFragment instanceof CreateLocation) {
-            // 清除数据
-            //((CreateLocation) createLocationFragment).clearData();
-        }
-
-        //建立CardView在toolbar
-       /* CardView cardmap = new CardView(requireContext());
-
-        int widthInPixels = getResources().getDimensionPixelSize(R.dimen.map_width);
-        int heightInPixels = getResources().getDimensionPixelSize(R.dimen.map_height);
-        cardmap.setLayoutParams(new CardView.LayoutParams(widthInPixels, heightInPixels));
-
-        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewmap_shape);
-        cardmap.setBackground(drawable);*/
-
-        //建立LinearLayout在CardView等等放圖案和文字
-        /*LinearLayout linearLayout = new LinearLayout(requireContext());
-        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        linearLayout.addView(fragmentcontainerView);*/
-
-
-
-        /* ImageView mapmark = new ImageView(requireContext());
-        mapmark.setImageResource(R.drawable.magnifier_search);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
-        );
-        params.setMarginStart(10); // 设置左边距
-        mapmark.setLayoutParams(params);*/
-
-        // 創建EditText
-       /* EditText edmap = new EditText(requireContext());
-        edmap.setHint("搜尋地點");
-        edmap.setTextColor(getResources().getColor(R.color.green));
-        edmap.setLayoutParams(new CardView.LayoutParams(widthInPixels, heightInPixels));
-
-        edmap.setSingleLine(true);
-        edmap.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-
-
-        linearLayout.addView(mapmark);
-        linearLayout.addView(edmap);
-        cardmap.addView(linearLayout);*/
-
-        // 將cardview新增到actionBar
-
     }
-    public void clearData() {
-        // 清除地点信息
-        //destinationNameTextView.setText("");
-        //destinationLatitudeTextView.setText("");
-        //destinationLongitudeTextView.setText("");
-    }
+
     private void iniAutocomplete(){
 
         String apiKey="AIzaSyCf6tnPO_VbhDJ_EreXXRZes48c7X5giSM";

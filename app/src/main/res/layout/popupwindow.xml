@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="300dp"
-    android:layout_height="100dp"
+    android:layout_height="120dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:andoird="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="@drawable/popupborder">
 
@@ -52,9 +53,10 @@
             app:backgroundTint="@null" />
 
     </LinearLayout>
-    <View
-        android:layout_width="100dp"
-        android:layout_height="20dp"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
 
 
 </LinearLayout>

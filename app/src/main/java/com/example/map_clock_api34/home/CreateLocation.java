@@ -352,7 +352,11 @@ public class CreateLocation extends Fragment {
             for (int j = 0; j <= sharedViewModel.getI(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
                 tx10=sharedViewModel.getDestinationName(j);
-                hashMap.put("data", tx10.substring(0,20)+"...");
+                if(tx10.length()>20){
+                    hashMap.put("data", tx10.substring(0,20)+"...");
+                }else{
+                    hashMap.put("data", tx10);
+                }
                 //超過20個字用...代替
                 arrayList.add(hashMap);
             }
