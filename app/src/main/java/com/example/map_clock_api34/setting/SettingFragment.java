@@ -165,7 +165,8 @@ public class SettingFragment extends Fragment {
 
             // ImageView 放置图标
             ImageView mark = new ImageView(requireContext());
-            mark.setImageResource(R.drawable.setting);
+            mark.setImageResource(R.drawable.setting1);
+            mark.setPadding(10,10,5,10);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     100, // 设置宽度为 100 像素
                     100 // 设置高度为 100 像素
