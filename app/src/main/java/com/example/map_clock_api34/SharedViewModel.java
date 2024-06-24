@@ -1,11 +1,13 @@
 package com.example.map_clock_api34;
+
 import androidx.lifecycle.ViewModel;
+
 public class SharedViewModel extends ViewModel {
     private String[] destinationName = new String[7];
     private String[] destinationCapital = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
-    private int i=-1;
+    private int i = -1;
 
     public void setDestination(String name, double latitude, double longitude) {
         i++;
@@ -13,13 +15,16 @@ public class SharedViewModel extends ViewModel {
         this.latitude[i] = latitude;
         this.longitude[i] = longitude;
     }
-    public void setCapital(String capital){
-        this.destinationCapital[i]=capital;
+
+    public void setCapital(String capital) {
+        this.destinationCapital[i] = capital;
     }
-    public String getCapital(int j){
+
+    public String getCapital(int j) {
         return destinationCapital[j];
     }
-    public void swap(int start, int end){
+
+    public void swap(int start, int end) {
         double temp;
         String stemp;
         temp = latitude[start];
@@ -32,38 +37,44 @@ public class SharedViewModel extends ViewModel {
         destinationName[start] = destinationName[end];
         destinationName[end] = stemp;
     }
-    public void delet(int position){
-        while(position!=i){
-            swap(position,position+1);
+
+    public void delet(int position) {
+        while (position != i) {
+            swap(position, position + 1);
             position++;
         }
         i--;
     }
-    public int getI(){
+
+    public int getI() {
         return i;
     }
-    public void setI(){
+
+    public void setI() {
         i--;
     }
+
     public String getDestinationName(int j) {
         return destinationName[j];
     }
+
     public double getLatitude(int j) {
         return latitude[j];
     }
+
     public double getLongitude(int j) {
         return longitude[j];
     }
+
     public String[] getDestinationNameArray() {
-        return destinationName; //123
+        return destinationName;
     }
 
     public double[] getLatitudeArray() {
-        return latitude;  //123
+        return latitude;
     }
 
     public double[] getLongitudeArray() {
-        return longitude; //123
+        return longitude;
     }
-
 }
