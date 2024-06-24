@@ -189,9 +189,7 @@ public class mapping extends Fragment {
                     resetNotificationSent(); // 新增重製通知(6/2新增)
 
                 }
-                if (last_distance < 0.05 && time < 1) {
-                    navigateToTimesUpFragment();
-                }
+
                 //設定組新增
 
             }
@@ -213,13 +211,7 @@ public class mapping extends Fragment {
             }
         }
     }//此方法設定組加
-    private void navigateToTimesUpFragment() {
-        TimesUpFragment timesUpFragment = new TimesUpFragment();
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, timesUpFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
+
 
     private void initPopWindow(){
 

@@ -18,9 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.Distance;
+import android.util.Log;
+
+
+
+import java.util.Arrays;
 
 public class LocationService extends Service {
 
@@ -46,6 +50,12 @@ public class LocationService extends Service {
             public void onLocationChanged(@NonNull Location location) {
                 handleLocationUpdate(location);
             }
+
+            @Override
+            public void onProviderEnabled(@NonNull String provider) {}
+
+            @Override
+            public void onProviderDisabled(@NonNull String provider) {}
         };
 
         createNotificationChannel();
@@ -64,13 +74,24 @@ public class LocationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+        if (intent != null) {
+            latitude = intent.getDoubleArrayExtra("latitude");
+            longitude = intent.getDoubleArrayExtra("longitude");
+            destinationName = intent.getStringArrayExtra("destinationName");
+
+            Log.d("LocationService", "Received latitude: " + Arrays.toString(latitude));
+            Log.d("LocationService", "Received longitude: " + Arrays.toString(longitude));
+            Log.d("LocationService", "Received destinationName: " + Arrays.toString(destinationName));
+        } else {
+            stopSelf();
+            return START_NOT_STICKY;
         }
 
-        latitude = intent.getDoubleArrayExtra("latitude");
-        longitude = intent.getDoubleArrayExtra("longitude");
-        destinationName = intent.getStringArrayExtra("destinationName");
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+        } else {
+            stopSelf();
+        }
 
         return START_STICKY;
     }
@@ -78,7 +99,9 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationManager.removeUpdates(locationListener);
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener);
+        }
     }
 
     @Nullable
@@ -97,8 +120,6 @@ public class LocationService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(serviceChannel);
         }
-
-
     }
 
     private void handleLocationUpdate(Location nowLocation) {
@@ -118,7 +139,7 @@ public class LocationService extends Service {
         }
 
         if (last_distance < 0.05 && time < 3) {
-            sendNotification("快到了!");
+            sendNotification("快到了!(背景執行的)");
         }
     }
 
