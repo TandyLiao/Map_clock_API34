@@ -210,6 +210,7 @@ public class CreateLocation extends Fragment {
             public ViewHolder(View itemView) {
                 super(itemView);
                 tx2 = itemView.findViewById(R.id.textVLocateionName);
+
                 dragHandle = itemView.findViewById(R.id.dragHandle);
                 dragHandle.setOnTouchListener(new View.OnTouchListener() {
                     @Override
@@ -302,13 +303,14 @@ public class CreateLocation extends Fragment {
 
         //
         ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.anya062516);
-
+        bookmark.setImageResource(R.drawable.route);
+        bookmark.setPadding(10,10,5,10);//設定icon邊界
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
         );
         params.setMarginStart(10); // 设置左边距
+
         bookmark.setLayoutParams(params);
 
         // 創建TextView
@@ -345,10 +347,13 @@ public class CreateLocation extends Fragment {
     }
     private void resetData() {
         arrayList.clear();
+        String tx10;
         if (sharedViewModel.getI() != -1) {
             for (int j = 0; j <= sharedViewModel.getI(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
-                hashMap.put("data", sharedViewModel.getDestinationName(j));
+                tx10=sharedViewModel.getDestinationName(j);
+                hashMap.put("data", tx10.substring(0,20)+"...");
+                //超過20個字用...代替
                 arrayList.add(hashMap);
             }
         }
@@ -524,16 +529,16 @@ public class CreateLocation extends Fragment {
 
             // 根据数据内容设置不同的图标
             if (data.equals("記事")) {
-                holder.horecycleimageView.setImageResource(R.drawable.bookmark);
+                holder.horecycleimageView.setImageResource(R.drawable.note);
             }
             else if (data.equals("天氣")) {
-                holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+                holder.horecycleimageView.setImageResource(R.drawable.weather);
             }
             else if (data.equals("震動")) {
-                holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+                holder.horecycleimageView.setImageResource(R.drawable.vibrate);
             }
             else if (data.equals("鈴聲")) {
-                holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+                holder.horecycleimageView.setImageResource(R.drawable.bell);
             }
             // 可以继续添加其他条目的处理逻辑
         }

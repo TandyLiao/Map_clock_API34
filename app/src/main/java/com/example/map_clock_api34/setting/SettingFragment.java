@@ -66,8 +66,11 @@ public class SettingFragment extends Fragment {
         remind_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 启动其他 Activity 或执行其他操作
-                startActivity(new Intent(requireContext(), SettingRemind.class));
+                SettingRemind settingRemind = new SettingRemind();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, settingRemind);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
@@ -162,7 +165,8 @@ public class SettingFragment extends Fragment {
 
             // ImageView 放置图标
             ImageView mark = new ImageView(requireContext());
-            mark.setImageResource(R.drawable.setting);
+            mark.setImageResource(R.drawable.setting1);
+            mark.setPadding(10,10,5,10);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     100, // 设置宽度为 100 像素
                     100 // 设置高度为 100 像素
