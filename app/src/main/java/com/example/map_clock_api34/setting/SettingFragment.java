@@ -66,8 +66,11 @@ public class SettingFragment extends Fragment {
         remind_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 启动其他 Activity 或执行其他操作
-                startActivity(new Intent(requireContext(), SettingRemind.class));
+                SettingRemind settingRemind = new SettingRemind();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, settingRemind);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
