@@ -72,7 +72,7 @@ public class BookFragment extends Fragment {
             CreateBookmark createBookmarkFragment = new CreateBookmark();
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, createBookmarkFragment)
+                    .replace(R.id.container_id, createBookmarkFragment)
                     .commit();
         });
 
@@ -87,7 +87,7 @@ public class BookFragment extends Fragment {
             CreateBookmark createBookmarkFragment = new CreateBookmark();
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container_id, createBookmarkFragment)
+                    .replace(R.id.action_create_bookmark, createBookmarkFragment)
                     .commit();
             return true;
         }
