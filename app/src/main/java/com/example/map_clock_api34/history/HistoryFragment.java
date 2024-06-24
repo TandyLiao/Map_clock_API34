@@ -74,7 +74,8 @@ public class HistoryFragment extends Fragment {
 
         //
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.clock);
+        mark.setImageResource(R.drawable.history_record1);
+        mark.setPadding(10,10,5,10);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
