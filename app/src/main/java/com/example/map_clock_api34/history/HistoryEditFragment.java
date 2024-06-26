@@ -30,7 +30,7 @@ public class HistoryEditFragment extends Fragment {
             dbHelper.insertDataToDatabase();
         }
 
-        View view = inflater.inflate(R.layout.fragment_history_edit, container, false);
+        View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
         Button clearButton = view.findViewById(R.id.Clearbutton);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -7,23 +7,17 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +26,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,11 +37,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
-import android.Manifest;
+
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,8 +52,9 @@ import java.util.Locale;
 
 import com.example.map_clock_api34.R;
 
-public class MapsFragment extends Fragment {
+public class SelectPlace extends Fragment {
 
+    boolean isUnknown = false;
     private Toolbar toolbar;
     private AutocompleteSupportFragment start_autocompleteSupportFragment;
     private SharedViewModel sharedViewModel;
@@ -75,9 +68,6 @@ public class MapsFragment extends Fragment {
     private Geocoder geocoder;
     private View overlayView;
 
-
-    private boolean isPopupShowing = false;
-
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
@@ -85,8 +75,6 @@ public class MapsFragment extends Fragment {
 
             mMap=googleMap;
 
-            //一直更新目前位置
-            //locationManager.requestLocationUpdates(commandStr,1000,0,locationListener);
             // 跑出藍色定位點
             mMap.setMyLocationEnabled(true);
             //取得最後的定位位置
@@ -98,7 +86,7 @@ public class MapsFragment extends Fragment {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
             } else {
                 // 处理 lastLocation 为 null 的情况
-                Toast.makeText(getContext(), "无法获取当前位置，请检查GPS设置", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "無法取得當前位置，請查看您的GPS設備", Toast.LENGTH_LONG).show();
             }
 
 
@@ -116,10 +104,13 @@ public class MapsFragment extends Fragment {
                     // Set title of marker
                     markerOptions.title(latLng.latitude+" : "+latLng.longitude);
 
-                    String placeName = "我們仍未知道哪天google能看見的地名";
+                    String nuKnownName="座標： "+ Math.round(latLng.latitude * 1000)/1000.0+"  "+ Math.round(latLng.longitude * 1000)/1000.0;
+                    cityName = getCityNameCustom(latLng.latitude, latLng.longitude);
+                    isUnknown = true;
+
                     // Remove all marker
                     mMap.clear();
-                    showPopupWindow(placeName, latLng.latitude, latLng.longitude);
+                    showPopupWindow(nuKnownName, latLng.latitude, latLng.longitude);
                     // Animating to zoom the marker
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
                     // Add marker on map
@@ -136,7 +127,7 @@ public class MapsFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View v =inflater.inflate(R.layout.fragment_maps, container, false);
+        View v =inflater.inflate(R.layout.home_fragment_maps, container, false);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -225,25 +216,8 @@ public class MapsFragment extends Fragment {
 
             LatLng destiantion_LatLng;
             destiantion_LatLng= new LatLng(place.getLatLng().latitude,place.getLatLng().longitude);
-
-            Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
-            List<Address> addresses = null;
-
-            try {
-                addresses = geocoder.getFromLocation(destiantion_LatLng.latitude, destiantion_LatLng.longitude, 1);
-                if (addresses != null && !addresses.isEmpty()) {
-                    Address address = addresses.get(0);
-
-                    cityName = String.valueOf(address.getAdminArea()); // Get the city name
-                    if(cityName.contains("台")){
-                        cityName=cityName.replace("台","臺");
-                    }
-                } else {
-                    Log.e("Geocoder", "No address found for the location");
-                }
-            } catch (IOException e) {
-                Log.e("Geocoder", "IOException while getting address", e);
-            }
+            cityName = getCityNameCustom(destiantion_LatLng.latitude, destiantion_LatLng.longitude);
+            isUnknown = false;
 
             //在地圖上標示Marker和彈跳地點資訊
             destiantion_Marker=mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(place.getName()));
@@ -265,7 +239,7 @@ public class MapsFragment extends Fragment {
         // Get layout inflater service
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // Inflate the popup layout
-        View popupView = inflater.inflate(R.layout.popview, null);
+        View popupView = inflater.inflate(R.layout.popupwindow_select_place, null);
 
         // Set the content of the popup window
         TextView destinationNameTextView = popupView.findViewById(R.id.DestinationName);
@@ -275,8 +249,10 @@ public class MapsFragment extends Fragment {
         Button btnCancel = popupView.findViewById(R.id.btnCancel);
         Button btnNext = popupView.findViewById(R.id.btnNext);
 
+        if(isUnknown!=true){
+            destinationNameTextView.setText(destiantion_Name);
+        }
         // Set the destination name
-        destinationNameTextView.setText(destiantion_Name);
         destination_latitudeTextView.setText(String.valueOf( destination_latitude));
         destination_longitudeTextView.setText(String.valueOf(destination_longitude));
 
@@ -302,6 +278,7 @@ public class MapsFragment extends Fragment {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mMap.clear();
                 // Close the popup window
                 closePopupWindow();
 
@@ -324,21 +301,12 @@ public class MapsFragment extends Fragment {
         overlayView.setClickable(true);
         ((ViewGroup) getView()).addView(overlayView);
 
-        // 禁用与底层视图的交互
-        overlayView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 什么也不做，以防止点击覆盖视图时关闭弹出窗口
-            }
-        });
-
     }
 
     private void closePopupWindow() {
         if (popupWindow != null && popupWindow.isShowing()) {
             popupWindow.dismiss();
-            // 关闭弹窗时将 isPopupShowing 置为 false
-            isPopupShowing = false;
+
             destiantion_Name = null;
             destination_latitude = 0;
             destination_longitude = 0;
@@ -347,5 +315,35 @@ public class MapsFragment extends Fragment {
             }
         }
     }
+    private String getCityNameCustom(double latitude, double longitude) {
+        // 金門縣的經緯度範圍
+        if (latitude >= 24.4 && latitude <= 24.6 && longitude >= 118.2 && longitude <= 118.5) {
+            return "金門縣";
+        }
+        // 馬祖縣的經緯度範圍
+        if (latitude >= 26.0 && latitude <= 26.3 && longitude >= 119.9 && longitude <= 120.5) {
+            return "連江縣";
+        }
 
+        // 使用內置的 Geocoder 獲取其他地區名稱
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                String cityName = address.getAdminArea();
+                if (cityName != null && !cityName.isEmpty()) {
+                    if (cityName.contains("台")) {
+                        cityName = cityName.replace("台", "臺");
+                    }
+                    return cityName;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // 返回默認值
+        return "未知地區";
+    }
 }
