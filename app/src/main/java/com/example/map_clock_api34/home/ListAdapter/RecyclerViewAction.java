@@ -2,6 +2,7 @@ package com.example.map_clock_api34.home.ListAdapter;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.home.CreateLocation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +23,7 @@ public class RecyclerViewAction {
 
     private ItemTouchHelper itemTouchHelper;
 
-    public void attachToRecyclerView(RecyclerView recyclerView, ArrayList<HashMap<String, String>> arrayList, ListAdapterRoute listAdapterRoute, SharedViewModel sharedViewModel, Context context) {
+    public void attachToRecyclerView(RecyclerView recyclerView, ArrayList<HashMap<String, String>> arrayList, ListAdapterRoute listAdapterRoute, SharedViewModel sharedViewModel, Context context, Button btnReset) {
         ItemTouchHelper.Callback callback = new ItemTouchHelper.Callback() {
             @Override
             public boolean isLongPressDragEnabled() {
@@ -49,6 +51,8 @@ public class RecyclerViewAction {
                 arrayList.remove(position);
                 sharedViewModel.delet(position);
                 listAdapterRoute.notifyItemRemoved(position);
+
+                updateResetButtonState(sharedViewModel, context, btnReset);
             }
 
             @Override
@@ -64,5 +68,24 @@ public class RecyclerViewAction {
         itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
         listAdapterRoute.setItemTouchHelper(itemTouchHelper);
+
+    }
+    private void updateResetButtonState(SharedViewModel sharedViewModel, Context context, Button btnReset) {
+
+        if (sharedViewModel.getI() >= 0) {
+            //設置可點擊狀態
+            btnReset.setEnabled(true);
+            //改變按鈕文字顏色
+            btnReset.setTextColor(ContextCompat.getColor(context, R.color.darkgreen));
+            //改變按鈕的Drawable
+            btnReset.setBackground(ContextCompat.getDrawable(context, R.drawable.btn_additem)); // 設定啟用時的背景顏色
+        } else {
+            //設置不可點擊狀態
+            btnReset.setEnabled(false);
+            //改變按鈕文字顏色
+            btnReset.setTextColor(ContextCompat.getColor(context, R.color.lightgreen));
+            //改變按鈕的Drawable
+            btnReset.setBackground(ContextCompat.getDrawable(context, R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
+        }
     }
 }

@@ -200,7 +200,7 @@ public class CreateLocation extends Fragment {
 
         //讓路線表可以交換、刪除...等動作
         recyclerViewAction = new RecyclerViewAction();
-        recyclerViewAction.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity());
+        recyclerViewAction.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(),btnReset);
 
         //初始化下面工具列的表
         recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
