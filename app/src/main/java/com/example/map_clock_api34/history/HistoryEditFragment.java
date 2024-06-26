@@ -25,10 +25,7 @@ public class HistoryEditFragment extends Fragment {
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel);
 
-        // Only insert data if there is any to insert
-        if (sharedViewModel.getDestinationNameArray().length > 0) {
-            dbHelper.insertDataToDatabase();
-        }
+
 
         View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
         Button clearButton = view.findViewById(R.id.Clearbutton);
