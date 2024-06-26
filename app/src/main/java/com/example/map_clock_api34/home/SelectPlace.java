@@ -64,7 +64,7 @@ public class SelectPlace extends Fragment {
     private Marker destiantion_Marker;
     private GoogleMap mMap;
     double destination_latitude, destination_longitude;
-    String destiantion_Name,cityName;
+    String destiantion_Name, cityName, areaName;
     private Geocoder geocoder;
     private View overlayView;
 
@@ -106,6 +106,8 @@ public class SelectPlace extends Fragment {
 
                     String nuKnownName="座標： "+ Math.round(latLng.latitude * 1000)/1000.0+"  "+ Math.round(latLng.longitude * 1000)/1000.0;
                     cityName = getCityNameCustom(latLng.latitude, latLng.longitude);
+                    areaName= getAreaNameCustom(latLng.latitude, latLng.longitude);
+
                     isUnknown = true;
 
                     // Remove all marker
@@ -217,6 +219,7 @@ public class SelectPlace extends Fragment {
             LatLng destiantion_LatLng;
             destiantion_LatLng= new LatLng(place.getLatLng().latitude,place.getLatLng().longitude);
             cityName = getCityNameCustom(destiantion_LatLng.latitude, destiantion_LatLng.longitude);
+            areaName= getAreaNameCustom(destiantion_LatLng.latitude, destiantion_LatLng.longitude);
             isUnknown = false;
 
             //在地圖上標示Marker和彈跳地點資訊
@@ -243,6 +246,7 @@ public class SelectPlace extends Fragment {
 
         // Set the content of the popup window
         TextView destinationNameTextView = popupView.findViewById(R.id.DestinationName);
+        TextView destinationAreaTextView = popupView.findViewById(R.id.DestinationArea);
         TextView destination_latitudeTextView = popupView.findViewById(R.id.destination_latitude);
         TextView destination_longitudeTextView = popupView.findViewById(R.id.destination_longitude);
 
@@ -251,6 +255,7 @@ public class SelectPlace extends Fragment {
 
         if(isUnknown!=true){
             destinationNameTextView.setText(destiantion_Name);
+            destinationAreaTextView.setText(areaName);
         }
         // Set the destination name
         destination_latitudeTextView.setText(String.valueOf( destination_latitude));
@@ -266,6 +271,7 @@ public class SelectPlace extends Fragment {
 
                 sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
                 sharedViewModel.setCapital(cityName);
+                sharedViewModel.setArea(areaName);
 
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -345,5 +351,30 @@ public class SelectPlace extends Fragment {
 
         // 返回默認值
         return "未知地區";
+    }
+    private String getAreaNameCustom(double latitude, double longitude) {
+
+        // 使用內置的 Geocoder 獲取其他地區名稱
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+
+                Address address = addresses.get(0);
+                String areaName = address.getSubAdminArea();
+
+                if (areaName != null && !areaName.isEmpty()) {
+                    if (areaName.contains("台")) {
+                        areaName = areaName.replace("台", "臺");
+                    }
+                    return areaName;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // 返回默認值
+        return "";
     }
 }

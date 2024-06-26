@@ -27,6 +27,7 @@ public class WeatherAdviceHelper {
     private WeatherService weatherService;
     private Context context;
     private View overlayView;
+    private  StringBuilder weatherSuggestions;
 
     public WeatherAdviceHelper(SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.sharedViewModel = sharedViewModel;
@@ -39,24 +40,22 @@ public class WeatherAdviceHelper {
             @Override
             public void run() {
                 try {
-                    String[] capital = new String[sharedViewModel.getI() + 1];
+                    weatherSuggestions = new StringBuilder();
 
                     for (int x = 0; x <= sharedViewModel.getI(); x++) {
 
-                        String weatherJson = weatherService.getWeather(sharedViewModel.getCapital(x));
-                        List<String> advices = Collections.singletonList(WeatherService.getAdvice(weatherJson));
+                        String weatherJson = weatherService.getWeather(sharedViewModel.getCapital(x), sharedViewModel.getArea(x));
+                        List<String> advices = Collections.singletonList(WeatherService.getAdvice(sharedViewModel.getCapital(x), weatherJson));
 
-                        if (advices.size() > 0 && advices.get(0).contains("降雨概率")) {
-                            capital[x] = sharedViewModel.getCapital(x) + advices.get(0);
-                        } else {
-                            capital[x] = null;
+                        for (String advice : advices) {
+                            weatherSuggestions.append(sharedViewModel.getDestinationName(x)).append("：").append(advice).append("\n");
                         }
                     }
                     if (context instanceof FragmentActivity) {
                         ((FragmentActivity) context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showRainyLocations(view, sharedViewModel, capital);
+                                showRainyLocations(view, sharedViewModel);
                             }
                         });
                     }
@@ -76,7 +75,7 @@ public class WeatherAdviceHelper {
         }).start();
     }
     //顯示各地天氣
-    private void showRainyLocations(View view, SharedViewModel sharedViewModel, String[] capital) {
+    private void showRainyLocations(View view, SharedViewModel sharedViewModel) {
 
         if(sharedViewModel.getCapital(0)!=null){
             //呼叫PopupWindow顯示天氣
@@ -108,31 +107,11 @@ public class WeatherAdviceHelper {
             @Override
             public void run() {
 
-                StringBuilder weatherInfo = new StringBuilder();
-
-                for (int x = 0; x <= sharedViewModel.getI(); x++) {
-
-                    String capital = sharedViewModel.getCapital(x);
-
-                    if (capital != null) {
-                        try {
-                            String weatherJson = weatherService.getWeather(capital);
-                            List<String> advices = Collections.singletonList(WeatherService.getAdvice(weatherJson)); // 假設這裡可以直接取得多條天氣建議
-                            for (String advice : advices) {
-                                weatherInfo.append(capital).append("：").append(advice).append("\n");
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.e("WeatherService", "IOException occurred: " + e.getMessage());
-                            weatherInfo.append(capital).append("：").append("無法獲取天氣資訊\n");
-                        }
-                    }
-                }
                 ((FragmentActivity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // 將天氣資訊顯示在 TextView 中
-                        weatherInfoTextView.setText(weatherInfo.toString());
+                        weatherInfoTextView.setText(weatherSuggestions);
                         // 設置取消按鈕的點擊事件
                         Button btnCancel = view.findViewById(R.id.PopupYes);
                         btnCancel.setOnClickListener(new View.OnClickListener() {
