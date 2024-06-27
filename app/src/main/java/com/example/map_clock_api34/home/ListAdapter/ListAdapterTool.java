@@ -39,14 +39,20 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         item1.put("data", "記事");
         arrayList.add(item1);
         HashMap<String, String> item2 = new HashMap<>();
-        item2.put("data", "天氣");
+        item2.put("data", "加入書籤");
         arrayList.add(item2);
         HashMap<String, String> item3 = new HashMap<>();
-        item3.put("data", "震動");
+        item3.put("data", "天氣");
         arrayList.add(item3);
         HashMap<String, String> item4 = new HashMap<>();
-        item4.put("data", "鈴聲");
+        item4.put("data", "推薦路線");
         arrayList.add(item4);
+        HashMap<String, String> item5 = new HashMap<>();
+        item5.put("data", "震動");
+        arrayList.add(item5);
+        HashMap<String, String> item6 = new HashMap<>();
+        item6.put("data", "鈴聲");
+        arrayList.add(item6);
     }
 
     //新增功能列表的動作
@@ -61,10 +67,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
         }
         else if (position == 1) {
-            weatherAdviceHelper.getWeatherAdvice(view);
+            Toast.makeText(context, "資料庫組等你開發", Toast.LENGTH_SHORT).show();
         }
         else if (position == 2) {
-            Toast.makeText(context, "沒這功能，等你開發呢!親~", Toast.LENGTH_SHORT).show();
+            weatherAdviceHelper.getWeatherAdvice(view);
         }
         else if (position == 3) {
             Toast.makeText(context, "沒這功能，等你開發呢!親~", Toast.LENGTH_SHORT).show();
@@ -72,6 +78,13 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         else if (position == 4) {
             Toast.makeText(context, "沒這功能，等你開發呢!親~", Toast.LENGTH_SHORT).show();
         }
+        else if (position == 5) {
+            Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
+        }
+        else if (position == 6) {
+            Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
+        }
+
         // 有新增功能列表的功能請在這新增他的動作
     }
 
@@ -86,9 +99,17 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         // 根据数据内容设置不同的图标
         if (data.equals("記事")) {
             holder.horecycleimageView.setImageResource(R.drawable.note);
-        } else if (data.equals("天氣")) {
+        }
+        else if (data.equals("加入書籤")) {
+            holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+        }
+        else if (data.equals("天氣")) {
             holder.horecycleimageView.setImageResource(R.drawable.weather);
-        } else if (data.equals("震動")) {
+        }
+        else if (data.equals("推薦路線")) {
+            holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+        }
+        else if (data.equals("震動")) {
             holder.horecycleimageView.setImageResource(R.drawable.vibrate);
         } else if (data.equals("鈴聲")) {
             holder.horecycleimageView.setImageResource(R.drawable.bell);
