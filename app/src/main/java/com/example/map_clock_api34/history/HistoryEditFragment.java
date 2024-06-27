@@ -30,7 +30,7 @@ public class HistoryEditFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_history_edit, container, false);
+        View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel);
