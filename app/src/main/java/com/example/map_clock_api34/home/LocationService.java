@@ -60,7 +60,7 @@ public class LocationService extends Service {
 
         createNotificationChannel();
 
-        Intent notificationIntent = new Intent(this, mapping.class);
+        Intent notificationIntent = new Intent(this, StartMapping.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("地圖鬧鐘正在運行")
@@ -144,7 +144,7 @@ public class LocationService extends Service {
     }
 
     private void sendNotification(String message) {
-        Intent intent = new Intent(this, mapping.class);
+        Intent intent = new Intent(this, StartMapping.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)

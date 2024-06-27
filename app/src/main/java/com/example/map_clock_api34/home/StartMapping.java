@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,10 +33,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 //設定組新增
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,15 +47,8 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.app.Service;
-import android.location.Location;
-import android.os.IBinder;
-import android.content.ComponentName;
-import android.content.ServiceConnection;
-import androidx.fragment.app.Fragment;
 
-
-public class mapping extends Fragment {
+public class StartMapping extends Fragment {
 
     private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
     private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
@@ -109,7 +99,7 @@ public class mapping extends Fragment {
             bounds = builder.build();
 
             // 計算將這個邊界框移動到地圖中心所需的偏移量
-            int padding = 100; // 偏移量（以像素為單位）
+            int padding = 300; // 偏移量（以像素為單位）
             // 移动地图视图到最后已知的位置
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
 
@@ -215,7 +205,7 @@ public class mapping extends Fragment {
 
     private void initPopWindow(){
 
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow, null, false);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         TextView txt = view.findViewById(R.id.txtNote);
 
@@ -286,7 +276,7 @@ public class mapping extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        v = inflater.inflate(R.layout.mapping, container, false);
+        v = inflater.inflate(R.layout.home_start_mapping, container, false);
 
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 

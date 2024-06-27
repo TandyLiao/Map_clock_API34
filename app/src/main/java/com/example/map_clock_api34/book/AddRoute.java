@@ -20,7 +20,7 @@ public class AddRoute extends FragmentActivity implements OnMapReadyCallback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.addroute);
+        setContentView(R.layout.book_addroute);
 
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

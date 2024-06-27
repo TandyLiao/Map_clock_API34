@@ -43,7 +43,7 @@ public class BookFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.bookmark, container, false);
+        View view = inflater.inflate(R.layout.book_bookmark, container, false);
 
         listView1 = view.findViewById(R.id.list_view1);
         listView2 = view.findViewById(R.id.list_view2);

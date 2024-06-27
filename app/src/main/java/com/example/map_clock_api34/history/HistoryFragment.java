@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.widget.Button;
-import androidx.appcompat.app.AlertDialog;
+
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.map_clock_api34.R;
@@ -31,7 +31,7 @@ public class HistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_history, container, false);
+        View view = inflater.inflate(R.layout.history_fragment_history, container, false);
 
         // 新增對EditButton的點擊事件
         Button editButton = view.findViewById(R.id.EditButton);
