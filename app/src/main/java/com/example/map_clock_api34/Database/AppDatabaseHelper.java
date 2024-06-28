@@ -5,16 +5,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.example.map_clock_api34.SharedViewModel;
 import android.content.ContentValues;
-import android.util.Log;
 
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
     private static final int DATABASE_VERSION = 1;
+    private SQLiteDatabase database;
     private SharedViewModel sharedViewModel;
 
     public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.database = this.getWritableDatabase();
         this.sharedViewModel = sharedViewModel;
     }
 
@@ -127,25 +128,26 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void insertDataToDatabase() {
-        String[] names = sharedViewModel.getDestinationNameArray().getValue();
-        double[] latitudes = sharedViewModel.getLatitudeArray().getValue();
-        double[] longitudes = sharedViewModel.getLongitudeArray().getValue();
+        // Get data from SharedViewModel
+        String[] names = sharedViewModel.getDestinationNameArray();
+        double[] latitudes = sharedViewModel.getLatitudeArray();
+        double[] longitudes = sharedViewModel.getLongitudeArray();
 
+        // Open database in write mode
         SQLiteDatabase db = this.getWritableDatabase();
 
-        if (names != null && latitudes != null && longitudes != null) {
-            for (int i = 0; i < sharedViewModel.getI().getValue(); i++) {
-                if (names[i] != null) {
-                    ContentValues values = new ContentValues();
-                    values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
-                    values.put(LocationTable.COLUMN_LATITUDE, latitudes[i]);
-                    values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
-                    long rowId = db.insert(LocationTable.TABLE_NAME, null, values);
-                    Log.d("AppDatabaseHelper", "Inserted row ID: " + rowId + ", Name: " + names[i] + ", Latitude: " + latitudes[i] + ", Longitude: " + longitudes[i]);
-                }
+        // Insert data into the database
+        for (int i = 0; i < names.length; i++) {
+            if (names[i] != null && latitudes[i] != 0 && longitudes[i] != 0) {
+                ContentValues values = new ContentValues();
+                values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
+                values.put(LocationTable.COLUMN_LATITUDE, latitudes[i]);
+                values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
+                db.insert(LocationTable.TABLE_NAME, null, values);
             }
         }
 
+        // Close the database
         db.close();
     }
 }
