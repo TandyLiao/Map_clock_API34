@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.example.map_clock_api34.Database.AppDatabaseHelper;
 
 public class SharedViewModel extends ViewModel {
     private String[] destinationName = new String[7];
@@ -12,6 +13,10 @@ public class SharedViewModel extends ViewModel {
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
     private int i = -1;
+
+    private final MutableLiveData<Boolean> _isDataCleared = new MutableLiveData<>();
+    public LiveData<Boolean> isDataCleared = _isDataCleared;
+
 
     public void setDestination(String name, double latitude, double longitude) {
         i++;
@@ -98,4 +103,9 @@ public class SharedViewModel extends ViewModel {
     public double[] getLongitudeArray() {
         return longitude;
     }
+    public void clearDatabase(AppDatabaseHelper dbHelper) {
+        dbHelper.clearAllTables();
+        _isDataCleared.setValue(true);
+    }
+
 }

@@ -38,6 +38,16 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void clearAllTables() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM " + HistoryTable.TABLE_NAME);
+        db.execSQL("DELETE FROM " + LocationTable.TABLE_NAME);
+        db.execSQL("DELETE FROM " + BookmarkTable.TABLE_NAME);
+        db.execSQL("DELETE FROM " + NoteTable.TABLE_NAME);
+        db.execSQL("DELETE FROM " + SettingTable.TABLE_NAME);
+        db.close();
+    }
+
     public static class HistoryTable {
         public static final String TABLE_NAME = "history";
         public static final String COLUMN_ROUTE_ID = "route_id";

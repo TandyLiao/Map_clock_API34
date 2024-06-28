@@ -17,15 +17,14 @@ import com.example.map_clock_api34.Database.AppDatabaseHelper;
 public class HistoryEditFragment extends Fragment {
 
     private AppDatabaseHelper dbHelper;
+    private SharedViewModel sharedViewModel;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel);
-
-
 
         View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
         Button clearButton = view.findViewById(R.id.Clearbutton);
@@ -38,12 +37,19 @@ public class HistoryEditFragment extends Fragment {
                         .setMessage("Are you sure you want to delete all data?")
                         .setPositiveButton("Yes", (dialog, which) -> {
                             // Handle clearing operation
-                            // For example, clear the RecyclerView data
+                            sharedViewModel.clearDatabase(dbHelper);
                         })
                         .setNegativeButton("No", (dialog, which) -> {
                             // User chose to cancel, do nothing
                         })
                         .show();
+            }
+        });
+
+        // Observe LiveData for database clear result
+        sharedViewModel.isDataCleared.observe(getViewLifecycleOwner(), isCleared -> {
+            if (isCleared) {
+                // Data cleared, handle UI update
             }
         });
 
