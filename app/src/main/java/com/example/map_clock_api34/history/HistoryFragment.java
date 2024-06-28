@@ -14,45 +14,101 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.history.ListAdapter.RecyclerViewActionHistory;
 import com.example.map_clock_api34.R;
-import com.example.map_clock_api34.SharedViewModel;
+
 import android.widget.Button;
-import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class HistoryFragment extends Fragment {
 
+    boolean isEdit;
+
+    View rootView;
+    Button btnEdit, btnSelect;
+
+    RecyclerView recyclerViewHistory;
+    ListAdapterHistory listAdapterHistory;
+    RecyclerViewActionHistory recyclerViewActionHistory;
+    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.history_fragment_history, container, false);
+        rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
 
         setupActionBar();
 
-        // 新增对 EditButton 的点击事件
-        Button editButton = view.findViewById(R.id.EditButton);
-        editButton.setOnClickListener(v -> {
+        //初始化按鈕
+        setupButtons();
+        //初始化路線表和功能表
+        setupRecyclerViews();
 
-            HistoryEditFragment historyEditFragment = new HistoryEditFragment();
-            // 使用 FragmentTransaction 来替换当前的 Fragment
-            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, historyEditFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        });
-        return view;
+        return rootView;
     }
 
+    //初始化按鈕(包含定位請求)
+    private void setupButtons(){
+
+        btnEdit = rootView.findViewById(R.id.EditButton);
+        btnEdit.setOnClickListener(v -> {
+            updateButtonState();
+        });
+
+        btnSelect = rootView.findViewById(R.id.SelectButton);
+        btnSelect.setOnClickListener(v -> {
+
+        });
+    }
+    private void setupRecyclerViews() {
+        //初始化路線的表
+        recyclerViewHistory = rootView.findViewById(R.id.recycleViewHistory);
+        recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewHistory.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        listAdapterHistory = new ListAdapterHistory(arrayList);
+        recyclerViewHistory.setAdapter(listAdapterHistory);
+
+        //讓路線表可以交換、刪除...等動作
+        recyclerViewActionHistory = new RecyclerViewActionHistory();
+        recyclerViewActionHistory.attachToRecyclerView(recyclerViewHistory, arrayList, listAdapterHistory, getActivity());
+
+    }
+    private void RecycleViewReset() {
+        //清除原本的表
+        arrayList.clear();
+
+        HashMap<String, String> hashMap1 = new HashMap<>();
+        hashMap1.put("data", "TANDY");
+        arrayList.add(hashMap1);
+
+        HashMap<String, String> hashMap2 = new HashMap<>();
+        hashMap2.put("data", "吳俊廷");
+        arrayList.add(hashMap2);
+
+        HashMap<String, String> hashMap3 = new HashMap<>();
+        hashMap3.put("data", "趙子陽");
+        arrayList.add(hashMap3);
+
+
+        //套用更新
+        listAdapterHistory.notifyDataSetChanged();
+
+    }
     @Override
     public void onResume() {
         super.onResume();
+        RecycleViewReset();
     }
 
     private void setupActionBar() {
@@ -112,5 +168,8 @@ public class HistoryFragment extends Fragment {
                     Gravity.END));
             actionBar.show();
         }
+    }
+    private void updateButtonState(){
+
     }
 }

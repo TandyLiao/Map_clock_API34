@@ -1,8 +1,7 @@
-package com.example.map_clock_api34.home.ListAdapter;
+package com.example.map_clock_api34.history.ListAdapter;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -10,7 +9,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
-import com.example.map_clock_api34.SharedViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,11 +16,11 @@ import java.util.HashMap;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
-public class RecyclerViewAction {
+public class RecyclerViewActionHistory {
 
     private ItemTouchHelper itemTouchHelper;
 
-    public void attachToRecyclerView(RecyclerView recyclerView, ArrayList<HashMap<String, String>> arrayList, ListAdapterRoute listAdapterRoute, SharedViewModel sharedViewModel, Context context, Button btnReset) {
+    public void attachToRecyclerView(RecyclerView recyclerView, ArrayList<HashMap<String, String>> arrayList, ListAdapterHistory listAdapterHistory, Context context) {
         ItemTouchHelper.Callback callback = new ItemTouchHelper.Callback() {
             @Override
             public boolean isLongPressDragEnabled() {
@@ -39,8 +37,7 @@ public class RecyclerViewAction {
                 int position_dragged = viewHolder.getAdapterPosition();
                 int position_target = target.getAdapterPosition();
                 Collections.swap(arrayList, position_dragged, position_target);
-                listAdapterRoute.notifyItemMoved(position_dragged, position_target);
-                sharedViewModel.swap(position_dragged, position_target);
+                listAdapterHistory.notifyItemMoved(position_dragged, position_target);
                 return true;
             }
 
@@ -48,10 +45,8 @@ public class RecyclerViewAction {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 arrayList.remove(position);
-                sharedViewModel.delet(position);
-                listAdapterRoute.notifyItemRemoved(position);
+                listAdapterHistory.notifyItemRemoved(position);
 
-                updateResetButtonState(sharedViewModel, context, btnReset);
             }
 
             @Override
@@ -66,25 +61,7 @@ public class RecyclerViewAction {
         };
         itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-        listAdapterRoute.setItemTouchHelper(itemTouchHelper);
+        listAdapterHistory.setItemTouchHelper(itemTouchHelper);
 
-    }
-    private void updateResetButtonState(SharedViewModel sharedViewModel, Context context, Button btnReset) {
-
-        if (sharedViewModel.getLocationCount() >= 0) {
-            //設置可點擊狀態
-            btnReset.setEnabled(true);
-            //改變按鈕文字顏色
-            btnReset.setTextColor(ContextCompat.getColor(context, R.color.darkgreen));
-            //改變按鈕的Drawable
-            btnReset.setBackground(ContextCompat.getDrawable(context, R.drawable.btn_additem)); // 設定啟用時的背景顏色
-        } else {
-            //設置不可點擊狀態
-            btnReset.setEnabled(false);
-            //改變按鈕文字顏色
-            btnReset.setTextColor(ContextCompat.getColor(context, R.color.lightgreen));
-            //改變按鈕的Drawable
-            btnReset.setBackground(ContextCompat.getDrawable(context, R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
-        }
     }
 }

@@ -26,7 +26,7 @@ public class HistoryEditFragment extends Fragment {
         dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel);
 
         View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
-        Button clearButton = view.findViewById(R.id.Clearbutton);
+        Button clearButton = view.findViewById(R.id.SelectButton);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

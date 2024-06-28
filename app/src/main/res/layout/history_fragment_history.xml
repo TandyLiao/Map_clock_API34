@@ -5,12 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fl_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <Button
         android:id="@+id/EditButton"
         android:layout_width="wrap_content"
@@ -22,19 +16,21 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycleViewHistory"
         android:layout_width="410dp"
         android:layout_height="553dp"
         android:layout_marginStart="2dp"
         android:layout_marginTop="65dp"
         android:layout_marginEnd="2dp"
         android:layout_marginBottom="35dp"
-        app:layout_constraintBottom_toTopOf="@+id/Clearbutton"
+        android:background="@drawable/recyclerview"
+        app:layout_constraintBottom_toTopOf="@+id/SelectButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/Clearbutton"
+        android:id="@+id/SelectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="65dp"

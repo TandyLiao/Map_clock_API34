@@ -34,7 +34,7 @@ import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
-import com.example.map_clock_api34.home.ListAdapter.RecyclerViewAction;
+import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public class CreateLocation extends Fragment {
 
     RecyclerView recyclerViewRoute;
     RecyclerView recyclerViewTool;
-    RecyclerViewAction recyclerViewAction;
+    RecyclerViewActionHome recyclerViewActionHome;
     ListAdapterRoute listAdapterRoute;
 
     //獨立出來是因為要設置不可點擊狀態
@@ -199,8 +199,8 @@ public class CreateLocation extends Fragment {
         recyclerViewRoute.setAdapter(listAdapterRoute);
 
         //讓路線表可以交換、刪除...等動作
-        recyclerViewAction = new RecyclerViewAction();
-        recyclerViewAction.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(),btnReset);
+        recyclerViewActionHome = new RecyclerViewActionHome();
+        recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(),btnReset);
 
         //初始化下面工具列的表
         recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
