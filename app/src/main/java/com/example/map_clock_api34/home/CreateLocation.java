@@ -126,7 +126,7 @@ public class CreateLocation extends Fragment {
                         db.insert(LocationTable.TABLE_NAME, null, values);
                     }
                 }
-                Close the database
+                //Close the database
                 db.close();
 
             } else {
