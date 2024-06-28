@@ -117,7 +117,7 @@ public  class CreateLocation extends Fragment {
                 names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
                 longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
-                SQLiteDatabase db = this.getWritableDatabase();
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
                 for (int i = 0; i < names.length; i++) {
                     if (names!= null && latitudes!= 0 && longitudes!= 0) {
                         ContentValues values = new ContentValues();
