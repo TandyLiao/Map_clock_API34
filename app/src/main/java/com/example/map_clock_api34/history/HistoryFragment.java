@@ -1,5 +1,5 @@
 package com.example.map_clock_api34.history;
-
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -24,72 +24,51 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import android.widget.Button;
+import android.widget.Toast;
 
 
 public class HistoryFragment extends Fragment {
-
-    private Toolbar toolbar;
-    private SharedViewModel sharedViewModel;
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        toolbar = getActivity().findViewById(R.id.toolbar); // 初始化 toolbar
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
-        // Observe LiveData for database clear result
-        sharedViewModel.isDataCleared.observe(getViewLifecycleOwner(), isCleared -> {
-            if (isCleared) {
-                // Data cleared, handle UI update
-                // For example, clear the RecyclerView data
-                // updateUI(); // Call your method to update UI
-            }
-        });
-
-        setupActionBar(); // 设置 ActionBar
-    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.history_fragment_history, container, false);
 
+        setupActionBar();
+
         // 新增对 EditButton 的点击事件
         Button editButton = view.findViewById(R.id.EditButton);
         editButton.setOnClickListener(v -> {
+
+            HistoryEditFragment historyEditFragment = new HistoryEditFragment();
             // 使用 FragmentTransaction 来替换当前的 Fragment
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, new HistoryEditFragment());
+            transaction.replace(R.id.fl_container, historyEditFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
-
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setupActionBar(); // 恢复时重新设置 ActionBar
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // 在暂停时隐藏 ActionBar
-        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowCustomEnabled(false);
-            actionBar.setCustomView(null);
-        }
     }
 
     private void setupActionBar() {
+
+        //取消原本預設的ActionBar，為了之後自己的Bar創建用
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+            actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
+        }
+
         // 建立 CardView 在 toolbar
-        CardView cardViewTitle = new CardView(requireContext());
-        cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+        CardView cardViewtitle = new CardView(requireContext());
+        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewTitle.setBackground(drawable);
+        cardViewtitle.setBackground(drawable);
 
         // 建立 LinearLayout 在 CardView 等等放图案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
@@ -120,17 +99,17 @@ public class HistoryFragment extends Fragment {
 
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
-        cardViewTitle.addView(linearLayout);
+        cardViewtitle.addView(linearLayout);
 
-        // 将 cardview 添加到 ActionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        // 將cardview新增到actionBar
+        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
+            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 宽度设置为 WRAP_CONTENT
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 高度设置为 WRAP_CONTENT
-                    Gravity.END)); // 将包含 TextView 的 CardView 设置为自定义视图
+            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    Gravity.END));
             actionBar.show();
         }
     }

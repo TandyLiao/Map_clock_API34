@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +71,7 @@ public class RecyclerViewAction {
     }
     private void updateResetButtonState(SharedViewModel sharedViewModel, Context context, Button btnReset) {
 
-        if (sharedViewModel.getI() >= 0) {
+        if (sharedViewModel.getLocationCount() >= 0) {
             //設置可點擊狀態
             btnReset.setEnabled(true);
             //改變按鈕文字顏色

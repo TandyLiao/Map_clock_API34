@@ -42,7 +42,7 @@ public class WeatherAdviceHelper {
                 try {
                     weatherSuggestions = new StringBuilder();
 
-                    for (int x = 0; x <= sharedViewModel.getI(); x++) {
+                    for (int x = 0; x <= sharedViewModel.getLocationCount(); x++) {
 
                         String weatherJson = weatherService.getWeather(sharedViewModel.getCapital(x), sharedViewModel.getArea(x));
                         List<String> advices = Collections.singletonList(WeatherService.getAdvice(sharedViewModel.getCapital(x), weatherJson));

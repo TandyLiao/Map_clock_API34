@@ -273,6 +273,8 @@ public class SelectPlace extends Fragment {
                 sharedViewModel.setCapital(cityName);
                 sharedViewModel.setArea(areaName);
 
+                sharedViewModel.setnowLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
+
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, createFragment);

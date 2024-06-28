@@ -2,7 +2,6 @@ package com.example.map_clock_api34.home;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -75,6 +74,7 @@ public class CreateLocation extends Fragment {
 
         return rootView;
     }
+
     //初始化按鈕(包含定位請求)
     private void setupButtons() {
 
@@ -83,7 +83,7 @@ public class CreateLocation extends Fragment {
         btnAddItem.setOnClickListener(v -> {
             //如果他沒同意定位需求則跳else叫他打開
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                if (sharedViewModel.getI() < 6) {
+                if (sharedViewModel.getLocationCount() < 6) {
                     openSelectPlaceFragment();
                 }
             } else {
@@ -99,7 +99,7 @@ public class CreateLocation extends Fragment {
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
             //如有選擇地點就導航，沒有就跳提醒
-            if (sharedViewModel.getI() >= 0) {
+            if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
@@ -216,8 +216,8 @@ public class CreateLocation extends Fragment {
         //清除原本的表
         arrayList.clear();
         String shortLocationName;
-        if (sharedViewModel.getI() != -1) {
-            for (int j = 0; j <= sharedViewModel.getI(); j++) {
+        if (sharedViewModel.getLocationCount() != -1) {
+            for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
                 shortLocationName=sharedViewModel.getDestinationName(j);
                 //如果地名大於20字，後面都用...代替
@@ -268,9 +268,9 @@ public class CreateLocation extends Fragment {
         btnsure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                while(sharedViewModel.getI()>=0){
-                    arrayList.remove(sharedViewModel.getI());
-                    sharedViewModel.setI();
+                while(sharedViewModel.getLocationCount()>=0){
+                    arrayList.remove(sharedViewModel.getLocationCount());
+                    sharedViewModel.setLocationCount();
                 }
                 recyclerViewRoute.setAdapter(listAdapterRoute);
                 //改變重置按鈕狀態
@@ -297,7 +297,7 @@ public class CreateLocation extends Fragment {
     }
     // 更新重置按鈕的狀態
     private void updateResetButtonState() {
-        if (sharedViewModel.getI() >= 0) {
+        if (sharedViewModel.getLocationCount() >= 0) {
             //設置可點擊狀態
             btnReset.setEnabled(true);
             //改變按鈕文字顏色

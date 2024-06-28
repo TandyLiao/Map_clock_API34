@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+
+import com.example.map_clock_api34.BusAdvice.BusStationFinderHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
@@ -25,11 +27,15 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     private ArrayList<HashMap<String, String>> arrayList;
     private FragmentTransaction fragmentTransaction;
     private WeatherAdviceHelper weatherAdviceHelper;
+    private BusStationFinderHelper stationFinder;
+    private SharedViewModel sharedViewModel;
 
     public ListAdapterTool(FragmentTransaction fragmentTransaction, SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.fragmentTransaction = fragmentTransaction;
         this.arrayList = new ArrayList<>();
         this.weatherAdviceHelper = new WeatherAdviceHelper(sharedViewModel, weatherService, context);
+        this.stationFinder = new BusStationFinderHelper(context,sharedViewModel);
+        this.sharedViewModel=sharedViewModel;
         initData();
     }
 
@@ -73,15 +79,13 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             weatherAdviceHelper.getWeatherAdvice(view);
         }
         else if (position == 3) {
-            Toast.makeText(context, "沒這功能，等你開發呢!親~", Toast.LENGTH_SHORT).show();
+
+            stationFinder.findNearbyStations(view);
         }
         else if (position == 4) {
-            Toast.makeText(context, "沒這功能，等你開發呢!親~", Toast.LENGTH_SHORT).show();
-        }
-        else if (position == 5) {
             Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         }
-        else if (position == 6) {
+        else if (position == 5) {
             Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         }
 

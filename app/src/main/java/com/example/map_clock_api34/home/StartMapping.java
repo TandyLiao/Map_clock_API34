@@ -304,7 +304,7 @@ public class StartMapping extends Fragment {
             mapFragment.getMapAsync(callback);
         }
 
-        for(j=0 ; j<=sharedViewModel.getI() ; j++){
+        for(j=0 ; j<=sharedViewModel.getLocationCount() ; j++){
             destinationName[j]=sharedViewModel.getDestinationName(j);
             latitude[j]=sharedViewModel.getLatitude(j);
             longitude[j]=sharedViewModel.getLongitude(j);

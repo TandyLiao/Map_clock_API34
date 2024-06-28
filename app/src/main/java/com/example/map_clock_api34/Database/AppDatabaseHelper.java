@@ -11,12 +11,12 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "map_clock_database";
     private static final int DATABASE_VERSION = 1;
     private SQLiteDatabase database;
-    private SharedViewModel sharedViewModel;
+    //private SharedViewModel sharedViewModel;
 
     public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.database = this.getWritableDatabase();
-        this.sharedViewModel = sharedViewModel;
+        //this.sharedViewModel = sharedViewModel;
     }
 
     @Override
@@ -139,15 +139,15 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     public void insertDataToDatabase() {
         // Get data from SharedViewModel
-        String[] names = sharedViewModel.getDestinationNameArray();
-        double[] latitudes = sharedViewModel.getLatitudeArray();
-        double[] longitudes = sharedViewModel.getLongitudeArray();
+        //String[] names = sharedViewModel.getDestinationNameArray();
+        //double[] latitudes = sharedViewModel.getLatitudeArray();
+        //double[] longitudes = sharedViewModel.getLongitudeArray();
 
         // Open database in write mode
         SQLiteDatabase db = this.getWritableDatabase();
 
         // Insert data into the database
-        for (int i = 0; i < names.length; i++) {
+        /*for (int i = 0; i < names.length; i++) {
             if (names[i] != null && latitudes[i] != 0 && longitudes[i] != 0) {
                 ContentValues values = new ContentValues();
                 values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
@@ -155,7 +155,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
-        }
+        }*/
 
         // Close the database
         db.close();
