@@ -137,27 +137,4 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + ")";
     }
 
-    public void insertDataToDatabase() {
-        // Get data from SharedViewModel
-        //String[] names = sharedViewModel.getDestinationNameArray();
-        //double[] latitudes = sharedViewModel.getLatitudeArray();
-        //double[] longitudes = sharedViewModel.getLongitudeArray();
-
-        // Open database in write mode
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        // Insert data into the database
-        /*for (int i = 0; i < names.length; i++) {
-            if (names[i] != null && latitudes[i] != 0 && longitudes[i] != 0) {
-                ContentValues values = new ContentValues();
-                values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
-                values.put(LocationTable.COLUMN_LATITUDE, latitudes[i]);
-                values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
-                db.insert(LocationTable.TABLE_NAME, null, values);
-            }
-        }*/
-
-        // Close the database
-        db.close();
-    }
 }

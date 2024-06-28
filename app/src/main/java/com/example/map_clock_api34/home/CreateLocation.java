@@ -1,7 +1,14 @@
 package com.example.map_clock_api34.home;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.map_clock_api34.Database.AppDatabaseHelper;
+import com.example.map_clock_api34.SharedViewModel;
+import android.content.ContentValues;
 import android.Manifest;
 import android.content.pm.PackageManager;
+
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -40,6 +47,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CreateLocation extends Fragment {
+
+    private AppDatabaseHelper dbHelper;
+    String names;
+    double latitudes;
+    double longitudes;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     View rootView;
@@ -98,13 +110,57 @@ public class CreateLocation extends Fragment {
 
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
-            //如有選擇地點就導航，沒有就跳提醒
+            //如有選擇地點就導航，沒有就跳提醒，加上吳俊廷的匯入資料庫的程式
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
+                names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
+                longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
+                /*SQLiteDatabase db = this.getWritableDatabase();
+                for (int i = 0; i < names.length; i++) {
+                    if (names!= null && latitudes!= 0 && longitudes!= 0) {
+                        ContentValues values = new ContentValues();
+                        values.put(LocationTable.COLUMN_PLACE_NAME, names);
+                        values.put(LocationTable.COLUMN_LATITUDE, latitudes);
+                        values.put(LocationTable.COLUMN_LONGITUDE, longitudes);
+                        db.insert(LocationTable.TABLE_NAME, null, values);
+                    }
+                }
+                //Close the database
+                db.close();*/
+
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
         });
+
+        /*吳俊廷的實驗區。都別給我碰(#`Д´)ﾉ
+
+    public void insertDataToDatabase() {
+        //Get data from SharedViewModel
+        String[] names = sharedViewModel.getDestinationNameArray();
+        double[] latitudes = sharedViewModel.getLatitudeArray();
+        double[] longitudes = sharedViewModel.getLongitudeArray();
+
+        //Open database in write mode
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        //Insert data into the database
+        for (int i = 0; i < names.length; i++) {
+            if (names[i] != null && latitudes[i] != 0 && longitudes[i] != 0) {
+                ContentValues values = new ContentValues();
+                values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
+                values.put(LocationTable.COLUMN_LATITUDE, latitudes[i]);
+                values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
+                db.insert(LocationTable.TABLE_NAME, null, values);
+            }
+        }
+
+        Close the database
+        db.close();
+    }
+    */
+
     }
     //打開選地點頁面
     private void openSelectPlaceFragment() {
@@ -313,4 +369,5 @@ public class CreateLocation extends Fragment {
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
         }
     }
+
 }
