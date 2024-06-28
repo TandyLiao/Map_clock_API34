@@ -116,7 +116,7 @@ public class CreateLocation extends Fragment {
                 names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
                 longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
-                SQLiteDatabase db = this.getWritableDatabase();
+                /*SQLiteDatabase db = this.getWritableDatabase();
                 for (int i = 0; i < names.length; i++) {
                     if (names!= null && latitudes!= 0 && longitudes!= 0) {
                         ContentValues values = new ContentValues();
@@ -127,7 +127,7 @@ public class CreateLocation extends Fragment {
                     }
                 }
                 //Close the database
-                db.close();
+                db.close();*/
 
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();

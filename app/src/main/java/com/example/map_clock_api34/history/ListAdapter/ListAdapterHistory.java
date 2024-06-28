@@ -1,15 +1,12 @@
 package com.example.map_clock_api34.history.ListAdapter;
 
-
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
@@ -17,67 +14,63 @@ import com.example.map_clock_api34.R;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.ViewHolder> {
 
-    private ArrayList<HashMap<String, String>> arrayList;
-    private ItemTouchHelper itemTouchHelper;
+    private final ArrayList<HashMap<String, String>> arrayList;
+    private boolean isEditMode = false;
 
     public ListAdapterHistory(ArrayList<HashMap<String, String>> arrayList) {
         this.arrayList = arrayList;
     }
 
-    public void setItemTouchHelper(ItemTouchHelper itemTouchHelper) {
-        this.itemTouchHelper = itemTouchHelper;
+    public void setEditMode(boolean isEditMode) {
+        this.isEditMode = isEditMode;
+        notifyDataSetChanged();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        //地名
-        private TextView LocateionName;
-        //拖曳的圖標
-        private ImageView dragHandle;
-
-        @SuppressLint("ClickableViewAccessibility")
-        public ViewHolder(View itemView) {
-            super(itemView);
-            LocateionName = itemView.findViewById(R.id.textVLocateionName);
-            dragHandle = itemView.findViewById(R.id.dragHandle);
-
-            //讓拖曳的圖標可以動作
-            dragHandle.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        // 當觸摸ImageView時開始拖曳項目
-                        if (itemTouchHelper != null) {
-                            itemTouchHelper.startDrag(ViewHolder.this);
-                        }
-                    }
-                    return false;
-                }
-            });
-        }
-    }
-
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycleviewitem_route, parent, false);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycleviewitem_history, parent, false);
         return new ViewHolder(view);
     }
 
-    //從HashMap中抓取資料並將其印出
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.LocateionName.setText(arrayList.get(position).get("data"));
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        HashMap<String, String> item = arrayList.get(position);
+        holder.RouteName.setText(item.get("data"));
+
+        // 设置背景颜色
+        if (item.getOrDefault("isSelected", "false").equals("true")) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.selected_item_background));
+        } else {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.darkyellow));
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (isEditMode) {
+                boolean isSelected = item.getOrDefault("isSelected", "false").equals("true");
+                item.put("isSelected", isSelected ? "false" : "true");
+                notifyItemChanged(position);
+            }
+        });
+
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
     }
 
-    //回傳arrayList的大小
     @Override
     public int getItemCount() {
         return arrayList.size();
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView RouteName;
+
+        ViewHolder(View itemView) {
+            super(itemView);
+            RouteName = itemView.findViewById(R.id.textRouteName);
+        }
     }
 }

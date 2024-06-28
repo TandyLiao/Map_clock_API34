@@ -1,4 +1,5 @@
 package com.example.map_clock_api34.history;
+
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -21,26 +22,23 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
-import com.example.map_clock_api34.history.ListAdapter.RecyclerViewActionHistory;
 import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 
 import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class HistoryFragment extends Fragment {
 
-    boolean isEdit;
+    boolean isEdit, isDelete;
 
     View rootView;
     Button btnEdit, btnSelect;
 
     RecyclerView recyclerViewHistory;
     ListAdapterHistory listAdapterHistory;
-    RecyclerViewActionHistory recyclerViewActionHistory;
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
     @Nullable
@@ -49,43 +47,53 @@ public class HistoryFragment extends Fragment {
         rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
 
         setupActionBar();
-
-        //初始化按鈕
         setupButtons();
-        //初始化路線表和功能表
         setupRecyclerViews();
 
         return rootView;
     }
 
-    //初始化按鈕(包含定位請求)
-    private void setupButtons(){
-
+    private void setupButtons() {
         btnEdit = rootView.findViewById(R.id.EditButton);
         btnEdit.setOnClickListener(v -> {
+            isEdit = !isEdit;
+            isDelete = isEdit;
             updateButtonState();
+            listAdapterHistory.setEditMode(isEdit);
+            if (!isEdit) {
+                clearSelections();
+            }
         });
 
         btnSelect = rootView.findViewById(R.id.SelectButton);
         btnSelect.setOnClickListener(v -> {
-
+            if (isDelete) {
+                ArrayList<HashMap<String, String>> toRemove = new ArrayList<>();
+                for (HashMap<String, String> item : arrayList) {
+                    if (item.getOrDefault("isSelected", "false").equals("true")) {
+                        toRemove.add(item);
+                    }
+                }
+                arrayList.removeAll(toRemove);
+                isEdit=false;
+                isDelete=false;
+                updateButtonState();
+                listAdapterHistory.notifyDataSetChanged();
+            } else {
+                // Other action
+            }
         });
     }
+
     private void setupRecyclerViews() {
-        //初始化路線的表
         recyclerViewHistory = rootView.findViewById(R.id.recycleViewHistory);
         recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewHistory.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         listAdapterHistory = new ListAdapterHistory(arrayList);
         recyclerViewHistory.setAdapter(listAdapterHistory);
-
-        //讓路線表可以交換、刪除...等動作
-        recyclerViewActionHistory = new RecyclerViewActionHistory();
-        recyclerViewActionHistory.attachToRecyclerView(recyclerViewHistory, arrayList, listAdapterHistory, getActivity());
-
     }
+
     private void RecycleViewReset() {
-        //清除原本的表
         arrayList.clear();
 
         HashMap<String, String> hashMap1 = new HashMap<>();
@@ -100,33 +108,29 @@ public class HistoryFragment extends Fragment {
         hashMap3.put("data", "趙子陽");
         arrayList.add(hashMap3);
 
-
-        //套用更新
         listAdapterHistory.notifyDataSetChanged();
-
     }
+
     @Override
     public void onResume() {
         super.onResume();
+        isDelete = false;
+        isEdit = false;
         RecycleViewReset();
     }
 
     private void setupActionBar() {
-
-        //取消原本預設的ActionBar，為了之後自己的Bar創建用
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
             actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
         }
 
-        // 建立 CardView 在 toolbar
-        CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+        CardView cardViewTitle = new CardView(requireContext());
+        cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewtitle.setBackground(drawable);
+        cardViewTitle.setBackground(drawable);
 
-        // 建立 LinearLayout 在 CardView 等等放图案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -134,42 +138,52 @@ public class HistoryFragment extends Fragment {
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        // ImageView
         ImageView mark = new ImageView(requireContext());
         mark.setImageResource(R.drawable.history_record1);
         mark.setPadding(10, 10, 5, 10);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                100, 100
         );
-        params.setMarginStart(10); // 设置左边距
+        params.setMarginStart(10);
         mark.setLayoutParams(params);
 
-        // TextView
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("歷史紀錄");
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setTextColor(getResources().getColor(R.color.green));
+        bookTitle.setPadding(10, 10, 10, 10);
 
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
-        cardViewtitle.addView(linearLayout);
+        cardViewTitle.addView(linearLayout);
 
-        // 將cardview新增到actionBar
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
+            actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
+            actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
                     ActionBar.LayoutParams.WRAP_CONTENT,
                     ActionBar.LayoutParams.WRAP_CONTENT,
                     Gravity.END));
             actionBar.show();
         }
     }
-    private void updateButtonState(){
 
+    private void updateButtonState() {
+        if (isEdit) {
+            btnEdit.setText("確認");
+            btnSelect.setText("刪除");
+        } else {
+            btnEdit.setText("編輯");
+            btnSelect.setText("套用");
+        }
+    }
+
+    private void clearSelections() {
+        for (HashMap<String, String> item : arrayList) {
+            item.put("isSelected", "false");
+        }
+        listAdapterHistory.notifyDataSetChanged();
     }
 }

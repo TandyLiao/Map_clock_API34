@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
@@ -29,28 +28,24 @@ public class RecyclerViewActionHistory {
 
             @Override
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT);
+                // 移除所有滑动和移动功能
+                return makeMovementFlags(0, 0);
             }
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                int position_dragged = viewHolder.getAdapterPosition();
-                int position_target = target.getAdapterPosition();
-                Collections.swap(arrayList, position_dragged, position_target);
-                listAdapterHistory.notifyItemMoved(position_dragged, position_target);
-                return true;
+                return false; // 禁止移动操作
             }
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                arrayList.remove(position);
-                listAdapterHistory.notifyItemRemoved(position);
-
+                // 移除删除操作
+                listAdapterHistory.notifyItemChanged(viewHolder.getAdapterPosition());
             }
 
             @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                // 如果需要滑动效果装饰，可以保留此部分，否则可以删除
                 new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                         .addBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_dark))
                         .addActionIcon(R.drawable.baseline_delete_24)
@@ -61,7 +56,6 @@ public class RecyclerViewActionHistory {
         };
         itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-        listAdapterHistory.setItemTouchHelper(itemTouchHelper);
-
+        //listAdapterHistory.setItemTouchHelper(itemTouchHelper);
     }
 }
