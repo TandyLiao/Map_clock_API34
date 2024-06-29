@@ -34,8 +34,8 @@
             android:textColor="@color/gray"
             android:textSize="14dp"
             android:paddingLeft="20dp"
-            android:paddingTop="5dp" />
-
+            android:paddingTop="5dp"
+            />
         <!-- 新增的顯示經度的 TextView -->
         <TextView
             android:id="@+id/textLongitude"
@@ -48,6 +48,7 @@
             android:paddingLeft="20dp"
             android:paddingTop="5dp"
             android:paddingBottom="10dp" />
+
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

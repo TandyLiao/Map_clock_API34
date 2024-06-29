@@ -10,13 +10,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
     private static final int DATABASE_VERSION = 1;
-    private SQLiteDatabase database;
     //private SharedViewModel sharedViewModel;
 
-    public AppDatabaseHelper(Context context, SharedViewModel sharedViewModel) {
+    public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.database = this.getWritableDatabase();
-        //this.sharedViewModel = sharedViewModel;
     }
 
     @Override

@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
+import androidx.lifecycle.ViewModelProvider;
+
 
 public class HistoryEditFragment extends Fragment {
 
@@ -23,9 +25,12 @@ public class HistoryEditFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        dbHelper = new AppDatabaseHelper(getContext(), sharedViewModel);
-
         View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
+
+        // Initialize AppDatabaseHelper and SharedViewModel
+        dbHelper = new AppDatabaseHelper(requireContext()); // Pass only context here
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         Button clearButton = view.findViewById(R.id.SelectButton);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -36,6 +41,7 @@ public class HistoryEditFragment extends Fragment {
                         .setMessage("Are you sure you want to delete all data?")
                         .setPositiveButton("Yes", (dialog, which) -> {
                             // Handle clearing operation
+                            dbHelper.clearAllTables(); // Example of using dbHelper to clear tables
                         })
                         .setNegativeButton("No", (dialog, which) -> {
                             // User chose to cancel, do nothing
@@ -43,7 +49,6 @@ public class HistoryEditFragment extends Fragment {
                         .show();
             }
         });
-
 
         return view;
     }
