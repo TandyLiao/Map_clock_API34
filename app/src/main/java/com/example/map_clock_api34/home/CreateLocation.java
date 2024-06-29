@@ -45,6 +45,12 @@ import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.example.map_clock_api34.book.AppDatabaseHelper.LocationTable;
+
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CreateLocation extends Fragment {
 
@@ -113,21 +119,25 @@ public class CreateLocation extends Fragment {
             //如有選擇地點就導航，沒有就跳提醒，加上吳俊廷的匯入資料庫的程式
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
+
                 names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
                 longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
-                /*SQLiteDatabase db = this.getWritableDatabase();
-                for (int i = 0; i < names.length; i++) {
-                    if (names!= null && latitudes!= 0 && longitudes!= 0) {
+
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
+                    String name = sharedViewModel.getDestinationName(i);
+                    double latitude = sharedViewModel.getLatitude(i);
+                    double longitude = sharedViewModel.getLongitude(i);
+                    if (name != null) {
                         ContentValues values = new ContentValues();
-                        values.put(LocationTable.COLUMN_PLACE_NAME, names);
-                        values.put(LocationTable.COLUMN_LATITUDE, latitudes);
-                        values.put(LocationTable.COLUMN_LONGITUDE, longitudes);
+                        values.put(LocationTable.COLUMN_PLACE_NAME, name);
+                        values.put(LocationTable.COLUMN_LATITUDE, latitude);
+                        values.put(LocationTable.COLUMN_LONGITUDE, longitude);
                         db.insert(LocationTable.TABLE_NAME, null, values);
                     }
                 }
-                //Close the database
-                db.close();*/
+                db.close();
 
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
@@ -367,6 +377,42 @@ public class CreateLocation extends Fragment {
             btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
+        }
+    }
+
+    public class Destination {
+        private String name;
+        private double latitude;
+        private double longitude;
+
+        public Destination(String name, double latitude, double longitude) {
+            this.name = name;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setLatitude(double latitude) {
+            this.latitude = latitude;
+        }
+
+        public void setLongitude(double longitude) {
+            this.longitude = longitude;
         }
     }
 
