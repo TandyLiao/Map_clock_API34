@@ -1,12 +1,16 @@
 package com.example.map_clock_api34.history;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,10 +26,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +46,8 @@ public class HistoryFragment extends Fragment {
     RecyclerView recyclerViewHistory;
     ListAdapterHistory listAdapterHistory;
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+
+    private AppDatabaseHelper dbHelper;
 
     @Nullable
     @Override
@@ -96,17 +104,32 @@ public class HistoryFragment extends Fragment {
     private void RecycleViewReset() {
         arrayList.clear();
 
-        HashMap<String, String> hashMap1 = new HashMap<>();
-        hashMap1.put("placeName", "TANDY");
-        arrayList.add(hashMap1);
+        String placeName = "";
+        String lan = "";
+        String lon = "";
 
-        HashMap<String, String> hashMap2 = new HashMap<>();
-        hashMap2.put("placeName", "吳俊廷");
-        arrayList.add(hashMap2);
+        AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());  // 如果在碎片中使用，或者 getActivity() 如果在活動中使用
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        if(db!=null){
 
-        HashMap<String, String> hashMap3 = new HashMap<>();
-        hashMap3.put("placeName", "趙子陽");
-        arrayList.add(hashMap3);
+            Cursor cursor = db.rawQuery(" SELECT * FROM " + "location", null);
+            Log.d("RecycleViewReset", String.valueOf(cursor));
+            while(cursor.moveToNext()){
+                placeName = cursor.getString(3);
+                lan = cursor.getString(2);
+                lon = cursor.getString(1);
+
+                HashMap<String, String> hashMap = new HashMap<>();
+                hashMap.put("placeName", placeName);
+                hashMap.put("latitude", lan);
+                hashMap.put("longitude", lon);
+                arrayList.add(hashMap);
+            }
+        }
+        else{
+            Toast.makeText(getActivity(),"NoDB",Toast.LENGTH_SHORT).show();
+        }
+
 
         listAdapterHistory.notifyDataSetChanged();
     }

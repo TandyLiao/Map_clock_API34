@@ -60,7 +60,7 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
 
     @Override
     public int getItemCount() {
-        return arrayList.size();
+        return arrayList.size(); // 返回資料集合的大小
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -71,8 +71,8 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
         ViewHolder(View itemView) {
             super(itemView);
             RouteName = itemView.findViewById(R.id.textRouteName);
-            Latitude = itemView.findViewById(R.id.textLatitude);
-            Longitude = itemView.findViewById(R.id.textLongitude);
+            Latitude = itemView.findViewById(R.id.textLantitude);
+            Longitude = itemView.findViewById(R.id.textLongtitude);
         }
     }
 }
