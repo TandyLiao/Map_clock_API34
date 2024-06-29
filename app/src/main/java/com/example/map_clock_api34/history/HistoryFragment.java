@@ -75,16 +75,25 @@ public class HistoryFragment extends Fragment {
 
         btnSelect = rootView.findViewById(R.id.SelectButton);
         btnSelect.setOnClickListener(v -> {
+
             if (isDelete) {
+
                 ArrayList<HashMap<String, String>> toRemove = new ArrayList<>();
+
+                AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
                 for (HashMap<String, String> item : arrayList) {
                     if (item.getOrDefault("isSelected", "false").equals("true")) {
                         toRemove.add(item);
+                        // 使用 SQL DELETE 語句刪除資料庫中的相應項目
+                        String placeName = item.get("placeName");
+                        db.execSQL("DELETE FROM " + "location"+ " WHERE " + "place_name" + " = ?", new String[]{placeName});
                     }
                 }
+                db.close();
                 arrayList.removeAll(toRemove);
-                isEdit=false;
-                isDelete=false;
+                isEdit = false;
+                isDelete = false;
                 updateButtonState();
                 listAdapterHistory.notifyDataSetChanged();
             } else {
@@ -92,6 +101,7 @@ public class HistoryFragment extends Fragment {
             }
         });
     }
+
 
     private void setupRecyclerViews() {
         recyclerViewHistory = rootView.findViewById(R.id.recycleViewHistory);
@@ -104,17 +114,22 @@ public class HistoryFragment extends Fragment {
     private void RecycleViewReset() {
         arrayList.clear();
 
+        addFromDB();
+
+        listAdapterHistory.notifyDataSetChanged();
+    }
+
+    private void addFromDB(){
         String placeName = "";
         String lan = "";
         String lon = "";
 
         AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());  // 如果在碎片中使用，或者 getActivity() 如果在活動中使用
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        if(db!=null){
 
-            Cursor cursor = db.rawQuery(" SELECT * FROM " + "location", null);
-            Log.d("RecycleViewReset", String.valueOf(cursor));
-            while(cursor.moveToNext()){
+        Cursor cursor = db.rawQuery(" SELECT * FROM " + "location", null);
+        if(cursor!=null){
+            while(cursor.moveToNext()) {
                 placeName = cursor.getString(3);
                 lan = cursor.getString(2);
                 lon = cursor.getString(1);
@@ -126,14 +141,7 @@ public class HistoryFragment extends Fragment {
                 arrayList.add(hashMap);
             }
         }
-        else{
-            Toast.makeText(getActivity(),"NoDB",Toast.LENGTH_SHORT).show();
-        }
-
-
-        listAdapterHistory.notifyDataSetChanged();
     }
-
     @Override
     public void onResume() {
         super.onResume();

@@ -123,27 +123,7 @@ public class CreateLocation extends Fragment {
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
-                names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
-                latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
-                longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
-
-
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
-                    String name = sharedViewModel.getDestinationName(i);
-                    double latitude = sharedViewModel.getLatitude(i);
-                    double longitude = sharedViewModel.getLongitude(i);
-                    if (name != null) {
-                        ContentValues values = new ContentValues();
-                        values.put(LocationTable.COLUMN_PLACE_NAME, name);
-                        values.put(LocationTable.COLUMN_LATITUDE, latitude);
-                        values.put(LocationTable.COLUMN_LONGITUDE, longitude);
-
-                        //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
-                        db.insert(LocationTable.TABLE_NAME, null, values);
-                    }
-                }
-                db.close();
+                saveInDB();
 
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
@@ -179,6 +159,29 @@ public class CreateLocation extends Fragment {
 
     }
 
+    private void saveInDB(){
+        names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+        latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
+        longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
+
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
+            String name = sharedViewModel.getDestinationName(i);
+            double latitude = sharedViewModel.getLatitude(i);
+            double longitude = sharedViewModel.getLongitude(i);
+            if (name != null) {
+                ContentValues values = new ContentValues();
+                values.put(LocationTable.COLUMN_PLACE_NAME, name);
+                values.put(LocationTable.COLUMN_LATITUDE, latitude);
+                values.put(LocationTable.COLUMN_LONGITUDE, longitude);
+
+                //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
+                db.insert(LocationTable.TABLE_NAME, null, values);
+            }
+        }
+        db.close();
+    }
     //打開選地點頁面
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
