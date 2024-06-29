@@ -77,7 +77,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY,"
+                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                         + COLUMN_LONGITUDE + " REAL,"
                         + COLUMN_LATITUDE + " REAL,"
                         + COLUMN_PLACE_NAME + " TEXT,"
