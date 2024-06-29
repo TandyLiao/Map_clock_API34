@@ -24,5 +24,30 @@
             android:textSize="20dp"
             android:paddingLeft="20dp" />
 
+        <!-- 新增的顯示緯度的 TextView -->
+        <TextView
+            android:id="@+id/textLatitude"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Latitude"
+            android:textColor="@color/gray"
+            android:textSize="14dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp" />
+
+        <!-- 新增的顯示經度的 TextView -->
+        <TextView
+            android:id="@+id/textLongitude"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Longitude"
+            android:textColor="@color/gray"
+            android:textSize="14dp"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

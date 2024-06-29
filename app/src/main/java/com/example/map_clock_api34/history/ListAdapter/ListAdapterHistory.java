@@ -38,9 +38,11 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         HashMap<String, String> item = arrayList.get(position);
-        holder.RouteName.setText(item.get("data"));
+        holder.RouteName.setText(item.get("placeName"));
+        holder.Latitude.setText(item.get("latitude"));
+        holder.Longitude.setText(item.get("longitude"));
 
-        // 设置背景颜色
+        // 設置背景顏色
         if (item.getOrDefault("isSelected", "false").equals("true")) {
             holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.selected_item_background));
         } else {
@@ -54,10 +56,6 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
                 notifyItemChanged(position);
             }
         });
-
-        ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
-        layoutParams.height = 150;
-        holder.itemView.setLayoutParams(layoutParams);
     }
 
     @Override
@@ -67,10 +65,14 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView RouteName;
+        TextView Latitude;
+        TextView Longitude;
 
         ViewHolder(View itemView) {
             super(itemView);
             RouteName = itemView.findViewById(R.id.textRouteName);
+            Latitude = itemView.findViewById(R.id.textLatitude);
+            Longitude = itemView.findViewById(R.id.textLongitude);
         }
     }
 }

@@ -68,6 +68,8 @@ public class CreateLocation extends Fragment {
     RecyclerViewActionHome recyclerViewActionHome;
     ListAdapterRoute listAdapterRoute;
 
+
+
     //獨立出來是因為要設置不可點擊狀態
     Button btnReset;
 
@@ -76,7 +78,7 @@ public class CreateLocation extends Fragment {
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
 
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -124,6 +126,7 @@ public class CreateLocation extends Fragment {
                 latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
                 longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
 
+
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
                     String name = sharedViewModel.getDestinationName(i);
@@ -134,6 +137,8 @@ public class CreateLocation extends Fragment {
                         values.put(LocationTable.COLUMN_PLACE_NAME, name);
                         values.put(LocationTable.COLUMN_LATITUDE, latitude);
                         values.put(LocationTable.COLUMN_LONGITUDE, longitude);
+
+                        //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
                         db.insert(LocationTable.TABLE_NAME, null, values);
                     }
                 }
@@ -172,6 +177,7 @@ public class CreateLocation extends Fragment {
     */
 
     }
+
     //打開選地點頁面
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
@@ -180,6 +186,7 @@ public class CreateLocation extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
     //打開導航頁面
     private void openStartMappingFragment() {
         StartMapping StartMapping = new StartMapping();
@@ -188,6 +195,7 @@ public class CreateLocation extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
     //初始化漢堡選單
     private void setupNavigationDrawer() {
         ImageView huButton = rootView.findViewById(R.id.DrawerButton);
@@ -196,6 +204,7 @@ public class CreateLocation extends Fragment {
             drawerLayout.openDrawer(GravityCompat.START);
         });
     }
+
     //ActionBar初始設定
     private void setupActionBar() {
         //取消原本預設的ActionBar，為了之後自己的Bar創建用
@@ -223,7 +232,7 @@ public class CreateLocation extends Fragment {
         //設置右上角的小圖示
         ImageView bookmark = new ImageView(requireContext());
         bookmark.setImageResource(R.drawable.route);
-        bookmark.setPadding(10,10,5,10);//設定icon邊界
+        bookmark.setPadding(10, 10, 5, 10);//設定icon邊界
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
@@ -255,6 +264,7 @@ public class CreateLocation extends Fragment {
             actionBar.show();
         }
     }
+
     //初始化設定表和功能表
     private void setupRecyclerViews() {
         //初始化路線的表
@@ -266,7 +276,7 @@ public class CreateLocation extends Fragment {
 
         //讓路線表可以交換、刪除...等動作
         recyclerViewActionHome = new RecyclerViewActionHome();
-        recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(),btnReset);
+        recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
 
         //初始化下面工具列的表
         recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
@@ -277,6 +287,7 @@ public class CreateLocation extends Fragment {
         ListAdapterTool listAdapterTool = new ListAdapterTool(fragmentTransaction, sharedViewModel, weatherService, getActivity());
         recyclerViewTool.setAdapter(listAdapterTool);
     }
+
     //每次回到路線規劃都會重製路線表，不然會疊加
     private void RecycleViewReset() {
         //清除原本的表
@@ -285,11 +296,11 @@ public class CreateLocation extends Fragment {
         if (sharedViewModel.getLocationCount() != -1) {
             for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
-                shortLocationName=sharedViewModel.getDestinationName(j);
+                shortLocationName = sharedViewModel.getDestinationName(j);
                 //如果地名大於20字，後面都用...代替
-                if(shortLocationName.length()>20){
-                    hashMap.put("data", shortLocationName.substring(0,20)+"...");
-                }else{
+                if (shortLocationName.length() > 20) {
+                    hashMap.put("data", shortLocationName.substring(0, 20) + "...");
+                } else {
                     hashMap.put("data", shortLocationName);
                 }
                 //重新加回路線表
@@ -301,8 +312,9 @@ public class CreateLocation extends Fragment {
         //設置重置按鈕的顏色和觸及狀態
         updateResetButtonState();
     }
+
     //按重置紐後PopupWindow跳出來的設定
-    private void ShowPopupWindow(){
+    private void ShowPopupWindow() {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
 
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
@@ -310,7 +322,7 @@ public class CreateLocation extends Fragment {
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
         //讓PopupWindow顯示出來的關鍵句
-        popupWindow.showAtLocation(rootView, Gravity.CENTER,0,0);
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         //疊加View在底下，讓她不會按到底層就跳掉
@@ -334,7 +346,7 @@ public class CreateLocation extends Fragment {
         btnsure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                while(sharedViewModel.getLocationCount()>=0){
+                while (sharedViewModel.getLocationCount() >= 0) {
                     arrayList.remove(sharedViewModel.getLocationCount());
                     sharedViewModel.setLocationCount();
                 }
@@ -347,6 +359,7 @@ public class CreateLocation extends Fragment {
             }
         });
     }
+
     //把疊加在底層的View刪掉
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {
@@ -354,6 +367,7 @@ public class CreateLocation extends Fragment {
             overlayView = null;
         }
     }
+
     //Fragment生命週期相關
     @Override
     public void onResume() {
@@ -361,6 +375,7 @@ public class CreateLocation extends Fragment {
         //重新更新RecycleView
         RecycleViewReset();
     }
+
     // 更新重置按鈕的狀態
     private void updateResetButtonState() {
         if (sharedViewModel.getLocationCount() >= 0) {
@@ -384,11 +399,13 @@ public class CreateLocation extends Fragment {
         private String name;
         private double latitude;
         private double longitude;
+        private long routeId;
 
         public Destination(String name, double latitude, double longitude) {
             this.name = name;
             this.latitude = latitude;
             this.longitude = longitude;
+            this.routeId = routeId;
         }
 
         public String getName() {
@@ -415,5 +432,4 @@ public class CreateLocation extends Fragment {
             this.longitude = longitude;
         }
     }
-
 }
