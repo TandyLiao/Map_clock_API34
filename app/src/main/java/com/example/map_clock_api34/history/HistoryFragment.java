@@ -97,15 +97,15 @@ public class HistoryFragment extends Fragment {
         arrayList.clear();
 
         HashMap<String, String> hashMap1 = new HashMap<>();
-        hashMap1.put("data", "TANDY");
+        hashMap1.put("placeName", "TANDY");
         arrayList.add(hashMap1);
 
         HashMap<String, String> hashMap2 = new HashMap<>();
-        hashMap2.put("data", "吳俊廷");
+        hashMap2.put("placeName", "吳俊廷");
         arrayList.add(hashMap2);
 
         HashMap<String, String> hashMap3 = new HashMap<>();
-        hashMap3.put("data", "趙子陽");
+        hashMap3.put("placeName", "趙子陽");
         arrayList.add(hashMap3);
 
         listAdapterHistory.notifyDataSetChanged();

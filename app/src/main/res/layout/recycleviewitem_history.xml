@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/recycle_item"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -14,41 +14,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textRouteName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:text="TextView"
-            android:textColor="@color/black"
-            android:textSize="20dp"
-            android:paddingLeft="20dp" />
+            android:orientation="horizontal">
 
-        <!-- 新增的顯示緯度的 TextView -->
-        <TextView
-            android:id="@+id/textLatitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:text="Latitude"
-            android:textColor="@color/gray"
-            android:textSize="14dp"
-            android:paddingLeft="20dp"
-            android:paddingTop="5dp"
-            />
-        <!-- 新增的顯示經度的 TextView -->
-        <TextView
-            android:id="@+id/textLongitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:text="Longitude"
-            android:textColor="@color/gray"
-            android:textSize="14dp"
-            android:paddingLeft="20dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="10dp" />
+            <TextView
+                android:id="@+id/textRouteName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_weight="3"
+                android:text="TextView"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                android:paddingLeft="20dp" />
 
+            <!-- 新增的顯示緯度的 TextView -->
+            <TextView
+                android:id="@+id/textLatitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_weight="3"
+                android:paddingLeft="20dp"
+                android:paddingTop="5dp"
+                android:text="Latitude"
+                android:textColor="@color/gray"
+                android:textSize="14dp" />
+            <!-- 新增的顯示經度的 TextView -->
+            <TextView
+                android:id="@+id/textLongitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_weight="3"
+                android:text="Longitude"
+                android:textColor="@color/gray"
+                android:textSize="14dp"
+                android:paddingLeft="20dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="10dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

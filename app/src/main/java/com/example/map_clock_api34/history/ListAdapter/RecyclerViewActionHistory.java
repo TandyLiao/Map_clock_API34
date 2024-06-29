@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
-
+//目前沒作用，但我還沒有刪掉，怕之後用得到
 public class RecyclerViewActionHistory {
 
     private ItemTouchHelper itemTouchHelper;
