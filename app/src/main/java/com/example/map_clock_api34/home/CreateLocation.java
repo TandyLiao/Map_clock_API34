@@ -202,11 +202,7 @@ public class CreateLocation extends Fragment {
 
     //初始化漢堡選單
     private void setupNavigationDrawer() {
-        ImageView huButton = rootView.findViewById(R.id.DrawerButton);
-        huButton.setOnClickListener(v -> {
-            DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawerLayout);
-            drawerLayout.openDrawer(GravityCompat.START);
-        });
+
     }
 
     //ActionBar初始設定

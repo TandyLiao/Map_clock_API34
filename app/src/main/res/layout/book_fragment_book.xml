@@ -4,17 +4,183 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/lightyellow">
+    android:background="@color/lightyellow"
+    tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="170dp"
-        android:layout_marginTop="315dp"
-        android:layout_marginEnd="184dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycleView_book"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/recyclerview"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/controls_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Controls Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controls_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recycleView_book">
+
+        <!-- Book Add Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bookadd_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/lightyellow"
+            app:cardCornerRadius="20dp"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="@color/darkyellow"
+            app:strokeWidth="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/bookadd_imageView"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/anya062516"
+                    android:clickable="true"
+                    android:padding="20dp" />
+
+                <TextView
+                    android:id="@+id/bookadd_Name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="8dp"
+                    android:text="新增書籤"
+                    android:textColor="@color/green"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Book Use Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bookuse_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/lightyellow"
+            app:cardCornerRadius="20dp"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintStart_toEndOf="@id/bookadd_card"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="@color/darkyellow"
+            app:strokeWidth="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/bookuse_imageView"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/anya062516"
+                    android:clickable="true"
+                    android:padding="20dp" />
+
+                <TextView
+                    android:id="@+id/bookuse_Name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="8dp"
+                    android:text="使用書籤"
+                    android:textColor="@color/green"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Book Set Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bookset_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/lightyellow"
+            app:cardCornerRadius="20dp"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintStart_toEndOf="@id/bookuse_card"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:strokeColor="@color/darkyellow"
+            app:strokeWidth="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/bookset_imageView"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/anya062516"
+                    android:clickable="true"
+                    android:padding="20dp" />
+
+                <TextView
+                    android:id="@+id/bookset_Name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="8dp"
+                    android:text="修改書籤"
+                    android:textColor="@color/green"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Confirm Button -->
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="120dp"
+            android:layout_height="60dp"
+            android:layout_margin="16dp"
+            android:text="確認"
+            android:background="@drawable/btn_additem"
+            android:textColor="@color/green"
+            app:backgroundTint="@null"
+            app:layout_constraintTop_toBottomOf="@id/bookuse_card"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

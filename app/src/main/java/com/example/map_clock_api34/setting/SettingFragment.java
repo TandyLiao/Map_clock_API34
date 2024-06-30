@@ -200,7 +200,6 @@ public class SettingFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        // 清除 ActionBar 的自定义视图
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(false);

@@ -1,151 +1,144 @@
 package com.example.map_clock_api34.book;
 
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import android.app.Activity;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.map_clock_api34.R;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.util.ArrayList;
+import com.example.map_clock_api34.home.SelectPlace;
+import com.example.map_clock_api34.note.Note;
 
 public class BookFragment extends Fragment {
-    private static final int CREATE_BOOKMARK_REQUEST = 1;
-
-    private TextView tx1;
     private Toolbar toolbar;
-    private BottomNavigationView navigation;
-    private ListView listView1, listView2;
-    private ArrayAdapter<String> adapter1, adapter2;
-    private ArrayList<String> list1, list2;
-
-
+    private ImageView addbook_imageView;
+    private ImageView usebook_imageView;
+    private ImageView setbook_imageView;
+    private ActionBarDrawerToggle toggle;
+    private DrawerLayout drawerLayout;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.book_bookmark, container, false);
+        View view = inflater.inflate(R.layout.book_fragment_book, container, false);
 
-        listView1 = view.findViewById(R.id.list_view1);
-        listView2 = view.findViewById(R.id.list_view2);
+        // Initialize ImageViews
+        addbook_imageView = view.findViewById(R.id.bookadd_imageView);
+        usebook_imageView = view.findViewById(R.id.bookuse_imageView);
+        setbook_imageView = view.findViewById(R.id.bookset_imageView);
 
-        list1 = new ArrayList<String>();
-        list2 = new ArrayList<String>();
+        // Set click listeners for ImageViews
+        addbook_imageView.setOnClickListener(v -> {
+            CreateBook createbook = new CreateBook();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, createbook);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
 
-        adapter1 = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, list1);
-        listView1.setAdapter(adapter1);
+        usebook_imageView.setOnClickListener(v -> {
+            // Handle Use Bookmark click
+        });
 
-        adapter2 = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, list2);
-        listView2.setAdapter(adapter2);
+        setbook_imageView.setOnClickListener(v -> {
+            // Handle Set Bookmark click
+        });
+
+        // Initialize DrawerLayout
+        if (getActivity() != null) {
+            drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        }
 
         return view;
     }
 
-
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        toolbar = getActivity().findViewById(R.id.toolbar);
-
-        // 獲取 confirm_button 的引用並為它設置 OnClickListener
-        Button confirmButton = view.findViewById(R.id.confirm_button);
-        confirmButton.setOnClickListener(v -> {
-            CreateBookmark createBookmarkFragment = new CreateBookmark();
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container_id, createBookmarkFragment)
-                    .commit();
-        });
-
-        // 如果 navigation 控件有在你的 bookmark layout
-        navigation = view.findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        toolbar = requireActivity().findViewById(R.id.toolbar);
     }
-
-    private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = menuItem -> {
-        if (menuItem.getItemId() == R.id.action_create_bookmark) {
-            CreateBookmark createBookmarkFragment = new CreateBookmark();
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.action_create_bookmark, createBookmarkFragment)
-                    .commit();
-            return true;
-        }
-        return false;
-    };
-
 
     @Override
     public void onResume() {
         super.onResume();
-
-
-        //建立CardView在toolbar
-        CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
-        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewtitle.setBackground(drawable);
-        //建立LinearLayout在CardView等等放圖案和文字
-        LinearLayout linearLayout = new LinearLayout(requireContext());
-        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-        //
-        ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.bookmark1);
-        mark.setPadding(10,10,5,10);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
-        );
-        params.setMarginStart(10); // 设置左边距
-        mark.setLayoutParams(params);
-
-        // 創建TextView
-        TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("書籤");
-        bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
-
-        linearLayout.addView(mark);
-        linearLayout.addView(bookTitle);
-        cardViewtitle.addView(linearLayout);
-
-        // 將cardview新增到actionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
-            actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 宽度设置为 WRAP_CONTENT
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 高度设置为 WRAP_CONTENT
-                    Gravity.END)); // 将包含 TextView 的 CardView 设置为自定义视图
-            actionBar.show();
+            // Ensure drawerLayout is not null
+            if (drawerLayout != null) {
+                // Set up ActionBarDrawerToggle
+                if (toggle == null) {
+                    toggle = new ActionBarDrawerToggle(
+                            requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+                    drawerLayout.addDrawerListener(toggle);
+                    toggle.syncState();
+                }
+                toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+
+                // Create CardView and add it to the ActionBar
+                CardView cardViewtitle = new CardView(requireContext());
+                cardViewtitle.setLayoutParams(new CardView.LayoutParams(
+                        ActionBar.LayoutParams.MATCH_PARENT,
+                        ActionBar.LayoutParams.MATCH_PARENT));
+                Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
+                cardViewtitle.setBackground(drawable);
+
+                // Create LinearLayout inside CardView
+                LinearLayout linearLayout = new LinearLayout(requireContext());
+                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT));
+                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+                // Create ImageView
+                ImageView mark = new ImageView(requireContext());
+                mark.setImageResource(R.drawable.bookmark1);
+                mark.setPadding(10, 10, 5, 10);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        100, // Width in pixels
+                        100 // Height in pixels
+                );
+                params.setMarginStart(10); // Set left margin
+                mark.setLayoutParams(params);
+
+                // Create TextView
+                TextView bookTitle = new TextView(requireContext());
+                bookTitle.setText("書籤");
+                bookTitle.setTextSize(15);
+                bookTitle.setTextColor(getResources().getColor(R.color.green)); // Change text color
+                bookTitle.setPadding(10, 10, 10, 10); // Set padding
+
+                // Add ImageView and TextView to LinearLayout
+                linearLayout.addView(mark);
+                linearLayout.addView(bookTitle);
+                cardViewtitle.addView(linearLayout);
+
+                // Set custom view to ActionBar
+                actionBar.setDisplayShowTitleEnabled(false); // Hide default title
+                actionBar.setDisplayShowCustomEnabled(true);
+                actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
+                        ActionBar.LayoutParams.WRAP_CONTENT, // Width as WRAP_CONTENT
+                        ActionBar.LayoutParams.WRAP_CONTENT, // Height as WRAP_CONTENT
+                        Gravity.END)); // Align to the end
+
+                actionBar.show();
+            }
         }
     }
 
@@ -156,30 +149,7 @@ public class BookFragment extends Fragment {
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(false);
             actionBar.setCustomView(null);
+            actionBar.setDisplayShowTitleEnabled(true); // Restore title display
         }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == CREATE_BOOKMARK_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                ArrayList<String> returnedList1 = data.getStringArrayListExtra("list1");
-                ArrayList<String> returnedList2 = data.getStringArrayListExtra("list2");
-
-                list1.clear();
-                list1.addAll(returnedList1);
-                adapter1.notifyDataSetChanged();
-
-                list2.clear();
-                list2.addAll(returnedList2);
-                adapter2.notifyDataSetChanged();
-            }
-
-
-        }
-
-
     }
 }
