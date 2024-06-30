@@ -41,7 +41,7 @@ public class HistoryFragment extends Fragment {
     boolean isEdit, isDelete;
 
     View rootView;
-    Button btnEdit, btnSelect;
+    Button btnEdit, btnSelect, btnClearAll;
 
     RecyclerView recyclerViewHistory;
     ListAdapterHistory listAdapterHistory;
@@ -57,6 +57,17 @@ public class HistoryFragment extends Fragment {
         setupActionBar();
         setupButtons();
         setupRecyclerViews();
+
+        btnClearAll = rootView.findViewById(R.id.ClearAllButton);
+        btnClearAll.setOnClickListener(v -> {
+            AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.execSQL("DELETE FROM location");
+            db.close();
+            arrayList.clear();
+            listAdapterHistory.notifyDataSetChanged();
+            Toast.makeText(getActivity(), "已清除所有紀錄", Toast.LENGTH_SHORT).show();
+        });
 
         return rootView;
     }
@@ -75,11 +86,8 @@ public class HistoryFragment extends Fragment {
 
         btnSelect = rootView.findViewById(R.id.SelectButton);
         btnSelect.setOnClickListener(v -> {
-
             if (isDelete) {
-
                 ArrayList<HashMap<String, String>> toRemove = new ArrayList<>();
-
                 AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 for (HashMap<String, String> item : arrayList) {
@@ -87,7 +95,7 @@ public class HistoryFragment extends Fragment {
                         toRemove.add(item);
                         // 使用 SQL DELETE 語句刪除資料庫中的相應項目
                         String placeName = item.get("placeName");
-                        db.execSQL("DELETE FROM " + "location"+ " WHERE " + "place_name" + " = ?", new String[]{placeName});
+                        db.execSQL("DELETE FROM location WHERE place_name = ?", new String[]{placeName});
                     }
                 }
                 db.close();
@@ -102,7 +110,6 @@ public class HistoryFragment extends Fragment {
         });
     }
 
-
     private void setupRecyclerViews() {
         recyclerViewHistory = rootView.findViewById(R.id.recycleViewHistory);
         recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -113,23 +120,21 @@ public class HistoryFragment extends Fragment {
 
     private void RecycleViewReset() {
         arrayList.clear();
-
         addFromDB();
-
         listAdapterHistory.notifyDataSetChanged();
     }
 
-    private void addFromDB(){
-        String placeName = "";
-        String lan = "";
-        String lon = "";
+    private void addFromDB() {
+        String placeName;
+        String lan;
+        String lon;
 
-        AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());  // 如果在碎片中使用，或者 getActivity() 如果在活動中使用
+        AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery(" SELECT * FROM " + "location", null);
-        if(cursor!=null){
-            while(cursor.moveToNext()) {
+        Cursor cursor = db.rawQuery("SELECT * FROM location", null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
                 placeName = cursor.getString(3);
                 lan = cursor.getString(2);
                 lon = cursor.getString(1);
@@ -140,8 +145,11 @@ public class HistoryFragment extends Fragment {
                 hashMap.put("longitude", lon);
                 arrayList.add(hashMap);
             }
+            cursor.close();
         }
+        db.close();
     }
+
     @Override
     public void onResume() {
         super.onResume();
