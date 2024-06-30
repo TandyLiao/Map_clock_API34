@@ -46,7 +46,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
+import android.content.SharedPreferences;
+import android.content.Context;
 
 public class StartMapping extends Fragment {
 
@@ -169,7 +170,7 @@ public class StartMapping extends Fragment {
                     totalTime -= 10;
                 }
 
-                if (last_distance < 0.05 && time < 3) {
+                if (last_distance < 0.5 && time < 30) {
                     initPopWindow();
                 }
 
@@ -204,7 +205,6 @@ public class StartMapping extends Fragment {
 
 
     private void initPopWindow(){
-
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         TextView txt = view.findViewById(R.id.txtNote);
@@ -212,7 +212,7 @@ public class StartMapping extends Fragment {
         startLocation.setLatitude(latitude[i]);
         startLocation.setLongitude(longitude[i]);
         i++;
-        if(i<j){
+        if(i < j){
             txt.setText("你到目的地囉\n記得做事...\n下個地點嗎?");
         }else{
             txt.setText("你到目的地囉\n記得做事...\n沒地點了");
@@ -237,8 +237,7 @@ public class StartMapping extends Fragment {
         btnSure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(i<j){
-
+                if(i < j){
                     mMap.clear();
                     builder = new LatLngBounds.Builder();
 
@@ -259,8 +258,10 @@ public class StartMapping extends Fragment {
                     double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],startLocation.getLatitude(),startLocation.getLongitude())/1000;
                     time = Math.round(trip_distance/4*60);
                     txtTime.setText("目的:"+destinationName[i]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
-                }else{
 
+                    // 在這裡重新啟動位置更新
+                    startLocationUpdates();
+                }else{
                     getActivity().getSupportFragmentManager().popBackStack();
                 }
                 popupWindow.dismiss();
@@ -268,6 +269,7 @@ public class StartMapping extends Fragment {
         });
 
     }
+
 
     @SuppressLint("MissingPermission")
     @Nullable
@@ -304,7 +306,7 @@ public class StartMapping extends Fragment {
             mapFragment.getMapAsync(callback);
         }
 
-        for(j=0 ; j<=sharedViewModel.getLocationCount() ; j++){
+        for(j=0 ; j<=sharedViewModel.getLatitude(j) ; j++){
             destinationName[j]=sharedViewModel.getDestinationName(j);
             latitude[j]=sharedViewModel.getLatitude(j);
             longitude[j]=sharedViewModel.getLongitude(j);
@@ -317,16 +319,21 @@ public class StartMapping extends Fragment {
 
     }
     private void checkAndRequestPermissions() {
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if(getActivity() != null){
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.POST_NOTIFICATIONS
-            }, NOTIFICATION_PERMISSION_CODE);
-        } else {
-            startLocationUpdates();
+                ActivityCompat.requestPermissions(getActivity(), new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.POST_NOTIFICATIONS
+                }, NOTIFICATION_PERMISSION_CODE);
+            } else {
+                startLocationUpdates();
+            }
+        }else{
+
         }
+
     }//這方法設定組新增
 
     @SuppressLint("MissingPermission")

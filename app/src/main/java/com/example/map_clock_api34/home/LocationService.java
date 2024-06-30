@@ -138,8 +138,13 @@ public class LocationService extends Service {
             totalTime -= 10;
         }
 
-        if (last_distance < 0.05 && time < 3) {
+        if (last_distance < 0.5 && time < 30) {
             sendNotification("快到了!(背景執行的)");
+        }
+        destinationIndex++;
+        if (destinationIndex < latitude.length && destinationIndex < longitude.length && destinationIndex < destinationName.length) {
+            // 更新 startLocation 到当前位置，并继续追踪
+            startLocation = nowLocation;
         }
     }
 

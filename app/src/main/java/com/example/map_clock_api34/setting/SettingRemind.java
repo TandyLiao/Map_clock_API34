@@ -27,7 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -175,26 +175,24 @@ public class SettingRemind extends Fragment {
         }
         mMediaPlayer.setLooping(false);
 
+        // 使用 Handler 來控制音量增加和播放
+        Handler mHandler = new Handler(Looper.getMainLooper());
+
         for (int i = 0; i < intervals; i++) {
             final int iteration = i;
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mMediaPlayer.setVolume(volumeIncrement * (iteration + 1), volumeIncrement * (iteration + 1));
-                    if (mMediaPlayer.isPlaying()) {
-                        mMediaPlayer.seekTo(0);
-                    } else {
+                    float newVolume = volumeIncrement * (iteration + 1);
+                    mMediaPlayer.setVolume(newVolume, newVolume);
+                    if (!mMediaPlayer.isPlaying()) {
                         mMediaPlayer.start();
                     }
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mMediaPlayer.pause();
-                        }
-                    }, duration);
                 }
             }, i * (duration + 1000));
         }
+
+        // 設置在播放完成後停止並釋放 MediaPlayer
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -432,3 +430,6 @@ public class SettingRemind extends Fragment {
 
     }
 }
+
+
+
