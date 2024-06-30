@@ -46,8 +46,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import android.content.SharedPreferences;
-import android.content.Context;
 
 public class StartMapping extends Fragment {
 
@@ -295,7 +293,7 @@ public class StartMapping extends Fragment {
             public void onClick(View v) {
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, createFragment);
+                transaction.replace(R.id.home_fragment_container, createFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
