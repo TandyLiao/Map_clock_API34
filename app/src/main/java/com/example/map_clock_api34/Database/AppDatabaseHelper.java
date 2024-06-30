@@ -52,6 +52,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_START_TIME = "start_time";
 
         public static final String CREATE_TABLE =
+
                 "CREATE TABLE " + TABLE_NAME + "("
                         + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_LOCATION_ID + " INTEGER,"

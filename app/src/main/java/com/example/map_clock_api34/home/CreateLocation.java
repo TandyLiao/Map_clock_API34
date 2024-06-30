@@ -46,7 +46,10 @@ import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.example.map_clock_api34.book.AppDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.book.AppDatabaseHelper.HistoryTable;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 import java.util.ArrayList;
@@ -56,6 +59,7 @@ public class CreateLocation extends Fragment {
 
     private AppDatabaseHelper dbHelper;
     String names;
+    String Historynames;
     double latitudes;
     double longitudes;
 
@@ -124,6 +128,7 @@ public class CreateLocation extends Fragment {
                 openStartMappingFragment();
 
                 saveInDB();
+                saveInHistoryDB();
 
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
@@ -155,11 +160,45 @@ public class CreateLocation extends Fragment {
         Close the database
         db.close();
     }
+
+    public class Example {
+    public static void main(String[] args) {
+        long currentTimeMillis = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = sdf.format(new Date(currentTimeMillis));
+        System.out.println("Current time: " + formattedDate);
+    }
+}
+
     */
 
     }
 
+    private void saveInHistoryDB(){
+
+        Historynames = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
+            String Historyname = sharedViewModel.getDestinationName(i);
+
+            if (Historyname != null) {
+                ContentValues values = new ContentValues();
+                values.put(HistoryTable.COLUMN_ALARM_NAME, Historyname);
+
+                //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
+                db.insert(HistoryTable.TABLE_NAME, null, values);
+            }
+            ContentValues values = new ContentValues();
+            long currentTimeMillis = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = sdf.format(new Date(currentTimeMillis));
+            values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
+        }
+        db.close();
+    }
+
     private void saveInDB(){
+
         names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
         latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
         longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
