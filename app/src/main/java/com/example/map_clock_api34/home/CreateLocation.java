@@ -216,7 +216,7 @@ public class CreateLocation extends Fragment {
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, mapFragment);
+        transaction.replace(R.id.home_fragment_container, mapFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -225,7 +225,7 @@ public class CreateLocation extends Fragment {
     private void openStartMappingFragment() {
         StartMapping StartMapping = new StartMapping();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, StartMapping);
+        transaction.replace(R.id.home_fragment_container, StartMapping);
         transaction.addToBackStack(null);
         transaction.commit();
     }

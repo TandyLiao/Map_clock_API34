@@ -277,7 +277,7 @@ public class SelectPlace extends Fragment {
 
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, createFragment);
+                transaction.replace(R.id.home_fragment_container, createFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
