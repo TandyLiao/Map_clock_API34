@@ -168,7 +168,7 @@ public class StartMapping extends Fragment {
                     totalTime -= 10;
                 }
 
-                if (last_distance < 0.5 && time < 30) {
+                if (last_distance < 0.05 && time < 3) {
                     initPopWindow();
                 }
 

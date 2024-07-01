@@ -138,7 +138,7 @@ public class LocationService extends Service {
             totalTime -= 10;
         }
 
-        if (last_distance < 0.5 && time < 30) {
+        if (last_distance < 0.05 && time < 3) {
             sendNotification("快到了!(背景執行的)");
         }
         destinationIndex++;
