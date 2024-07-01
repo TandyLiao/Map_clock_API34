@@ -3,6 +3,7 @@ package com.example.map_clock_api34.home;
 import android.Manifest;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
@@ -543,7 +544,6 @@ public class CreateLocation extends Fragment {
             return arrayList.size();
         }
     }
-
 
 
 }

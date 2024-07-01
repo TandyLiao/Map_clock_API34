@@ -1,11 +1,14 @@
 package com.example.map_clock_api34.note;
 
+import static android.content.Intent.getIntent;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,6 +21,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 
@@ -30,6 +34,14 @@ public class Note extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
+        Button btnA = view.findViewById(R.id.btn_note);
+        btnA.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
 
         return view;
     }
@@ -105,4 +117,7 @@ public class Note extends Fragment {
             actionBar.setCustomView(null);
         }
     }
+
+
+
 }
