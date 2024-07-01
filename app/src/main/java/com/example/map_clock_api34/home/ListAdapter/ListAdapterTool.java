@@ -1,6 +1,7 @@
 package com.example.map_clock_api34.home.ListAdapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,8 +81,9 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         }
         else if (position == 3) {
 
-            stationFinder.findNearbyStations(view);
+        stationFinder.findNearbyStations(view);
         }
+
         else if (position == 4) {
             Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         }

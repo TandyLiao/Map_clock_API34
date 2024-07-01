@@ -1,10 +1,8 @@
 package com.example.map_clock_api34.BusAdvice;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
-
-import androidx.fragment.app.FragmentActivity;
 
 import org.json.JSONObject;
 
@@ -13,7 +11,6 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -24,13 +21,29 @@ public class AuthHelper {
     private static final String TOKEN_URL = "https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token";
     private static final String CLIENT_ID = "410631773-c1cdfe37-9629-4d15"; // 替換為你的Client ID
     private static final String CLIENT_SECRET = "0c434717-9fe4-4326-a7a4-b8c08394587f"; // 替換為你的Client Secret
-    private OkHttpClient client;
+    private static final long TOKEN_EXPIRY_BUFFER = 60 * 1000; // 1分鐘的緩衝時間
 
-    public AuthHelper() {
+    private static final String PREFS_NAME = "AuthHelperPrefs";
+    private static final String KEY_ACCESS_TOKEN = "AccessToken";
+    private static final String KEY_TOKEN_EXPIRY_TIME = "TokenExpiryTime";
+
+    private OkHttpClient client;
+    private String cachedAccessToken;
+    private long tokenExpiryTime;
+    private SharedPreferences sharedPreferences;
+
+    public AuthHelper(Context context) {
         this.client = new OkHttpClient();
+        this.sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        loadToken();
     }
 
     public void getAccessToken(final AuthCallback callback) {
+        if (isTokenValid()) {
+            callback.onSuccess(cachedAccessToken);
+            return;
+        }
+
         RequestBody formBody = new FormBody.Builder()
                 .add("grant_type", "client_credentials")
                 .add("client_id", CLIENT_ID)
@@ -61,9 +74,12 @@ public class AuthHelper {
                 try {
                     String jsonResponse = response.body().string();
                     JSONObject jsonObject = new JSONObject(jsonResponse);
-                    String accessToken = jsonObject.getString("access_token");
-                    Log.d("AuthHelper", "Access Token: " + accessToken);
-                    callback.onSuccess(accessToken);
+                    cachedAccessToken = jsonObject.getString("access_token");
+                    int expiresIn = jsonObject.getInt("expires_in");
+                    tokenExpiryTime = System.currentTimeMillis() + (expiresIn * 1000) - TOKEN_EXPIRY_BUFFER;
+                    saveToken();
+                    Log.d("AuthHelper", "Access Token: " + cachedAccessToken);
+                    callback.onSuccess(cachedAccessToken);
                 } catch (Exception e) {
                     Log.e("AuthHelper", "Parsing error: " + e.getMessage());
                     callback.onFailure("Parsing error: " + e.getMessage());
@@ -72,9 +88,24 @@ public class AuthHelper {
         });
     }
 
+    private boolean isTokenValid() {
+        return cachedAccessToken != null && System.currentTimeMillis() < tokenExpiryTime;
+    }
+
+    private void saveToken() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_ACCESS_TOKEN, cachedAccessToken);
+        editor.putLong(KEY_TOKEN_EXPIRY_TIME, tokenExpiryTime);
+        editor.apply();
+    }
+
+    private void loadToken() {
+        cachedAccessToken = sharedPreferences.getString(KEY_ACCESS_TOKEN, null);
+        tokenExpiryTime = sharedPreferences.getLong(KEY_TOKEN_EXPIRY_TIME, 0);
+    }
+
     public interface AuthCallback {
         void onSuccess(String accessToken);
         void onFailure(String errorMessage);
     }
 }
-

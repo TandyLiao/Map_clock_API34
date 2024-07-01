@@ -14,7 +14,6 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
@@ -22,8 +21,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -37,7 +39,8 @@ public class BusStationFinderHelper {
 
     private Context context;
     private View overlayView;
-    private StringBuilder stationSuggestions;
+    private StringBuilder nearbyStationSuggestions;
+    private StringBuilder destinationStationSuggestions;
     private SharedViewModel sharedViewModel;
     private OkHttpClient client;
     private AuthHelper authHelper;
@@ -46,14 +49,20 @@ public class BusStationFinderHelper {
         this.context = context;
         this.sharedViewModel = sharedViewModel;
         this.client = new OkHttpClient();
-        this.authHelper = new AuthHelper();
+        this.authHelper = new AuthHelper(context); // 傳遞context給AuthHelper
     }
 
     public void findNearbyStations(View view) {
         authHelper.getAccessToken(new AuthHelper.AuthCallback() {
             @Override
             public void onSuccess(String accessToken) {
-                requestBusStations(view, accessToken);
+                nearbyStationSuggestions = new StringBuilder(); // 初始化變數
+                destinationStationSuggestions = new StringBuilder(); // 初始化變數
+                try {
+                    findNearbyBusStops(view, accessToken);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -66,117 +75,112 @@ public class BusStationFinderHelper {
         });
     }
 
-    private void requestBusStations(View view, String accessToken) {
-        new Thread(() -> {
-            stationSuggestions = new StringBuilder();
-            String cityName = "NewTaipei"; // 使用被接受的城市名稱
-            String districtName = "淡水"; // 具体区域名称
-            String url = BASE_URL + cityName + "?$top=30&$filter=contains(StopName/Zh_tw,'" + districtName + "')&$format=JSON";
-            Log.d("BusStationFinderHelper", "Request URL: " + url); // 打印URL以進行調試
-            Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("Authorization", "Bearer " + accessToken)
-                    .build();
-            Log.d("BusStationFinderHelper", "Authorization Header: Bearer " + accessToken); // 打印Header以進行調試
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
-                    if (context != null) {
-                        ((FragmentActivity) context).runOnUiThread(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
-                    }
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        String errorBody = response.body().string();
-                        Log.e("BusStationFinderHelper", "Request failed: " + response.message());
-                        Log.e("BusStationFinderHelper", "Response: " + errorBody); // 打印響應以進行調試
-                        if (context != null) {
-                            ((FragmentActivity) context).runOnUiThread(() -> Toast.makeText(context, "無法獲取公車站牌資訊", Toast.LENGTH_SHORT).show());
-                        }
-                        return;
-                    }
-
-                    try {
-                        String jsonResponse = response.body().string();
-                        Log.d("BusStationFinderHelper", "Response: " + jsonResponse); // 打印響應內容以進行調試
-                        parseBusStations(jsonResponse, view);
-                    } catch (Exception e) {
-                        Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
-                        if (context != null) {
-                            ((FragmentActivity) context).runOnUiThread(() -> Toast.makeText(context, "無法解析公車站牌資訊", Toast.LENGTH_SHORT).show());
-                        }
-                    }
-                }
-            });
-        }).start();
-    }
-
-    private void parseBusStations(String jsonResponse, View view) throws Exception {
-        Log.d("BusStationFinderHelper", "Parsing response"); // 調試信息
-        JSONArray stopsArray = new JSONArray(jsonResponse);
-
-        if (stopsArray.length() == 0) {
-            showToast("找不到該區域的公交站牌");
-            return;
-        }
-
-        List<BusStation> nearbyCurrentStations = new ArrayList<>();
-        List<BusStation> nearbyDestinationStations = new ArrayList<>();
-
+    private void findNearbyBusStops(View view, String accessToken) throws UnsupportedEncodingException {
         double currentLat = sharedViewModel.getNowLantitude();
         double currentLon = sharedViewModel.getNowLontitude();
         double destLat = sharedViewModel.getLatitude(0);
         double destLon = sharedViewModel.getLongitude(0);
 
-        for (int i = 0; i < stopsArray.length(); i++) {
-            JSONObject station = stopsArray.getJSONObject(i);
-            if (!station.has("StopPosition")) {
-                Log.e("BusStationFinderHelper", "No StopPosition for station: " + station.getJSONObject("StopName").getString("Zh_tw"));
-                continue;
+        // 增加和減少經緯度值來獲取200公尺範圍
+        double latDiff = 0.0018; // 200公尺約為0.0018度緯度
+        double lonDiff = 0.0018; // 200公尺約為0.0018度經度
+
+        double minLat = currentLat - latDiff;
+        double maxLat = currentLat + latDiff;
+        double minLon = currentLon - lonDiff;
+        double maxLon = currentLon + lonDiff;
+
+        double destMinLat = destLat - latDiff;
+        double destMaxLat = destLat + latDiff;
+        double destMinLon = destLon - lonDiff;
+        double destMaxLon = destLon + lonDiff;
+
+        String cityName = "NewTaipei"; // 使用被接受的城市名稱
+
+        // 構造查詢附近站牌的URL，使用 or 邏輯
+        String userStopsUrl = BASE_URL + cityName + "?$filter=( " +
+                "StopPosition/PositionLat ge " + minLat + " and StopPosition/PositionLat le " + maxLat + " and " +
+                "StopPosition/PositionLon ge " + minLon + " and StopPosition/PositionLon le " + maxLon + "" +
+                ") or ( " +
+                "StopPosition/PositionLat ge " + destMinLat + " and StopPosition/PositionLat le " + destMaxLat + " and " +
+                "StopPosition/PositionLon ge " + destMinLon + " and StopPosition/PositionLon le " + destMaxLon + "" +
+                ")&$format=JSON";
+
+        Log.d("BusStationFinderHelper", "User Stops URL: " + userStopsUrl);
+
+        Request userStopsRequest = new Request.Builder()
+                .url(userStopsUrl)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+
+        client.newCall(userStopsRequest).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
+                if (context != null) {
+                    ((FragmentActivity) context).runOnUiThread(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
+                }
             }
 
-            JSONObject stationPosition = station.getJSONObject("StopPosition");
-            double stationLat = stationPosition.getDouble("PositionLat");
-            double stationLon = stationPosition.getDouble("PositionLon");
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
+                    Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
+                    if (context != null) {
+                        ((FragmentActivity) context).runOnUiThread(() -> Toast.makeText(context, "無法獲取公車站牌資訊", Toast.LENGTH_SHORT).show());
+                    }
+                    return;
+                }
 
-            double distanceToCurrent = Distance.getDistanceBetweenPointsNew(currentLat, currentLon, stationLat, stationLon)/1000;
-
-
-            if (distanceToCurrent <= 0.5) {
-                Log.e("BusStationFinderHelper", "距離: " +  stationLat+":"+stationLon);
-                nearbyCurrentStations.add(new BusStation(station.getJSONObject("StopName").getString("Zh_tw"), stationLat, stationLon));
+                try {
+                    String userStopsResponse = response.body().string();
+                    Log.d("BusStationFinderHelper", "User Stops Response: " + userStopsResponse);
+                    List<BusStation> userStops = parseStops(userStopsResponse, currentLat, currentLon, destLat, destLon);
+                    nearbyStationSuggestions.append("附近站牌:\n");
+                    destinationStationSuggestions.append("目的地站牌:\n");
+                    for (BusStation stop : userStops) {
+                        if (isNearby(stop, currentLat, currentLon)) {
+                            nearbyStationSuggestions.append(stop.getStopName()).append("\n");
+                            Log.d("BusStationFinderHelper", "Nearby Stop: " + stop.getStopName() + " (Lat: " + stop.getStopLat() + ", Lon: " + stop.getStopLon() + ")");
+                        } else if (isNearby(stop, destLat, destLon)) {
+                            destinationStationSuggestions.append(stop.getStopName()).append("\n");
+                            Log.d("BusStationFinderHelper", "Destination Stop: " + stop.getStopName() + " (Lat: " + stop.getStopLat() + ", Lon: " + stop.getStopLon() + ")");
+                        }
+                    }
+                    ((FragmentActivity) context).runOnUiThread(() -> showStationsPopup(view));
+                } catch (Exception e) {
+                    Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
+                    if (context != null) {
+                        ((FragmentActivity) context).runOnUiThread(() -> Toast.makeText(context, "無法解析公車站牌資訊", Toast.LENGTH_SHORT).show());
+                    }
+                }
             }
+        });
+    }
 
-            double distanceToDestination = Distance.getDistanceBetweenPointsNew(destLat, destLon, stationLat, stationLon);
-            if (distanceToDestination <= 0.5) {
-                nearbyDestinationStations.add(new BusStation(station.getJSONObject("StopName").getString("Zh_tw"), stationLat, stationLon));
+    private List<BusStation> parseStops(String jsonResponse, double currentLat, double currentLon, double destLat, double destLon) throws Exception {
+        List<BusStation> stops = new ArrayList<>();
+        Set<String> stopNames = new HashSet<>();
+        JSONArray jsonArray = new JSONArray(jsonResponse);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject stopObj = jsonArray.getJSONObject(i);
+            String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
+            if (!stopNames.contains(stopName)) {
+                double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
+                double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
+                String stopID = stopObj.getString("StopID");
+                stops.add(new BusStation(stopName, stopLat, stopLon, stopID));
+                stopNames.add(stopName);
             }
         }
+        return stops;
+    }
 
-        stationSuggestions.append("附近的公車站牌：\n\n");
-
-        if (!nearbyCurrentStations.isEmpty()) {
-            stationSuggestions.append("當前位置附近：\n");
-            for (BusStation station : nearbyCurrentStations) {
-                stationSuggestions.append(station.getStationName()).append("\n");
-            }
-            stationSuggestions.append("\n");
-        }
-
-        if (!nearbyDestinationStations.isEmpty()) {
-            stationSuggestions.append("目的地附近：\n");
-            for (BusStation station : nearbyDestinationStations) {
-                stationSuggestions.append(station.getStationName()).append("\n");
-            }
-        }
-
-        if (context instanceof FragmentActivity) {
-            ((FragmentActivity) context).runOnUiThread(() -> showStationsPopup(view));
-        }
+    private boolean isNearby(BusStation stop, double targetLat, double targetLon) {
+        double latDiff = 0.0018; // 200公尺約為0.0018度緯度
+        double lonDiff = 0.0018; // 200公尺約為0.0018度經度
+        return Math.abs(stop.getStopLat() - targetLat) <= latDiff && Math.abs(stop.getStopLon() - targetLon) <= lonDiff;
     }
 
     private void showStationsPopup(View view) {
@@ -195,7 +199,7 @@ public class BusStationFinderHelper {
         ((ViewGroup) ((FragmentActivity) context).findViewById(android.R.id.content)).addView(overlayView);
 
         ((FragmentActivity) context).runOnUiThread(() -> {
-            stationInfoTextView.setText(stationSuggestions);
+            stationInfoTextView.setText(nearbyStationSuggestions.toString() + "\n" + destinationStationSuggestions.toString());
             Button btnCancel = popupView.findViewById(R.id.PopupYes);
             btnCancel.setOnClickListener(v -> {
                 popupWindow.dismiss();
@@ -219,27 +223,32 @@ public class BusStationFinderHelper {
     }
 
     private static class BusStation {
-        private final String stationName;
-        private final double stationLat;
-        private final double stationLon;
+        private final String stopName;
+        private final double stopLat;
+        private final double stopLon;
+        private final String stopID;
 
-        public BusStation(String stationName, double stationLat, double stationLon) {
-            this.stationName = stationName;
-            this.stationLat = stationLat;
-            this.stationLon = stationLon;
+        public BusStation(String stopName, double stopLat, double stopLon, String stopID) {
+            this.stopName = stopName;
+            this.stopLat = stopLat;
+            this.stopLon = stopLon;
+            this.stopID = stopID;
         }
 
-        public String getStationName() {
-            return stationName;
+        public String getStopName() {
+            return stopName;
         }
 
-        public double getStationLat() {
-            return stationLat;
+        public double getStopLat() {
+            return stopLat;
         }
 
-        public double getStationLon() {
-            return stationLon;
+        public double getStopLon() {
+            return stopLon;
+        }
+
+        public String getStopID() {
+            return stopID;
         }
     }
 }
-
