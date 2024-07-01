@@ -5,23 +5,23 @@
 
         <item
             android:id="@+id/action_home"
-            android:icon="@drawable/location_map"
-            android:title="首頁"
+            android:icon="@drawable/route"
+            android:title="路線規劃"
             android:checked="true"/>
 
         <item
             android:id="@+id/action_book"
-            android:icon="@drawable/bookmark"
+            android:icon="@drawable/bookmark1"
             android:title="書籤" />
 
         <item
             android:id="@+id/action_history"
-            android:icon="@drawable/clock"
+            android:icon="@drawable/history_record1"
             android:title="歷史紀錄" />
 
         <item
             android:id="@+id/action_setting"
-            android:icon="@drawable/setting"
+            android:icon="@drawable/setting1"
             android:title="設定" />
     </group>
 

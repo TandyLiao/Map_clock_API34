@@ -1,69 +1,105 @@
 package com.example.map_clock_api34;
+
 import androidx.lifecycle.ViewModel;
+
 public class SharedViewModel extends ViewModel {
+
+    private int locationCount = -1;
+
     private String[] destinationName = new String[7];
     private String[] destinationCapital = new String[7];
+    private String[] destinationArea = new String[7];
+
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
-    private int i=-1;
+
+    private double nowLantitude;
+    private double nowLontitude;
+
 
     public void setDestination(String name, double latitude, double longitude) {
-        i++;
-        this.destinationName[i] = name;
-        this.latitude[i] = latitude;
-        this.longitude[i] = longitude;
+        locationCount++;
+        this.destinationName[locationCount] = name;
+        this.latitude[locationCount] = latitude;
+        this.longitude[locationCount] = longitude;
     }
-    public void setCapital(String capital){
-        this.destinationCapital[i]=capital;
+
+    public void setCapital(String capital) {
+        this.destinationCapital[locationCount] = capital;
     }
-    public String getCapital(int j){
+
+    public void setArea(String area) {
+        this.destinationArea[locationCount] = area;
+    }
+
+    public void setnowLocation(double lantitude, double longtitude){
+        this.nowLantitude=lantitude;
+        this.nowLontitude=longtitude;
+    }
+
+    public String getCapital(int j) {
         return destinationCapital[j];
     }
-    public void swap(int start, int end){
+
+    public String getArea(int j) {
+        return destinationArea[j];
+    }
+
+    public Double getNowLantitude(){ return nowLantitude; }
+
+    public Double getNowLontitude(){ return nowLontitude; }
+
+    public void swap(int start, int end) {
         double temp;
         String stemp;
+
         temp = latitude[start];
         latitude[start] = latitude[end];
         latitude[end] = temp;
+
         temp = longitude[start];
         longitude[start] = longitude[end];
         longitude[end] = temp;
+
         stemp = destinationName[start];
         destinationName[start] = destinationName[end];
         destinationName[end] = stemp;
+
+        stemp = destinationCapital[start];
+        destinationCapital[start] = destinationCapital[end];
+        destinationCapital[end] = stemp;
+
+        stemp = destinationArea[start];
+        destinationArea[start] = destinationArea[end];
+        destinationArea[end] = stemp;
     }
-    public void delet(int position){
-        while(position!=i){
-            swap(position,position+1);
+
+    public void delet(int position) {
+        while (position != locationCount) {
+            swap(position, position + 1);
             position++;
         }
-        i--;
+        locationCount--;
     }
-    public int getI(){
-        return i;
+
+    public int getLocationCount() {
+        return locationCount;
     }
-    public void setI(){
-        i--;
+
+    public void setLocationCount() {
+        locationCount--;
     }
+
     public String getDestinationName(int j) {
         return destinationName[j];
     }
+
     public double getLatitude(int j) {
         return latitude[j];
     }
+
     public double getLongitude(int j) {
         return longitude[j];
-    }
-    public String[] getDestinationNameArray() {
-        return destinationName; //123
-    }
-
-    public double[] getLatitudeArray() {
-        return latitude;  //123
-    }
-
-    public double[] getLongitudeArray() {
-        return longitude; //123
     }
 
 }

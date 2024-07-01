@@ -7,10 +7,13 @@
     android:orientation="vertical">
 
     <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="70dp"
+        android:layout_height="60dp"
         android:contentDescription="@null"
-        android:src="@drawable/anya062516" />
+        android:src="@drawable/appicon_tem2"
+        android:scaleType="fitXY"
+        android:paddingLeft="10dp"
+        />
 
 
     <TextView
@@ -20,6 +23,7 @@
         android:ellipsize="end"
         android:paddingTop="4dp"
         android:text="地圖鬧鐘"
+        android:paddingLeft="10dp"
         android:textColor="@color/darkgreen" />
 
 </LinearLayout>

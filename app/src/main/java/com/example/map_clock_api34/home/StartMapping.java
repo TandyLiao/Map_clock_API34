@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,10 +33,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 //設定組新增
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,15 +47,7 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.app.Service;
-import android.location.Location;
-import android.os.IBinder;
-import android.content.ComponentName;
-import android.content.ServiceConnection;
-import androidx.fragment.app.Fragment;
-
-
-public class mapping extends Fragment {
+public class StartMapping extends Fragment {
 
     private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
     private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
@@ -109,7 +98,7 @@ public class mapping extends Fragment {
             bounds = builder.build();
 
             // 計算將這個邊界框移動到地圖中心所需的偏移量
-            int padding = 100; // 偏移量（以像素為單位）
+            int padding = 300; // 偏移量（以像素為單位）
             // 移动地图视图到最后已知的位置
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
 
@@ -189,9 +178,7 @@ public class mapping extends Fragment {
                     resetNotificationSent(); // 新增重製通知(6/2新增)
 
                 }
-                if (last_distance < 0.05 && time < 1) {
-                    navigateToTimesUpFragment();
-                }
+
                 //設定組新增
 
             }
@@ -213,24 +200,17 @@ public class mapping extends Fragment {
             }
         }
     }//此方法設定組加
-    private void navigateToTimesUpFragment() {
-        TimesUpFragment timesUpFragment = new TimesUpFragment();
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, timesUpFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
+
 
     private void initPopWindow(){
-
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow, null, false);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         TextView txt = view.findViewById(R.id.txtNote);
 
         startLocation.setLatitude(latitude[i]);
         startLocation.setLongitude(longitude[i]);
         i++;
-        if(i<j){
+        if(i < j){
             txt.setText("你到目的地囉\n記得做事...\n下個地點嗎?");
         }else{
             txt.setText("你到目的地囉\n記得做事...\n沒地點了");
@@ -255,8 +235,7 @@ public class mapping extends Fragment {
         btnSure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(i<j){
-
+                if(i < j){
                     mMap.clear();
                     builder = new LatLngBounds.Builder();
 
@@ -277,8 +256,10 @@ public class mapping extends Fragment {
                     double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],startLocation.getLatitude(),startLocation.getLongitude())/1000;
                     time = Math.round(trip_distance/4*60);
                     txtTime.setText("目的:"+destinationName[i]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
-                }else{
 
+                    // 在這裡重新啟動位置更新
+                    startLocationUpdates();
+                }else{
                     getActivity().getSupportFragmentManager().popBackStack();
                 }
                 popupWindow.dismiss();
@@ -287,6 +268,7 @@ public class mapping extends Fragment {
 
     }
 
+
     @SuppressLint("MissingPermission")
     @Nullable
     @Override
@@ -294,7 +276,7 @@ public class mapping extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        v = inflater.inflate(R.layout.mapping, container, false);
+        v = inflater.inflate(R.layout.home_start_mapping, container, false);
 
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -311,7 +293,7 @@ public class mapping extends Fragment {
             public void onClick(View v) {
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, createFragment);
+                transaction.replace(R.id.home_fragment_container, createFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
@@ -322,7 +304,7 @@ public class mapping extends Fragment {
             mapFragment.getMapAsync(callback);
         }
 
-        for(j=0 ; j<=sharedViewModel.getI() ; j++){
+        for(j=0 ; j<=sharedViewModel.getLatitude(j) ; j++){
             destinationName[j]=sharedViewModel.getDestinationName(j);
             latitude[j]=sharedViewModel.getLatitude(j);
             longitude[j]=sharedViewModel.getLongitude(j);
@@ -335,16 +317,21 @@ public class mapping extends Fragment {
 
     }
     private void checkAndRequestPermissions() {
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if(getActivity() != null){
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.POST_NOTIFICATIONS
-            }, NOTIFICATION_PERMISSION_CODE);
-        } else {
-            startLocationUpdates();
+                ActivityCompat.requestPermissions(getActivity(), new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.POST_NOTIFICATIONS
+                }, NOTIFICATION_PERMISSION_CODE);
+            } else {
+                startLocationUpdates();
+            }
+        }else{
+
         }
+
     }//這方法設定組新增
 
     @SuppressLint("MissingPermission")

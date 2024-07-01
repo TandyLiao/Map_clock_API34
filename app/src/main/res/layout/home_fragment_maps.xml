@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightyellow"
-    tools:context=".home.MapsFragment"
+    tools:context=".home.SelectPlace"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +23,7 @@
             android:maxWidth="45dp"
             android:maxHeight="45dp"
             android:padding="10dp"
-            android:src="@drawable/returnpage"
+            android:src="@drawable/back"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

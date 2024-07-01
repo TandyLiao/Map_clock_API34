@@ -1,4 +1,3 @@
-//CreateBookmark
 package com.example.map_clock_api34.book;
 
 import android.app.Activity;
@@ -8,11 +7,11 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,13 +20,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -49,14 +45,11 @@ public class CreateBookmark extends Fragment {
     private SharedPreferences sharedPreferences;
     private boolean nextList = false;
 
-    private TextView tx1;
-    private Toolbar toolbar;
-
-    private BookmarkDAO bookmarkDAO;
+    private static final String TAG = "CreateBookmark";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.create_bookmark, container, false);
+        return inflater.inflate(R.layout.book_create_bookmark, container, false);
     }
 
     @Override
@@ -67,8 +60,6 @@ public class CreateBookmark extends Fragment {
 
         List<String> list1 = new ArrayList<>(sharedPreferences.getStringSet("list1", new HashSet<>()));
         List<String> list2 = new ArrayList<>(sharedPreferences.getStringSet("list2", new HashSet<>()));
-
-        bookmarkDAO = new BookmarkDAO(getActivity());
 
         listView1 = view.findViewById(R.id.list_view1);
         listView2 = view.findViewById(R.id.list_view2);
@@ -83,7 +74,6 @@ public class CreateBookmark extends Fragment {
         listView1.setOnItemLongClickListener((parent, view1, position, id) -> {
             String bookmarkName = list1.get(position);
             list1.remove(position);
-            bookmarkDAO.deleteBookmarkByName(bookmarkName);
             adapter1.notifyDataSetChanged();
             return true;
         });
@@ -91,13 +81,13 @@ public class CreateBookmark extends Fragment {
         listView2.setOnItemLongClickListener((parent, view12, position, id) -> {
             String bookmarkName = list2.get(position);
             list2.remove(position);
-            bookmarkDAO.deleteBookmarkByName(bookmarkName);
             adapter2.notifyDataSetChanged();
             return true;
         });
 
         Button addRoute = view.findViewById(R.id.AddRoute);
         addRoute.setOnClickListener(view13 -> {
+            Log.d(TAG, "Add Route button clicked");
             String input = editText.getText().toString();
             if (!input.equals("")) {
                 if (!nextList) {
@@ -115,6 +105,7 @@ public class CreateBookmark extends Fragment {
 
         Button setRoute = view.findViewById(R.id.setRoute);
         setRoute.setOnClickListener(view14 -> {
+            Log.d(TAG, "Set Route button clicked");
             Uri gmmIntentUri = Uri.parse("geo:0,0?q=");
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             mapIntent.setPackage("com.google.android.apps.maps");
@@ -125,6 +116,7 @@ public class CreateBookmark extends Fragment {
 
         Button confirmButton = view.findViewById(R.id.confirm_button);
         confirmButton.setOnClickListener(v -> {
+            Log.d(TAG, "Confirm button clicked");
             SharedPreferences.Editor editor = sharedPreferences.edit();
             Set<String> set1 = new HashSet<>(list1);
             Set<String> set2 = new HashSet<>(list2);
@@ -147,6 +139,7 @@ public class CreateBookmark extends Fragment {
 
         Button cancelButton = view.findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(v -> {
+            Log.d(TAG, "Cancel button clicked");
             Set<String> backup = sharedPreferences.getStringSet("list1_backup", new HashSet<>());
             if (backup.size() > 0) {
                 list1.clear();
@@ -164,13 +157,14 @@ public class CreateBookmark extends Fragment {
     public void onResume() {
         super.onResume();
 
-        //建立CardView在toolbar
+        if (getActivity() == null)
+            return;
+
         CardView cardViewTitle = new CardView(getActivity());
         cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
         Drawable drawable = ContextCompat.getDrawable(getActivity(), R.drawable.cardviewtitle_shape);
         cardViewTitle.setBackground(drawable);
 
-        //建立LinearLayout在CardView等等放圖案和文字
         LinearLayout linearLayout = new LinearLayout(getActivity());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -178,37 +172,30 @@ public class CreateBookmark extends Fragment {
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        //
         ImageView mark = new ImageView(getActivity());
         mark.setImageResource(R.drawable.clock);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
-        );
-        params.setMarginStart(10); // 设置左边距
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
+        params.setMarginStart(10);
         mark.setLayoutParams(params);
 
-        // 创建TextView
         TextView bookTitle = new TextView(getActivity());
         bookTitle.setText("書籤");
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setTextColor(getResources().getColor(R.color.green));
+        bookTitle.setPadding(10, 10, 10, 10);
 
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
         cardViewTitle.addView(linearLayout);
 
-        // 將cardview新增到actionBar
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
+            actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 宽度设置为 WRAP_CONTENT
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 高度设置为 WRAP_CONTENT
-                    Gravity.END)); // 将包含 TextView 的 CardView 设置为自定义视图
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    Gravity.END));
             actionBar.show();
         }
     }

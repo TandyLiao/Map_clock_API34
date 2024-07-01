@@ -6,33 +6,20 @@
     android:layout_height="match_parent"
     android:background="@color/lightyellow"
     android:theme="@style/NoTheme"
-    tools:context=".home.MapsFragment">
+    tools:context=".home.SelectPlace">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/huButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:maxWidth="70dp"
-            android:maxHeight="70dp"
-            android:padding="10dp"
-            android:src="@drawable/hubutton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleView"
+            android:id="@+id/recycleViewRoute"
             android:layout_width="match_parent"
             android:layout_height="353dp"
             android:background="@drawable/recyclerview"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/huButton" />
+            tools:layout_editor_absoluteY="63dp" />
 
 
 
@@ -48,8 +35,8 @@
             app:backgroundTint="@null"
             android:textSize="15dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/recycleView2"
-            app:layout_constraintTop_toBottomOf="@+id/recycleView" />
+            app:layout_constraintBottom_toTopOf="@+id/recycleViewTool"
+            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
 
         <Button
             android:id="@+id/btn_reset"
@@ -61,12 +48,12 @@
             android:textColor="@color/green"
             app:backgroundTint="@null"
             android:textSize="15dp"
-            app:layout_constraintBottom_toTopOf="@+id/recycleView2"
+            app:layout_constraintBottom_toTopOf="@+id/recycleViewTool"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycleView" />
+            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleView2"
+            android:id="@+id/recycleViewTool"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="@drawable/recyclerview"

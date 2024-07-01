@@ -1,10 +1,16 @@
 package com.example.map_clock_api34.history;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,58 +19,157 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.map_clock_api34.Database.AppDatabaseHelper;
+import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 
 import android.widget.Button;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.FragmentTransaction;
+import android.widget.Toast;
 
-import com.example.map_clock_api34.R;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HistoryFragment extends Fragment {
 
-    private Toolbar toolbar;
+    boolean isEdit, isDelete;
+
+    View rootView;
+    Button btnEdit, btnSelect, btnClearAll;
+
+    RecyclerView recyclerViewHistory;
+    ListAdapterHistory listAdapterHistory;
+    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+
+    private AppDatabaseHelper dbHelper;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_history, container, false);
+        rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
 
-        // 新增對EditButton的點擊事件
-        Button editButton = view.findViewById(R.id.EditButton);
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 使用FragmentTransaction來替換當前的Fragment
-                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                transaction.replace(R.id.fl_container, new HistoryEditFragment());//修改這裡fl_container
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
+        setupActionBar();
+        setupButtons();
+        setupRecyclerViews();
+
+        btnClearAll = rootView.findViewById(R.id.ClearAllButton);
+        btnClearAll.setOnClickListener(v -> {
+            AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.execSQL("DELETE FROM location");
+            db.close();
+            arrayList.clear();
+            listAdapterHistory.notifyDataSetChanged();
+            Toast.makeText(getActivity(), "已清除所有紀錄", Toast.LENGTH_SHORT).show();
         });
-        return view;
+
+        return rootView;
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        toolbar = getActivity().findViewById(R.id.toolbar);
-        // 初始化 toolbar
+    private void setupButtons() {
+        btnEdit = rootView.findViewById(R.id.EditButton);
+        btnEdit.setOnClickListener(v -> {
+            isEdit = !isEdit;
+            isDelete = isEdit;
+            updateButtonState();
+            listAdapterHistory.setEditMode(isEdit);
+            if (!isEdit) {
+                clearSelections();
+            }
+        });
+
+        btnSelect = rootView.findViewById(R.id.SelectButton);
+        btnSelect.setOnClickListener(v -> {
+            if (isDelete) {
+                ArrayList<HashMap<String, String>> toRemove = new ArrayList<>();
+                AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                for (HashMap<String, String> item : arrayList) {
+                    if (item.getOrDefault("isSelected", "false").equals("true")) {
+                        toRemove.add(item);
+                        // 使用 SQL DELETE 語句刪除資料庫中的相應項目
+                        String placeName = item.get("placeName");
+                        db.execSQL("DELETE FROM location WHERE place_name = ?", new String[]{placeName});
+                    }
+                }
+                db.close();
+                arrayList.removeAll(toRemove);
+                isEdit = false;
+                isDelete = false;
+                updateButtonState();
+                listAdapterHistory.notifyDataSetChanged();
+            } else {
+                // Other action
+            }
+        });
+    }
+
+    private void setupRecyclerViews() {
+        recyclerViewHistory = rootView.findViewById(R.id.recycleViewHistory);
+        recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewHistory.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        listAdapterHistory = new ListAdapterHistory(arrayList);
+        recyclerViewHistory.setAdapter(listAdapterHistory);
+    }
+
+    private void RecycleViewReset() {
+        arrayList.clear();
+        addFromDB();
+        listAdapterHistory.notifyDataSetChanged();
+    }
+
+    private void addFromDB() {
+        String placeName;
+        String lan;
+        String lon;
+
+        AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM location", null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                placeName = cursor.getString(3);
+                lan = cursor.getString(2);
+                lon = cursor.getString(1);
+
+                HashMap<String, String> hashMap = new HashMap<>();
+                hashMap.put("placeName", placeName);
+                hashMap.put("latitude", lan);
+                hashMap.put("longitude", lon);
+                arrayList.add(hashMap);
+            }
+            cursor.close();
+        }
+        db.close();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        isDelete = false;
+        isEdit = false;
+        RecycleViewReset();
+    }
 
-        //建立CardView在toolbar
-        CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+    private void setupActionBar() {
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+            actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
+        }
+
+        CardView cardViewTitle = new CardView(requireContext());
+        cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewtitle.setBackground(drawable);
-        //建立LinearLayout在CardView等等放圖案和文字
+        cardViewTitle.setBackground(drawable);
+
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -72,48 +177,52 @@ public class HistoryFragment extends Fragment {
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        //
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.clock);
+        mark.setImageResource(R.drawable.history_record1);
+        mark.setPadding(10, 10, 5, 10);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                100, 100
         );
-        params.setMarginStart(10); // 设置左边距
+        params.setMarginStart(10);
         mark.setLayoutParams(params);
 
-        // 創建TextView
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("歷史紀錄");
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setTextColor(getResources().getColor(R.color.green));
+        bookTitle.setPadding(10, 10, 10, 10);
 
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
-        cardViewtitle.addView(linearLayout);
+        cardViewTitle.addView(linearLayout);
 
-        // 將cardview新增到actionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
+            actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 宽度设置为 WRAP_CONTENT
-                    ActionBar.LayoutParams.WRAP_CONTENT, // 高度设置为 WRAP_CONTENT
-                    Gravity.END)); // 将包含 TextView 的 CardView 设置为自定义视图
+            actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    ActionBar.LayoutParams.WRAP_CONTENT,
+                    Gravity.END));
             actionBar.show();
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowCustomEnabled(false);
-            actionBar.setCustomView(null);
+    private void updateButtonState() {
+        if (isEdit) {
+            btnEdit.setText("確認");
+            btnSelect.setText("刪除");
+        } else {
+            btnEdit.setText("編輯");
+            btnSelect.setText("套用");
         }
+    }
+
+    private void clearSelections() {
+        for (HashMap<String, String> item : arrayList) {
+            item.put("isSelected", "false");
+        }
+        listAdapterHistory.notifyDataSetChanged();
     }
 }

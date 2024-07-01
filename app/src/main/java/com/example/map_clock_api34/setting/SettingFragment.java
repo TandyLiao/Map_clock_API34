@@ -1,13 +1,9 @@
 package com.example.map_clock_api34.setting;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +23,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.map_clock_api34.R;
-import java.util.Locale;
 
 public class SettingFragment extends Fragment {
 
@@ -40,7 +35,7 @@ public class SettingFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_setting, container, false);
+        View view = inflater.inflate(R.layout.setting_fragment_setting, container, false);
 
         // 初始化按钮
         interface_Button = view.findViewById(R.id.interface_Button);
@@ -66,8 +61,11 @@ public class SettingFragment extends Fragment {
         remind_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 启动其他 Activity 或执行其他操作
-                startActivity(new Intent(requireContext(), SettingRemind.class));
+                SettingRemind settingRemind = new SettingRemind();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, settingRemind);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
@@ -162,7 +160,8 @@ public class SettingFragment extends Fragment {
 
             // ImageView 放置图标
             ImageView mark = new ImageView(requireContext());
-            mark.setImageResource(R.drawable.setting);
+            mark.setImageResource(R.drawable.setting1);
+            mark.setPadding(10,10,5,10);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     100, // 设置宽度为 100 像素
                     100 // 设置高度为 100 像素
@@ -201,7 +200,6 @@ public class SettingFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        // 清除 ActionBar 的自定义视图
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(false);

@@ -12,12 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginStart="204dp"
-        android:thumb="@drawable/switch_thumb"
-        android:track="@drawable/switch_track"
         android:paddingTop="9dp"
         android:paddingBottom="9dp"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/back" />
+        tools:layout_editor_absoluteY="98dp"
+        tools:ignore="MissingConstraints" />
 
 
     <TextView
@@ -80,22 +81,6 @@
         app:layout_constraintLeft_toLeftOf="@+id/text_RING"
 
         app:layout_constraintTop_toBottomOf="@+id/text_RING" />
-
-    <Button
-        android:id="@+id/back"
-        android:layout_width="200dp"
-        android:layout_height="82dp"
-        android:background="@drawable/oval_button_background"
-        android:elevation="20dp"
-        android:gravity="center"
-        android:text="回上一頁"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp" />
 
     <TextView
         android:id="@+id/texttt"

@@ -8,20 +8,10 @@ public class DBData {
     private String phone;
     private String hobby;
     private String elseInfo;
+    private double latitude;
+    private double longitude;
 
-    public DBData() {
-        // 空的建構子
-    }
-
-    public DBData(String id, String name, String phone, String hobby, String elseInfo) {
-        this.id = id;
-        this.name = name;
-        this.phone = phone;
-        this.hobby = hobby;
-        this.elseInfo = elseInfo;
-    }
-
-    // Getter 和 Setter 方法
+    // 添加 getter 和 setter 方法
     public String getId() {
         return id;
     }
@@ -60,5 +50,21 @@ public class DBData {
 
     public void setElseInfo(String elseInfo) {
         this.elseInfo = elseInfo;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
