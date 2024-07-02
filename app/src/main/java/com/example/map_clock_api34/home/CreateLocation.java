@@ -143,14 +143,16 @@ public class CreateLocation extends Fragment {
         String formattedDate = sdf.format(new Date(currentTimeMillis));
         System.out.println("Current time: " + formattedDate);
     }
+
 }
+Historynames =sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
     */
 
     }
 
     private void saveInHistoryDB(){
 
-        Historynames = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+        Historynames =sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
             String Historyname = sharedViewModel.getDestinationName(i);
