@@ -36,12 +36,20 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     public void clearAllTables() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + HistoryTable.TABLE_NAME);
-        db.execSQL("DELETE FROM " + LocationTable.TABLE_NAME);
-        db.execSQL("DELETE FROM " + BookmarkTable.TABLE_NAME);
-        db.execSQL("DELETE FROM " + NoteTable.TABLE_NAME);
-        db.execSQL("DELETE FROM " + SettingTable.TABLE_NAME);
-        db.close();
+        db.beginTransaction();
+        try {
+            db.execSQL("DELETE FROM " + HistoryTable.TABLE_NAME);
+            db.execSQL("DELETE FROM " + LocationTable.TABLE_NAME);
+            db.execSQL("DELETE FROM " + BookmarkTable.TABLE_NAME);
+            db.execSQL("DELETE FROM " + NoteTable.TABLE_NAME);
+            db.execSQL("DELETE FROM " + SettingTable.TABLE_NAME);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
 
     public static class HistoryTable {

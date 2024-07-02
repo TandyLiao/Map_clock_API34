@@ -1,5 +1,6 @@
 package com.example.map_clock_api34.home;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.SharedViewModel;
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,6 +82,7 @@ public class CreateLocation extends Fragment {
         setupButtons();
         //初始化路線表和功能表
         setupRecyclerViews();
+
         return rootView;
     }
     //初始化按鈕(包含定位請求)
@@ -150,31 +153,24 @@ public class CreateLocation extends Fragment {
     private void saveInHistoryDB(){
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        long currentTimeMillis = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = sdf.format(new Date(currentTimeMillis));
+
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
-            String Historyname = sharedViewModel.getDestinationName(i);
 
-            if (Historyname != null) {
+            if (Historynames != null) {
                 ContentValues values = new ContentValues();
-                values.put(HistoryTable.COLUMN_ALARM_NAME, Historyname);
-
-                //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
+                values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
+                values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
                 db.insert(HistoryTable.TABLE_NAME, null, values);
             }
-            ContentValues values = new ContentValues();
-            long currentTimeMillis = System.currentTimeMillis();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String formattedDate = sdf.format(new Date(currentTimeMillis));
-            values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
         }
         db.close();
     }
 
     private void saveInDB(){
-
-        names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
-        latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
-        longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
-
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
             String name = sharedViewModel.getDestinationName(i);
@@ -186,12 +182,13 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_LATITUDE, latitude);
                 values.put(LocationTable.COLUMN_LONGITUDE, longitude);
                 values.put(LocationTable.COLUMN_ALARM_NAME, Historynames);
-                //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
+
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
         }
         db.close();
     }
+
     //打開選地點頁面
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
