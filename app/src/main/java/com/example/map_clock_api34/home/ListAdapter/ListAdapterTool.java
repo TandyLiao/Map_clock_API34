@@ -67,6 +67,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         Context context = view.getContext();
 
         if (position == 0) {
+            if(sharedViewModel.getLocationCount()==-1){
+                Toast.makeText(context,"你還沒有選擇地點喔",Toast.LENGTH_SHORT).show();
+                return;
+            }
             // 跳到記事Fragment
             Note notesFragment = new Note();
             fragmentTransaction.replace(R.id.home_fragment_container, notesFragment);
@@ -77,11 +81,18 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             Toast.makeText(context, "資料庫組等你開發", Toast.LENGTH_SHORT).show();
         }
         else if (position == 2) {
+            if(sharedViewModel.getLocationCount()==-1){
+                Toast.makeText(context,"你還沒有選擇地點喔",Toast.LENGTH_SHORT).show();
+                return;
+            }
             weatherAdviceHelper.getWeatherAdvice(view);
         }
         else if (position == 3) {
-
-        stationFinder.findNearbyStations(view);
+            if(sharedViewModel.getLocationCount()==-1){
+                Toast.makeText(context,"你還沒有選擇地點喔",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            stationFinder.findNearbyStations(view);
         }
 
         else if (position == 4) {
