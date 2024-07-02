@@ -85,6 +85,9 @@ public class HistoryFragment extends Fragment {
             isEdit = false;    // 回到初始状态
             isDelete = false;  // 回到初始状态
             updateButtonState(); // 更新按鈕狀態
+
+            arrayList.clear();
+            listAdapterHistory.notifyDataSetChanged();
         });
 
         // 刪除以及套用按鈕
@@ -120,22 +123,20 @@ public class HistoryFragment extends Fragment {
     private void addFromDB() {
         String placeName;
         String lan;
-        String lon;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM location", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM history", null);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                placeName = cursor.getString(4);
-                lan = cursor.getString(2);
-                lon=cursor.getString(3);
+                placeName = cursor.getString(2);
+                lan = cursor.getString(3);
+                //lon=cursor.getString(3);
 
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName", placeName);
                 hashMap.put("latitude", lan);
-                hashMap.put("lontitude", lon);
                 arrayList.add(hashMap);
             }
             cursor.close();
