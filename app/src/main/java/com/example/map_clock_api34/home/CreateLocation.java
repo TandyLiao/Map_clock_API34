@@ -69,6 +69,8 @@ public class CreateLocation extends Fragment {
     Button btnReset;
     SharedViewModel sharedViewModel;
     WeatherService weatherService = new WeatherService();
+
+
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);

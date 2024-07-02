@@ -28,7 +28,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
-
+import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -123,6 +124,7 @@ public class HistoryFragment extends Fragment {
     private void addFromDB() {
         String placeName;
         String lan;
+        String lon;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -130,13 +132,14 @@ public class HistoryFragment extends Fragment {
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                placeName = cursor.getString(2);
-                lan = cursor.getString(3);
-                //lon=cursor.getString(3);
+                placeName = cursor.getString(0);
+                lan = cursor.getString(2);
+                lon=cursor.getString(3);
 
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName", placeName);
                 hashMap.put("latitude", lan);
+                hashMap.put("longitude", lon);
                 arrayList.add(hashMap);
             }
             cursor.close();
