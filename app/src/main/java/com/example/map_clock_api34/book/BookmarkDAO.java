@@ -3,7 +3,7 @@ package com.example.map_clock_api34.book;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-
+/*
 public class BookmarkDAO{
     private SQLiteDatabase db;
     private AppDatabaseHelper appDatabaseHelper;
@@ -26,4 +26,4 @@ public class BookmarkDAO{
                 new String[]{bookmarkName});
     }
 
-}
+}*/

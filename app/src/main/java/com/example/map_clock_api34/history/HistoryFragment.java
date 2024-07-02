@@ -54,6 +54,7 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
+        dbHelper= new AppDatabaseHelper(requireContext());
 
         setupActionBar();
         setupButtons();
@@ -79,12 +80,7 @@ public class HistoryFragment extends Fragment {
         // 清除資料庫按鈕
         btnClearAll = rootView.findViewById(R.id.ClearAllButton);
         btnClearAll.setOnClickListener(v -> {
-            AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            db.execSQL("DELETE FROM location");
-            db.close();
-            arrayList.clear();
-            listAdapterHistory.notifyDataSetChanged();
+            dbHelper.clearAllTables();
             Toast.makeText(getActivity(), "已清除所有紀錄", Toast.LENGTH_SHORT).show();
             isEdit = false;    // 回到初始状态
             isDelete = false;  // 回到初始状态
@@ -126,20 +122,20 @@ public class HistoryFragment extends Fragment {
         String lan;
         String lon;
 
-        AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM location", null);
+
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                placeName = cursor.getString(3);
+                placeName = cursor.getString(4);
                 lan = cursor.getString(2);
-                lon = cursor.getString(1);
+                lon=cursor.getString(3);
 
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName", placeName);
                 hashMap.put("latitude", lan);
-                hashMap.put("longitude", lon);
+                hashMap.put("lontitude", lon);
                 arrayList.add(hashMap);
             }
             cursor.close();
