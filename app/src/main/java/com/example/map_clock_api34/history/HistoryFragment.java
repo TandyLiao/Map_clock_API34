@@ -95,7 +95,7 @@ public class HistoryFragment extends Fragment {
                         toRemove.add(item);
                         // 使用 SQL DELETE 語句刪除資料庫中的相應項目
                         String placeName = item.get("placeName");
-                        db.execSQL("DELETE FROM location WHERE place_name = ?", new String[]{placeName});
+                        db.execSQL("DELETE FROM history WHERE place_name = ?", new String[]{placeName});
                     }
                 }
                 db.close();
@@ -132,7 +132,7 @@ public class HistoryFragment extends Fragment {
         AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM location", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM history", null);
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 placeName = cursor.getString(3);
