@@ -18,13 +18,26 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
 
     private final ArrayList<HashMap<String, String>> arrayList;
     private boolean isEditMode = false;
+    private boolean isMultiSelect = false;
+    private OnItemSelectedListener onItemSelectedListener;
+
+    //檢測是否有選擇RecycleView的監聽器
+    public interface OnItemSelectedListener {
+        void onItemSelected();
+    }
+
+    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+        this.onItemSelectedListener = listener;
+    }
 
     public ListAdapterHistory(ArrayList<HashMap<String, String>> arrayList) {
         this.arrayList = arrayList;
     }
 
-    public void setEditMode(boolean isEditMode) {
+    //設定選擇模式
+    public void setEditMode(boolean isEditMode, boolean isMultiSelect) {
         this.isEditMode = isEditMode;
+        this.isMultiSelect = isMultiSelect;
         notifyDataSetChanged();
     }
 
@@ -49,18 +62,33 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
             holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.darkyellow));
         }
 
+        //是否有選擇東西
         holder.itemView.setOnClickListener(v -> {
-            if (isEditMode) {
+            if (isEditMode || !isMultiSelect) {
                 boolean isSelected = item.getOrDefault("isSelected", "false").equals("true");
-                item.put("isSelected", isSelected ? "false" : "true");
-                notifyItemChanged(position);
+                if (isMultiSelect) {
+                    item.put("isSelected", isSelected ? "false" : "true");
+                } else {
+                    clearSelections();
+                    item.put("isSelected", isSelected ? "false" : "true");
+                }
+                notifyDataSetChanged();
+                if (onItemSelectedListener != null) {
+                    onItemSelectedListener.onItemSelected();
+                }
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return arrayList.size(); // 返回資料集合的大小
+        return arrayList.size(); // 返回數據集合的大小
+    }
+
+    private void clearSelections() {
+        for (HashMap<String, String> item : arrayList) {
+            item.put("isSelected", "false");
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
