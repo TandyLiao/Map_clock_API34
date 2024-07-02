@@ -1,6 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/lightyellow">
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycleViewnote"
+        android:layout_width="match_parent"
+        android:layout_height="353dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/recyclerview"
+        app:layout_constraintBottom_toTopOf="@+id/btn_addnote"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/btn_reset"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/btn_additem"
+        android:text="重置"
+        android:textColor="@color/darkgreen"
+        android:textSize="15sp"
+        app:backgroundTint="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_note"
+        app:layout_constraintHorizontal_bias="0.061"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_note"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/btn_additem"
+        android:text="記事"
+        android:textColor="@color/darkgreen"
+        android:textSize="15sp"
+        app:backgroundTint="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.966"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/btn_addnote"
+        android:layout_width="112dp"
+        android:layout_height="80dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toTopOf="@+id/btn_note"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/_0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
