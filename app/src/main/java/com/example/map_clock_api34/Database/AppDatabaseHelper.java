@@ -68,6 +68,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LONGITUDE = "longitude";
         public static final String COLUMN_LATITUDE = "latitude";
         public static final String COLUMN_PLACE_NAME = "place_name";
+        public static final String COLUMN_ALARM_NAME = "alarm_name";
         public static final String COLUMN_NOTE_ID = "note_id";
         public static final String COLUMN_SETTING_ID = "setting_id";
         public static final String COLUMN_SORT_ID = "sort_id";
@@ -78,6 +79,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_LONGITUDE + " REAL,"
                         + COLUMN_LATITUDE + " REAL,"
                         + COLUMN_PLACE_NAME + " TEXT,"
+                        + COLUMN_ALARM_NAME + " TEXT,"
                         + COLUMN_NOTE_ID + " INTEGER,"
                         + COLUMN_SETTING_ID + " INTEGER,"
                         + COLUMN_SORT_ID + " INTEGER,"

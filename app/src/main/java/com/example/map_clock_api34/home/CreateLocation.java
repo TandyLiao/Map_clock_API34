@@ -1,7 +1,6 @@
 package com.example.map_clock_api34.home;
-import android.content.Context;
+
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.SharedViewModel;
 import android.content.ContentValues;
@@ -25,8 +24,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,15 +32,15 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.R;
-import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import java.util.ArrayList;
 import java.util.HashMap;
-import com.example.map_clock_api34.book.AppDatabaseHelper.LocationTable;
-import com.example.map_clock_api34.book.AppDatabaseHelper.HistoryTable;
+
+import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -108,6 +106,7 @@ public class CreateLocation extends Fragment {
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
+                Historynames =sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInHistoryDB();
 
@@ -150,7 +149,6 @@ public class CreateLocation extends Fragment {
 
     private void saveInHistoryDB(){
 
-        Historynames = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
             String Historyname = sharedViewModel.getDestinationName(i);
@@ -176,6 +174,7 @@ public class CreateLocation extends Fragment {
         names = sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
         latitudes = sharedViewModel.getLatitude(sharedViewModel.getLocationCount());
         longitudes = sharedViewModel.getLongitude(sharedViewModel.getLocationCount());
+
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
             String name = sharedViewModel.getDestinationName(i);
@@ -186,6 +185,7 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_PLACE_NAME, name);
                 values.put(LocationTable.COLUMN_LATITUDE, latitude);
                 values.put(LocationTable.COLUMN_LONGITUDE, longitude);
+                values.put(LocationTable.COLUMN_ALARM_NAME, Historynames);
                 //values.put(LocationTable.COLUMN_LOCATION_ID, locationId);
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
