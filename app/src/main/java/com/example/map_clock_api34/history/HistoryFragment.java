@@ -62,7 +62,7 @@ public class HistoryFragment extends Fragment {
         btnClearAll.setOnClickListener(v -> {
             AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            db.execSQL("DELETE FROM location");
+            db.execSQL("DELETE FROM history");
             db.close();
             arrayList.clear();
             listAdapterHistory.notifyDataSetChanged();
@@ -78,7 +78,7 @@ public class HistoryFragment extends Fragment {
             isEdit = !isEdit;
             isDelete = isEdit;
             updateButtonState();
-            listAdapterHistory.setEditMode(isEdit);
+            listAdapterHistory.setEditMode(isEdit,false);
             if (!isEdit) {
                 clearSelections();
             }
