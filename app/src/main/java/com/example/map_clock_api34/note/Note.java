@@ -19,22 +19,44 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
+import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Note extends Fragment {
 
-    private Toolbar toolbar;
+    View rootView;
+
+    SharedViewModel sharedViewModel;
+    RecyclerView recyclerViewRoute;
+    ListAdapterRoute listAdapterRoute;
+
+    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.note_fragment_note, container, false);
-        toolbar = getActivity().findViewById(R.id.toolbar);
+        rootView = inflater.inflate(R.layout.note_fragment_note, container, false);
+
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         //初始化ActionBar
         setupActionBar();
-        return view;
+        setupRecyclerViews();
+        return rootView;
     }
     //ActionBar初始設定
     private void setupActionBar() {
@@ -91,6 +113,38 @@ public class Note extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        RecycleViewReset();
+    }
+    private void RecycleViewReset() {
+        //清除原本的表
+        arrayList.clear();
+        String shortLocationName;
+        if (sharedViewModel.getLocationCount() != -1) {
+            for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
+                HashMap<String, String> hashMap = new HashMap<>();
+                shortLocationName = sharedViewModel.getDestinationName(j);
+                //如果地名大於20字，後面都用...代替
+                if (shortLocationName.length() > 20) {
+                    hashMap.put("data", shortLocationName.substring(0, 20) + "...");
+                } else {
+                    hashMap.put("data", shortLocationName);
+                }
+                //重新加回路線表
+                arrayList.add(hashMap);
+            }
+        }
+        //套用更新
+        listAdapterRoute.notifyDataSetChanged();
+
+    }
+    //初始化設定表和功能表
+    private void setupRecyclerViews() {
+        // 初始化路線的表
+        recyclerViewRoute = rootView.findViewById(R.id.recycleViewnote);
+        recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, false); // 禁用拖動功能，啟用單選功能
+        recyclerViewRoute.setAdapter(listAdapterRoute);
     }
 
 }

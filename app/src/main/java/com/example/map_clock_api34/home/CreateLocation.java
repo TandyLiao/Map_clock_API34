@@ -73,12 +73,14 @@ public class CreateLocation extends Fragment {
     SharedViewModel sharedViewModel;
     WeatherService weatherService = new WeatherService();
 
-
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
+
         dbHelper = new AppDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         //初始化ActionBar
         setupActionBar();
         //初始化漢堡選單
@@ -278,19 +280,21 @@ public class CreateLocation extends Fragment {
     }
     //初始化設定表和功能表
     private void setupRecyclerViews() {
-        //初始化路線的表
+        // 初始化路線的表
         recyclerViewRoute = rootView.findViewById(R.id.recycleViewRoute);
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel);
+        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, true); // 啟用拖動功能
         recyclerViewRoute.setAdapter(listAdapterRoute);
-        //讓路線表可以交換、刪除...等動作
+
+        // 讓路線表可以交換、刪除...等動作
         recyclerViewActionHome = new RecyclerViewActionHome();
         recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
-        //初始化下面工具列的表
+
+        // 初始化下面工具列的表
         recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
         recyclerViewTool.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        //由於ListAdapter獨立出去了，所以要創建換頁的動作並傳給他
+        // 由於ListAdapter獨立出去了，所以要創建換頁的動作並傳給他
         FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
         ListAdapterTool listAdapterTool = new ListAdapterTool(fragmentTransaction, sharedViewModel, weatherService, getActivity());
         recyclerViewTool.setAdapter(listAdapterTool);
