@@ -21,9 +21,6 @@ import androidx.core.content.ContextCompat;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.Distance;
 import android.util.Log;
-
-
-
 import java.util.Arrays;
 
 public class LocationService extends Service {
@@ -88,7 +85,7 @@ public class LocationService extends Service {
         }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
         } else {
             stopSelf();
         }
@@ -127,7 +124,7 @@ public class LocationService extends Service {
             startLocation = nowLocation;
         }
 
-        totalTime += 10;
+        totalTime += 60;
         pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
         last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
 
@@ -135,7 +132,7 @@ public class LocationService extends Service {
             speed = pre_distance / (totalTime / 60 / 60);
             time = Math.round(last_distance / speed * 60);
         } else {
-            totalTime -= 10;
+            totalTime -= 60;
         }
 
         if (last_distance < 0.05 && time < 3) {
