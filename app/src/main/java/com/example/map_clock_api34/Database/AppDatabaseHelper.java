@@ -9,7 +9,7 @@ import android.content.ContentValues;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -83,7 +83,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_LONGITUDE + " REAL,"
                         + COLUMN_LATITUDE + " REAL,"
                         + COLUMN_PLACE_NAME + " TEXT,"

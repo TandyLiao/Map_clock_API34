@@ -50,6 +50,8 @@ import java.util.Date;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
+
 public class CreateLocation extends Fragment {
 
     private AppDatabaseHelper dbHelper;
@@ -57,6 +59,7 @@ public class CreateLocation extends Fragment {
     String Historynames;
     double latitudes;
     double longitudes;
+    String uniqueID;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     View rootView;
@@ -111,7 +114,7 @@ public class CreateLocation extends Fragment {
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
-                Historynames =sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                Historynames=sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInHistoryDB();
 
@@ -154,25 +157,37 @@ public class CreateLocation extends Fragment {
 
     private void saveInHistoryDB(){
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        try{
+            SQLiteDatabase writeDB = dbHelper.getWritableDatabase();
+            SQLiteDatabase readDB = dbHelper.getReadableDatabase();
 
-        long currentTimeMillis = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = sdf.format(new Date(currentTimeMillis));
+            Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[] {uniqueID});
 
-        for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
 
-            if (Historynames != null) {
-                ContentValues values = new ContentValues();
-                values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
-                values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
-                db.insert(HistoryTable.TABLE_NAME, null, values);
+            long currentTimeMillis = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = sdf.format(new Date(currentTimeMillis));
+
+            while(cursor.moveToNext()){
+                if (Historynames != null) {
+                    ContentValues values = new ContentValues();
+                    values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
+                    values.put(HistoryTable.COLUMN_LOCATION_ID,cursor.getString(0));
+                    values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
+                    writeDB.insert(HistoryTable.TABLE_NAME, null, values);
+                }
             }
+
+            writeDB.close();
+            readDB.close();
         }
-        db.close();
+        catch(Exception e){
+            Log.d("DBProblem",e.getMessage());
+        }
     }
 
     private void saveInDB(){
+        uniqueID = UUID.randomUUID().toString();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
             String name = sharedViewModel.getDestinationName(i);
@@ -183,7 +198,7 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_PLACE_NAME, name);
                 values.put(LocationTable.COLUMN_LATITUDE, latitude);
                 values.put(LocationTable.COLUMN_LONGITUDE, longitude);
-                values.put(LocationTable.COLUMN_ALARM_NAME, Historynames);
+                values.put(LocationTable.COLUMN_ALARM_NAME, uniqueID);
 
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
