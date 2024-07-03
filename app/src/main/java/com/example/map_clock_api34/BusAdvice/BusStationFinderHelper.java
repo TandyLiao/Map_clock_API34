@@ -174,13 +174,30 @@ public class BusStationFinderHelper {
                     String userStopsResponse = response.body().string();
                     Log.d("BusStationFinderHelper", "User Stops Response: " + userStopsResponse);
 
+                    //第一次過濾附近和目的地附近的站牌
+                    Map<String, String> firstCurrentMap = parseStops(userStopsResponse, currentLat, currentLon);
+                    Map<String, String> firstDesMap = parseStops(userStopsResponse, destLat, destLon);
+
                     Map<String, String> secondNearByStop = new HashMap<>();
                     Map<String, String> secondDesStop = new HashMap<>();
 
-                    parseStops(userStopsResponse, currentLat, currentLon, destLat, destLon, secondNearByStop, secondDesStop);
+                    //因為會有異步運行的問題所以這等待CallBack才會運行，因為呼叫外面的API會比較久，所以才會有這問題
+                    Runnable onCompletion = () -> {
+                        nearbyStationSuggestions.append("附近站牌:\n");
+                        for (Map.Entry<String, String> entry : secondNearByStop.entrySet()) {
+                            nearbyStationSuggestions.append(entry.getKey()).append("\n");
+                        }
 
+                        destinationStationSuggestions.append("目的地站牌:\n");
+                        for (Map.Entry<String, String> entry : secondDesStop.entrySet()) {
+                            destinationStationSuggestions.append(entry.getKey()).append("\n");
+                        }
 
-                    nearbyStationSuggestions.append("附近站牌:\n");
+                        mainHandler.post(() -> showPopup(view));
+                    };
+
+                    filterNearbyStops(currentLat, currentLon, firstCurrentMap, secondNearByStop, () ->
+                            filterNearbyStops(destLat, destLon, firstDesMap, secondDesStop, onCompletion));
 
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
@@ -193,25 +210,21 @@ public class BusStationFinderHelper {
     }
 
     //從GOOGLE找出附近站牌步行500公尺內能到的站
-    private void filterNearbyStops(double originLat, double originLon, Map<String, String> firstMap, Map<String, String> secondStop) {
-        //站牌經緯度LIST
+    private void filterNearbyStops(double originLat, double originLon, Map<String, String> firstMap, Map<String, String> resultMap, Runnable callback) {
         List<String> destinations = new ArrayList<>(firstMap.values());
-        //呼叫GOOGLE距離計算
         googleDistanceHelper.getWalkingDistances(originLat, originLon, destinations, new GoogleDistanceHelper.DistanceCallback() {
             @Override
             public void onSuccess(String jsonResponse) {
                 try {
-                    //呼叫距離抓取方法
                     Map<String, String> stopDistances = parseDistances(jsonResponse, firstMap);
 
                     for (Map.Entry<String, String> entry : stopDistances.entrySet()) {
-                        if ( (Integer.valueOf(entry.getValue()) <= 500)) {
-                            secondStop.put(entry.getKey(), firstMap.get(entry.getKey()));
-
+                        if (Integer.valueOf(entry.getValue()) <= 500) {
+                            resultMap.put(entry.getKey(), firstMap.get(entry.getKey()));
                         }
                     }
-                    Log.d("BusStationFinderHelper", "Second Current Stop " + secondStop);
 
+                    callback.run();
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Error parsing distances: " + e.getMessage());
                     if (context != null) {
@@ -230,30 +243,22 @@ public class BusStationFinderHelper {
         });
     }
 
-
     //距離抓取方法
     private Map<String, String> parseDistances(String jsonResponse, Map<String, String> nearByStop) throws Exception {
-
-        //建立站牌，對應距離HashMap
         Map<String, String> stopDistances = new HashMap<>();
 
         JSONObject jsonObject = new JSONObject(jsonResponse);
         JSONArray rows = jsonObject.getJSONArray("rows");
-
-        //GOOGLE回傳的JASON檔，會用名叫elements包裹一個地點
         JSONArray elements = rows.getJSONObject(0).getJSONArray("elements");
 
-        //儲存站牌對應的距離
-        int i=-1;
-        for (Map.Entry<String, String> entry : nearByStop.entrySet()){
-
+        int i = -1;
+        for (Map.Entry<String, String> entry : nearByStop.entrySet()) {
             i++;
-            while ( i < elements.length()) {
+            while (i < elements.length()) {
                 JSONObject element = elements.getJSONObject(i);
                 String status = element.getString("status");
 
                 if ("OK".equals(status)) {
-                    //抓取element裡面的距離參數
                     String distanceValue = element.getJSONObject("distance").getString("value");
                     stopDistances.put(entry.getKey(), distanceValue);
                     break;
@@ -343,37 +348,23 @@ public class BusStationFinderHelper {
         });
     }
 
-    private void parseStops(String jsonResponse, double currentLat, double currentLon, double destLat, double destLon,
-                            Map<String, String> secondNearByStop, Map<String, String> secondDesStop) throws Exception {
-        //把TDX回傳的JSON檔，轉成Array
+    private Map<String, String> parseStops(String jsonResponse, double Lat, double Lon) throws Exception {
         JSONArray jsonArray = new JSONArray(jsonResponse);
+        Map<String, String> firstMap = new HashMap<>();
 
-        //第一次過濾的MAP
-        Map<String, String> firstCurrentMap = new HashMap<>();
-        Map<String, String> firstDesMap = new HashMap<>();
-
-        //一筆一筆處理回傳的資料
         for (int i = 0; i < jsonArray.length(); i++) {
-
             JSONObject stopObj = jsonArray.getJSONObject(i);
             String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
             double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
             double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
             String latLon = stopLat + "," + stopLon;
 
-
-
-            //因為TDX回傳的值會有重複的值，所以先過濾成不重複的，HashMap的特性是一樣的值只會存一個
-            if (isNearby(stopLat, stopLon, currentLat, currentLon)) {
-                firstCurrentMap.put(stopName,latLon);
-            } else if (isNearby(stopLat, stopLon, destLat, destLon)) {
-                firstDesMap.put(stopName,latLon);
+            if (isNearby(stopLat, stopLon, Lat, Lon)) {
+                firstMap.put(stopName, latLon);
             }
         }
-        Log.d("BusStationFinderHelper", "First Current Nearby Stop: " + firstCurrentMap+ ")");
-        Log.d("BusStationFinderHelper", "First Destination Nearby Stop: " + firstDesMap+ ")");
-        filterNearbyStops(currentLat, currentLon, firstCurrentMap, secondNearByStop);
-        filterNearbyStops(destLat, destLon, firstDesMap, secondDesStop);
+
+        return firstMap;
     }
 
     //先過濾第一次經緯度附近的站牌
@@ -399,7 +390,7 @@ public class BusStationFinderHelper {
         ((ViewGroup) ((FragmentActivity) context).findViewById(android.R.id.content)).addView(overlayView);
 
         mainHandler.post(() -> {
-            stationInfoTextView.setText(nearbyStationSuggestions.toString() + "\n" + destinationStationSuggestions.toString() + "\n" + routeSuggestions.toString());
+            stationInfoTextView.setText(nearbyStationSuggestions.toString() + "\n" + destinationStationSuggestions.toString() + "\n" );
             Button btnCancel = popupView.findViewById(R.id.PopupYes);
             btnCancel.setOnClickListener(v -> {
                 popupWindow.dismiss();

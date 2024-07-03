@@ -50,6 +50,8 @@ import java.util.Date;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
+
 public class CreateLocation extends Fragment {
 
     private AppDatabaseHelper dbHelper;
@@ -57,6 +59,7 @@ public class CreateLocation extends Fragment {
     String Historynames;
     double latitudes;
     double longitudes;
+    String uniqueID;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     View rootView;
@@ -69,11 +72,15 @@ public class CreateLocation extends Fragment {
     Button btnReset;
     SharedViewModel sharedViewModel;
     WeatherService weatherService = new WeatherService();
+
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
+
         dbHelper = new AppDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         //初始化ActionBar
         setupActionBar();
         //初始化漢堡選單
@@ -109,7 +116,7 @@ public class CreateLocation extends Fragment {
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
-                Historynames =sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                Historynames=sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInHistoryDB();
 
@@ -152,25 +159,37 @@ public class CreateLocation extends Fragment {
 
     private void saveInHistoryDB(){
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        try{
+            SQLiteDatabase writeDB = dbHelper.getWritableDatabase();
+            SQLiteDatabase readDB = dbHelper.getReadableDatabase();
 
-        long currentTimeMillis = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = sdf.format(new Date(currentTimeMillis));
+            Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[] {uniqueID});
 
-        for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
 
-            if (Historynames != null) {
-                ContentValues values = new ContentValues();
-                values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
-                values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
-                db.insert(HistoryTable.TABLE_NAME, null, values);
+            long currentTimeMillis = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = sdf.format(new Date(currentTimeMillis));
+
+            while(cursor.moveToNext()){
+                if (Historynames != null) {
+                    ContentValues values = new ContentValues();
+                    values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
+                    values.put(HistoryTable.COLUMN_LOCATION_ID,cursor.getString(0));
+                    values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
+                    writeDB.insert(HistoryTable.TABLE_NAME, null, values);
+                }
             }
+
+            writeDB.close();
+            readDB.close();
         }
-        db.close();
+        catch(Exception e){
+            Log.d("DBProblem",e.getMessage());
+        }
     }
 
     private void saveInDB(){
+        uniqueID = UUID.randomUUID().toString();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
             String name = sharedViewModel.getDestinationName(i);
@@ -181,7 +200,7 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_PLACE_NAME, name);
                 values.put(LocationTable.COLUMN_LATITUDE, latitude);
                 values.put(LocationTable.COLUMN_LONGITUDE, longitude);
-                values.put(LocationTable.COLUMN_ALARM_NAME, Historynames);
+                values.put(LocationTable.COLUMN_ALARM_NAME, uniqueID);
 
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
@@ -261,19 +280,21 @@ public class CreateLocation extends Fragment {
     }
     //初始化設定表和功能表
     private void setupRecyclerViews() {
-        //初始化路線的表
+        // 初始化路線的表
         recyclerViewRoute = rootView.findViewById(R.id.recycleViewRoute);
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel);
+        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, true); // 啟用拖動功能
         recyclerViewRoute.setAdapter(listAdapterRoute);
-        //讓路線表可以交換、刪除...等動作
+
+        // 讓路線表可以交換、刪除...等動作
         recyclerViewActionHome = new RecyclerViewActionHome();
         recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
-        //初始化下面工具列的表
+
+        // 初始化下面工具列的表
         recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
         recyclerViewTool.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        //由於ListAdapter獨立出去了，所以要創建換頁的動作並傳給他
+        // 由於ListAdapter獨立出去了，所以要創建換頁的動作並傳給他
         FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
         ListAdapterTool listAdapterTool = new ListAdapterTool(fragmentTransaction, sharedViewModel, weatherService, getActivity());
         recyclerViewTool.setAdapter(listAdapterTool);

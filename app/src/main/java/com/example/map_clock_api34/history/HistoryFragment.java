@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +29,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
-
+import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -72,7 +74,7 @@ public class HistoryFragment extends Fragment {
 
             updateButtonState();
             listAdapterHistory.setEditMode(isEdit, isEdit);
-            if (isEdit) {
+            if (!isEdit) {
                 clearSelections();
             }
         });
@@ -80,14 +82,16 @@ public class HistoryFragment extends Fragment {
         // 清除資料庫按鈕
         btnClearAll = rootView.findViewById(R.id.ClearAllButton);
         btnClearAll.setOnClickListener(v -> {
+
             dbHelper.clearAllTables();
             Toast.makeText(getActivity(), "已清除所有紀錄", Toast.LENGTH_SHORT).show();
-            isEdit = false;    // 回到初始状态
-            isDelete = false;  // 回到初始状态
-            updateButtonState(); // 更新按鈕狀態
 
             arrayList.clear();
             listAdapterHistory.notifyDataSetChanged();
+
+            isEdit = false;    // 回到初始状态
+            isDelete = false;  // 回到初始状态
+            updateButtonState(); // 更新按鈕狀態
         });
 
         // 刪除以及套用按鈕
@@ -123,20 +127,24 @@ public class HistoryFragment extends Fragment {
     private void addFromDB() {
         String placeName;
         String lan;
+        String lon;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM history", null);
 
         if (cursor != null) {
+
             while (cursor.moveToNext()) {
-                placeName = cursor.getString(2);
-                lan = cursor.getString(3);
-                //lon=cursor.getString(3);
+                Log.d("Test111",cursor.getString(0));
+                placeName = cursor.getString(0);
+                lan = cursor.getString(1);
+                lon=cursor.getString(2);
 
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName", placeName);
                 hashMap.put("latitude", lan);
+                hashMap.put("longitude", lon);
                 arrayList.add(hashMap);
             }
             cursor.close();
@@ -148,14 +156,14 @@ public class HistoryFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // 按鈕是否"出現"的布林值
-        isEdit = false;    // true表示顯示編輯鈕，false表示顯示確認鈕
-        isDelete = false; // true表示顯示刪除鈕，false表示顯示套用鈕
+        //不在編輯模式下按鈕布林值
+        isEdit = false;
+        //刪除按鈕有無出現的布林值
+        isDelete = false;
 
         updateButtonState();
         RecycleViewReset();
     }
-
     private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -208,7 +216,8 @@ public class HistoryFragment extends Fragment {
     }
 
     private void updateButtonState() {
-        boolean hasItems = !arrayList.isEmpty();
+
+        boolean hasItems = arrayList.isEmpty();
         boolean hasSelectedItems = false;
         for (HashMap<String, String> item : arrayList) {
             if ("true".equals(item.get("isSelected"))) {
@@ -217,56 +226,58 @@ public class HistoryFragment extends Fragment {
             }
         }
 
-        //沒有選擇東西時的按鈕狀態
-        if (!hasItems) {
+        //RecycleView沒有東西時的按鈕狀態
+        if (hasItems) {
 
             btnEdit.setEnabled(false);
             btnSelect.setEnabled(false);
             btnClearAll.setEnabled(false);
             btnClearAll.setVisibility(View.INVISIBLE);
 
+            //兩個按鈕顏色的改變
             btnEdit.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
             btnSelect.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-            btnClearAll.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
 
+            //三個按鈕不能被點擊
             btnEdit.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
             btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
             btnClearAll.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
         } else {
+            //RecycleView有東西時的按鈕狀態
             btnEdit.setEnabled(true);
             btnEdit.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
             btnEdit.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
+        }
 
-            if (!isEdit) {
-                //如果不是編輯模式下的按鈕狀態
-                btnEdit.setText("編輯");
-                btnSelect.setText("套用");
-                btnClearAll.setVisibility(View.INVISIBLE);
-                btnClearAll.setEnabled(false);
+        //如果不在編輯模式下的按鈕狀態
+        if (!isEdit) {
+            btnEdit.setText("編輯");
+            btnSelect.setText("套用");
+            btnClearAll.setVisibility(View.INVISIBLE);
+            btnClearAll.setEnabled(false);
 
-                //不是編輯模式下的RecycleView選擇
-                if (hasSelectedItems) {
-                    btnSelect.setEnabled(true);
-                    btnSelect.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
-                    btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
-                } else {
-                    btnSelect.setEnabled(false);
-                    btnSelect.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-                    btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
-                }
+            //不是編輯模式下的RecycleView選擇
+            if (hasSelectedItems) {
+                btnSelect.setEnabled(true);
+                btnSelect.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
+                btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
             } else {
-                //在編輯模式下的按鈕狀態
-                btnEdit.setText("確認");
-                btnSelect.setText("刪除");
-                btnClearAll.setVisibility(View.VISIBLE);
-                btnClearAll.setEnabled(true);
-
-                btnClearAll.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
-                btnClearAll.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
-                btnSelect.setEnabled(hasSelectedItems);
-                btnSelect.setTextColor(hasSelectedItems ? ContextCompat.getColor(requireContext(), R.color.darkgreen) : ContextCompat.getColor(requireContext(), R.color.lightgreen));
-                btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), hasSelectedItems ? R.drawable.btn_additem : R.drawable.btn_unclickable));
+                btnSelect.setEnabled(false);
+                btnSelect.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
+                btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
             }
+        } else {
+            //在編輯模式下的按鈕狀態
+            btnEdit.setText("確認");
+            btnSelect.setText("刪除");
+            btnClearAll.setVisibility(View.VISIBLE);
+            btnClearAll.setEnabled(true);
+
+            btnClearAll.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
+            btnClearAll.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
+            btnSelect.setEnabled(hasSelectedItems);
+            btnSelect.setTextColor(hasSelectedItems ? ContextCompat.getColor(requireContext(), R.color.darkgreen) : ContextCompat.getColor(requireContext(), R.color.lightgreen));
+            btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), hasSelectedItems ? R.drawable.btn_additem : R.drawable.btn_unclickable));
         }
     }
 
@@ -298,7 +309,7 @@ public class HistoryFragment extends Fragment {
 
         // PopupWindow的文字顯示
         TextView warning = view.findViewById(R.id.txtNote);
-        warning.setText("你選的資料要刪掉囉!");
+        warning.setText("功能還沒寫好喔，請參考全部刪除!");
 
         // PopUpWindow的取消按鈕
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
@@ -309,9 +320,8 @@ public class HistoryFragment extends Fragment {
         });
 
         // PopupWindow的確認按鈕
-        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        /*Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
-
             AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -319,8 +329,8 @@ public class HistoryFragment extends Fragment {
                 if ("true".equals(item.get("isSelected"))) {
                     toRemove.add(item);
                     // 使用 SQL DELETE 語句刪除資料庫中的相應項目
-                    String placeName = item.get("placeName");
-                    db.execSQL("DELETE FROM location WHERE place_name = ?", new String[]{placeName});
+                    String alarm_name = item.get("alarm_name");
+                    db.execSQL("DELETE FROM history WHERE place_name = ?", new String[]{alarm_name});
                 }
             }
             db.close();
@@ -334,7 +344,7 @@ public class HistoryFragment extends Fragment {
                 isDelete = false;
                 updateButtonState();
             }
-        });
+        });*/
     }
 
     // 把疊加在底層的View刪掉

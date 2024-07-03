@@ -9,7 +9,7 @@ import android.content.ContentValues;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
 
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -58,6 +58,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LOCATION_ID = "location_id";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
         public static final String COLUMN_START_TIME = "start_time";
+        public static final String COLUMN_NOTE_ID = "note_id";
+        public static final String COLUMN_SETTING_ID = "setting_id";
 
         public static final String CREATE_TABLE =
 
@@ -66,6 +68,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_LOCATION_ID + " INTEGER,"
                         + COLUMN_ALARM_NAME + " TEXT,"
                         + COLUMN_START_TIME + " DATETIME,"
+                        + COLUMN_NOTE_ID + " INTEGER,"
+                        + COLUMN_SETTING_ID + " INTEGER,"
+                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "),"
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "),"
                         + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + ")"
                         + ")";
     }
@@ -77,22 +83,16 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LATITUDE = "latitude";
         public static final String COLUMN_PLACE_NAME = "place_name";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
-        public static final String COLUMN_NOTE_ID = "note_id";
-        public static final String COLUMN_SETTING_ID = "setting_id";
-        public static final String COLUMN_SORT_ID = "sort_id";
+
+
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY,"
                         + COLUMN_LONGITUDE + " REAL,"
                         + COLUMN_LATITUDE + " REAL,"
                         + COLUMN_PLACE_NAME + " TEXT,"
-                        + COLUMN_ALARM_NAME + " TEXT,"
-                        + COLUMN_NOTE_ID + " INTEGER,"
-                        + COLUMN_SETTING_ID + " INTEGER,"
-                        + COLUMN_SORT_ID + " INTEGER,"
-                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "),"
-                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + ")"
+                        + COLUMN_ALARM_NAME + " TEXT"
                         + ")";
     }
 
