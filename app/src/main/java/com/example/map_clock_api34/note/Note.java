@@ -27,7 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.book.BookFragment;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.home.CreateLocation;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
@@ -58,56 +60,128 @@ public class Note extends Fragment {
         setupRecyclerViews();
         return rootView;
     }
-    //ActionBar初始設定
+
     private void setupActionBar() {
-        //取消原本預設的ActionBar，為了之後自己的Bar創建用
-        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-            actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
-        }
         CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,
-                ActionBar.LayoutParams.MATCH_PARENT));
+        cardViewtitle.setLayoutParams(new CardView.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewtitle.setBackground(drawable);
-        //建立LinearLayout在CardView等等放圖案和文字
+
+        // 建立LinearLayout在CardView等等放圖案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        //設置右上角的小圖示
-        ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.route);
-        bookmark.setPadding(10, 10, 5, 10);//設定icon邊界
+
+        // ImageView放置圖案
+        ImageView mark = new ImageView(requireContext());
+        mark.setImageResource(R.drawable.anya062516);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
         );
         params.setMarginStart(10); // 设置左边距
-        bookmark.setLayoutParams(params);
-        // 創建右上角的名字
+        mark.setLayoutParams(params);
+
+        // 創建TextView
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("記事");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
-        linearLayout.addView(bookmark);
+
+        // 將ImageView和TextView添加到LinearLayout
+        linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
-        // 將cardview新增到actionBar
-        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+
+        // 创建自定义返回按钮
+        ImageView returnButton = new ImageView(requireContext());
+        returnButton.setImageResource(R.drawable.back);
+        LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(
+                100, // 设置宽度为 100 像素
+                100 // 设置高度为 100 像素
+        );
+        returnButton.setLayoutParams(returnButtonParams);
+
+        // 建立ActionBar的父LinearLayout
+        LinearLayout actionBarLayout = new LinearLayout(requireContext());
+        actionBarLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+        ));
+        actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
+        actionBarLayout.setWeightSum(1.0f);
+
+        // 子LinearLayout用于返回按钮
+        LinearLayout leftLayout = new LinearLayout(requireContext());
+        leftLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0.1f
+        ));
+        leftLayout.setOrientation(LinearLayout.HORIZONTAL);
+        leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        leftLayout.addView(returnButton);
+
+        // 子LinearLayout用于cardViewtitle
+        LinearLayout rightLayout = new LinearLayout(requireContext());
+        rightLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0.9f
+        ));
+        rightLayout.setOrientation(LinearLayout.HORIZONTAL);
+        rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        rightLayout.addView(cardViewtitle);
+
+        // 将子LinearLayout添加到父LinearLayout
+        actionBarLayout.addView(leftLayout);
+        actionBarLayout.addView(rightLayout);
+
+        androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
+
+        // 获取ActionBar
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
+            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    Gravity.END));
+            actionBar.setCustomView(actionBarLayout, new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.MATCH_PARENT, // 宽度设置为 MATCH_PARENT
+                    ActionBar.LayoutParams.MATCH_PARENT // 高度设置为 MATCH_PARENT
+            ));
             actionBar.show();
         }
+
+        // 设置返回按钮点击事件
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CreateLocation createFragment = new CreateLocation();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.home_fragment_container, createFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+    }
+    public void onPause() {
+        super.onPause();
+
+        // 获取ActionBar
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowCustomEnabled(false);
+            actionBar.setCustomView(null);
+            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
+            actionBar.show();
+        }
+
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.example.map_clock_api34.home;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.SharedViewModel;
+
 import android.content.ContentValues;
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -21,23 +23,30 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -60,6 +69,11 @@ public class CreateLocation extends Fragment {
     double latitudes;
     double longitudes;
     String uniqueID;
+
+    ActionBar actionBar;
+    private Toolbar toolbar;
+    private ActionBarDrawerToggle toggle;
+    private DrawerLayout drawerLayout;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     View rootView;
@@ -90,8 +104,17 @@ public class CreateLocation extends Fragment {
         //初始化路線表和功能表
         setupRecyclerViews();
 
+        //換頁回來再召喚漢堡選單
+        if (getActivity() != null) {
+            drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+            toolbar = requireActivity().findViewById(R.id.toolbar);
+        }
+
+
         return rootView;
     }
+
+
     //初始化按鈕(包含定位請求)
     private void setupButtons() {
         //新增地點按鈕初始化
@@ -116,7 +139,7 @@ public class CreateLocation extends Fragment {
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
-                Historynames=sharedViewModel.getDestinationName(0)+"->"+sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                Historynames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInHistoryDB();
 
@@ -157,24 +180,24 @@ public class CreateLocation extends Fragment {
 
     }
 
-    private void saveInHistoryDB(){
+    private void saveInHistoryDB() {
 
-        try{
+        try {
             SQLiteDatabase writeDB = dbHelper.getWritableDatabase();
             SQLiteDatabase readDB = dbHelper.getReadableDatabase();
 
-            Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[] {uniqueID});
+            Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[]{uniqueID});
 
 
             long currentTimeMillis = System.currentTimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String formattedDate = sdf.format(new Date(currentTimeMillis));
 
-            while(cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 if (Historynames != null) {
                     ContentValues values = new ContentValues();
                     values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
-                    values.put(HistoryTable.COLUMN_LOCATION_ID,cursor.getString(0));
+                    values.put(HistoryTable.COLUMN_LOCATION_ID, cursor.getString(0));
                     values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
                     writeDB.insert(HistoryTable.TABLE_NAME, null, values);
                 }
@@ -182,13 +205,12 @@ public class CreateLocation extends Fragment {
 
             writeDB.close();
             readDB.close();
-        }
-        catch(Exception e){
-            Log.d("DBProblem",e.getMessage());
+        } catch (Exception e) {
+            Log.d("DBProblem", e.getMessage());
         }
     }
 
-    private void saveInDB(){
+    private void saveInDB() {
         uniqueID = UUID.randomUUID().toString();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
@@ -216,6 +238,7 @@ public class CreateLocation extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
     //打開導航頁面
     private void openStartMappingFragment() {
         StartMapping StartMapping = new StartMapping();
@@ -224,13 +247,14 @@ public class CreateLocation extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
     //初始化漢堡選單
     private void setupNavigationDrawer() {
     }
+
     //ActionBar初始設定
     private void setupActionBar() {
-        //取消原本預設的ActionBar，為了之後自己的Bar創建用
-        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
             actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
@@ -278,6 +302,7 @@ public class CreateLocation extends Fragment {
             actionBar.show();
         }
     }
+
     //初始化設定表和功能表
     private void setupRecyclerViews() {
         // 初始化路線的表
@@ -299,6 +324,7 @@ public class CreateLocation extends Fragment {
         ListAdapterTool listAdapterTool = new ListAdapterTool(fragmentTransaction, sharedViewModel, weatherService, getActivity());
         recyclerViewTool.setAdapter(listAdapterTool);
     }
+
     //每次回到路線規劃都會重製路線表，不然會疊加
     private void RecycleViewReset() {
         //清除原本的表
@@ -323,6 +349,7 @@ public class CreateLocation extends Fragment {
         //設置重置按鈕的顏色和觸及狀態
         updateResetButtonState();
     }
+
     //按重置紐後PopupWindow跳出來的設定
     private void ShowPopupWindow() {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
@@ -365,6 +392,7 @@ public class CreateLocation extends Fragment {
             }
         });
     }
+
     //把疊加在底層的View刪掉
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {
@@ -372,13 +400,30 @@ public class CreateLocation extends Fragment {
             overlayView = null;
         }
     }
+
     //Fragment生命週期相關
     @Override
     public void onResume() {
         super.onResume();
         //重新更新RecycleView
         RecycleViewReset();
+
+        //換頁回來再召喚漢堡選單
+        if (actionBar != null) {
+            // Ensure drawerLayout is not null
+            if (drawerLayout != null) {
+                // Set up ActionBarDrawerToggle
+                if (toggle == null) {
+                    toggle = new ActionBarDrawerToggle(
+                            requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+                    drawerLayout.addDrawerListener(toggle);
+                    toggle.syncState();
+                }
+                toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+            }
+        }
     }
+
     // 更新重置按鈕的狀態
     private void updateResetButtonState() {
         if (sharedViewModel.getLocationCount() >= 0) {
