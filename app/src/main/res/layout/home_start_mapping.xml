@@ -30,6 +30,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginBottom="140dp"
             android:text="距離"
+            android:textColor="@color/green"
             android:textSize="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -50,6 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
+            android:textColor="@color/green"
             android:text=""
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/locatetionTitle" />

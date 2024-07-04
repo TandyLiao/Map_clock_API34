@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -25,11 +26,27 @@ import com.example.map_clock_api34.setting.SettingFragment;
 public class CreateBook extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.book_create, container, false);
+        setupActionBar();
         return view;
     }
     @Override
     public void onResume() {
         super.onResume();
+    }
+    public void onPause() {
+        super.onPause();
+
+        // 获取ActionBar
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowCustomEnabled(false);
+            actionBar.setCustomView(null);
+            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
+            actionBar.show();
+        }
+
+    }
+    private void setupActionBar() {
 
         // 建立CardView在toolbar
         CardView cardViewtitle = new CardView(requireContext());
@@ -113,7 +130,7 @@ public class CreateBook extends Fragment {
         actionBarLayout.addView(leftLayout);
         actionBarLayout.addView(rightLayout);
 
-        androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
+        Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
 
         // 获取ActionBar
@@ -139,18 +156,5 @@ public class CreateBook extends Fragment {
                 transaction.commit();
             }
         });
-    }
-    public void onPause() {
-        super.onPause();
-
-        // 获取ActionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowCustomEnabled(false);
-            actionBar.setCustomView(null);
-            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
-            actionBar.show();
-        }
-
     }
 }
