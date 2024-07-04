@@ -133,6 +133,8 @@ public class CreateLocation extends Fragment {
         //重置按鈕初始化
         btnReset = rootView.findViewById(R.id.btn_reset);
         btnReset.setOnClickListener(v -> ShowPopupWindow());
+
+
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
             //如有選擇地點就導航，沒有就跳提醒，加上吳俊廷的匯入資料庫的程式
@@ -188,10 +190,12 @@ public class CreateLocation extends Fragment {
 
             Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[]{uniqueID});
 
-
             long currentTimeMillis = System.currentTimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String formattedDate = sdf.format(new Date(currentTimeMillis));
+
+            //此變數要讓History的每筆路線都從0開始存入
+            int arranged_id_local=0;
 
             while (cursor.moveToNext()) {
                 if (Historynames != null) {
@@ -199,6 +203,8 @@ public class CreateLocation extends Fragment {
                     values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
                     values.put(HistoryTable.COLUMN_LOCATION_ID, cursor.getString(0));
                     values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
+                    //arranged_id_local存入History表後再+1
+                    values.put(HistoryTable.COLUMN_ARRANGED_ID, arranged_id_local++);
                     writeDB.insert(HistoryTable.TABLE_NAME, null, values);
                 }
             }
@@ -211,12 +217,19 @@ public class CreateLocation extends Fragment {
     }
 
     private void saveInDB() {
+
+        //產生一組獨一無二的ID存入區域變數內(重複機率近乎為0)
+        //用這ID去做Location_id和History做配對
         uniqueID = UUID.randomUUID().toString();
+
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
+
             String name = sharedViewModel.getDestinationName(i);
             double latitude = sharedViewModel.getLatitude(i);
             double longitude = sharedViewModel.getLongitude(i);
+
             if (name != null) {
                 ContentValues values = new ContentValues();
                 values.put(LocationTable.COLUMN_PLACE_NAME, name);
