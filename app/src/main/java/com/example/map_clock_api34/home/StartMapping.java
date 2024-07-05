@@ -3,11 +3,13 @@ package com.example.map_clock_api34.home;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.content.Context;
 
 import android.location.Location;
@@ -67,7 +69,59 @@ public class StartMapping extends Fragment {
     LatLngBounds.Builder builder;
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
-    View v;
+    View rootView;
+
+    @SuppressLint("MissingPermission")
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
+        rootView = inflater.inflate(R.layout.home_start_mapping, container, false);
+
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapp);
+
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+        txtTime = rootView.findViewById(R.id.txtTime);
+
+        setupButton();
+
+        resetNotificationSent();//設定組新增
+
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(callback);
+        }
+
+        for(j=0 ; j<=sharedViewModel.getLatitude(j) ; j++){
+            destinationName[j]=sharedViewModel.getDestinationName(j);
+            latitude[j]=sharedViewModel.getLatitude(j);
+            longitude[j]=sharedViewModel.getLongitude(j);
+        }
+
+        createNotificationChannel();//這行設定組新增
+        checkAndRequestPermissions();//這行設定組新增
+
+
+        return rootView;
+
+    }
+
+    private void setupButton() {
+        Button btnBack = rootView.findViewById(R.id.routeCancel);
+        btnBack.setOnClickListener(v -> {
+            CreateLocation createFragment = new CreateLocation();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.home_fragment_container, createFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+    }
+
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
@@ -221,7 +275,7 @@ public class StartMapping extends Fragment {
         popupWindow.setOutsideTouchable(false);
         popupWindow.setTouchable(true);
 
-        popupWindow.showAtLocation(v, Gravity.CENTER,0,0);
+        popupWindow.showAtLocation(rootView, Gravity.CENTER,0,0);
 
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
         BTNPopup.setOnClickListener(new View.OnClickListener() {
@@ -268,54 +322,6 @@ public class StartMapping extends Fragment {
 
     }
 
-
-    @SuppressLint("MissingPermission")
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
-        v = inflater.inflate(R.layout.home_start_mapping, container, false);
-
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapp);
-
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-        txtTime = v.findViewById(R.id.txtTime);
-
-        Button btnBack = v.findViewById(R.id.routeCancel);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.home_fragment_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        });
-        resetNotificationSent();//設定組新增
-
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(callback);
-        }
-
-        for(j=0 ; j<=sharedViewModel.getLatitude(j) ; j++){
-            destinationName[j]=sharedViewModel.getDestinationName(j);
-            latitude[j]=sharedViewModel.getLatitude(j);
-            longitude[j]=sharedViewModel.getLongitude(j);
-        }
-
-        createNotificationChannel();//這行設定組新增
-        checkAndRequestPermissions();//這行設定組新增
-
-        return v;
-
-    }
     private void checkAndRequestPermissions() {
         if(getActivity() != null){
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
@@ -345,6 +351,8 @@ public class StartMapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
+
+
 
 }
 /*@Override

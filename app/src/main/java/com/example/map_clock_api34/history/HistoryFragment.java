@@ -76,6 +76,10 @@ public class HistoryFragment extends Fragment {
             if (!isEdit) {
                 clearSelections();
             }
+            else{
+                listAdapterHistory.clearSelections();
+                updateButtonState();
+            }
         });
 
         // 清除資料庫按鈕
