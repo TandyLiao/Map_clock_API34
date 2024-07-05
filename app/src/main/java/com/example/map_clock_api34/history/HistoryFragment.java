@@ -101,9 +101,37 @@ public class HistoryFragment extends Fragment {
         btnSelect = rootView.findViewById(R.id.SelectButton);
         btnSelect.setOnClickListener(v -> {
             if (isDelete) {
-                ShowPopupWindow();
-            } else {
+                //ShowPopupWindow();
                 // 套用按鈕在這實現功能
+                // 獲取選中的項目
+                ArrayList<HashMap<String, String>> selectedItems = new ArrayList<>();
+                for (HashMap<String, String> item : arrayList) {
+                    if ("true".equals(item.get("isSelected"))) {
+                        selectedItems.add(item);
+                    }
+                }
+
+                // 從數據庫中刪除選中的項目
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                db.beginTransaction();
+                try {
+                    for (HashMap<String, String> item : selectedItems) {
+                        String placeName = item.get("placeName");
+                        db.execSQL("DELETE FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_ALARM_NAME + " = ?", new String[]{placeName});
+                    }
+                    db.setTransactionSuccessful();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    db.endTransaction();
+                    db.close();
+                }
+                // 從 arrayList 中刪除選中的項目
+                arrayList.removeAll(selectedItems);
+                listAdapterHistory.notifyDataSetChanged();
+
+            } else {
+
             }
         });
 
