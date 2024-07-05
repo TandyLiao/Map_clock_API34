@@ -61,7 +61,6 @@ public class HistoryFragment extends Fragment {
         setupActionBar();
         setupButtons();
         setupRecyclerViews();
-
         return rootView;
     }
 
@@ -76,6 +75,10 @@ public class HistoryFragment extends Fragment {
             listAdapterHistory.setEditMode(isEdit, isEdit);
             if (!isEdit) {
                 clearSelections();
+            }
+            else{
+                listAdapterHistory.clearSelections();
+                updateButtonState();
             }
         });
 
@@ -130,16 +133,14 @@ public class HistoryFragment extends Fragment {
         String lon;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM history", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM history WHERE arranged_id=0", null);
 
         if (cursor != null) {
 
             while (cursor.moveToNext()) {
-                Log.d("Test111",cursor.getString(0));
-                placeName = cursor.getString(0);
-                lan = cursor.getString(1);
-                lon=cursor.getString(2);
+                placeName = cursor.getString(2);
+                lan = cursor.getString(3);
+                lon=cursor.getString(4);
 
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName", placeName);
@@ -160,7 +161,7 @@ public class HistoryFragment extends Fragment {
         isEdit = false;
         //刪除按鈕有無出現的布林值
         isDelete = false;
-
+        Log.d("HistoryFragment", "onResume called");
         updateButtonState();
         RecycleViewReset();
     }

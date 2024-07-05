@@ -85,7 +85,7 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
         return arrayList.size(); // 返回數據集合的大小
     }
 
-    private void clearSelections() {
+    public void clearSelections() {
         for (HashMap<String, String> item : arrayList) {
             item.put("isSelected", "false");
         }
