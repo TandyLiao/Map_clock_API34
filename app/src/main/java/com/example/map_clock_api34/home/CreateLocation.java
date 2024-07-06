@@ -232,6 +232,8 @@ public class CreateLocation extends Fragment {
             String name = sharedViewModel.getDestinationName(i);
             double latitude = sharedViewModel.getLatitude(i);
             double longitude = sharedViewModel.getLongitude(i);
+            String CityName = sharedViewModel.getCapital(i);
+            String AreaName = sharedViewModel.getArea(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -239,6 +241,8 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_LATITUDE, latitude);
                 values.put(LocationTable.COLUMN_LONGITUDE, longitude);
                 values.put(LocationTable.COLUMN_ALARM_NAME, uniqueID);
+                values.put(LocationTable.COLUMN_CITY_NAME, CityName);
+                values.put(LocationTable.COLUMN_AREA_NAME, AreaName);
 
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
