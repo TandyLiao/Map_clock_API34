@@ -39,8 +39,7 @@ import java.util.HashMap;
 public class BookFragment extends Fragment {
 
     private Toolbar toolbar;
-    private ImageView addbook_imageView;
-    private ImageView usebook_imageView;
+    private ImageView createbook_imageView;
     private ImageView setbook_imageView;
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawerLayout;
@@ -58,13 +57,23 @@ public class BookFragment extends Fragment {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
         dbHelper= new BookDatabaseHelper(requireContext());
 
-        // Initialize ImageViews
-        addbook_imageView = rootView.findViewById(R.id.bookadd_imageView);
-        usebook_imageView = rootView.findViewById(R.id.bookuse_imageView);
+        setupActionBar();
+
+        createbook_imageView=rootView.findViewById(R.id.bookcreate_imageView);
         setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
 
         // Set click listeners for ImageViews
-        addbook_imageView.setOnClickListener(v -> {
+        createbook_imageView.setOnClickListener(v -> {
+            CreateBook createbook = new CreateBook();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, createbook);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+        });
+
+
+        setbook_imageView.setOnClickListener(v -> {
             CreateBook createbook = new CreateBook();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, createbook);
@@ -72,29 +81,16 @@ public class BookFragment extends Fragment {
             transaction.commit();
         });
 
-        usebook_imageView.setOnClickListener(v -> {
-            // Handle Use Bookmark click
-        });
 
-        setbook_imageView.setOnClickListener(v -> {
-            // Handle Set Bookmark click
-        });
 
-        // Initialize DrawerLayout
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+            toolbar = requireActivity().findViewById(R.id.toolbar);
         }
         dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
 
         return rootView;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        toolbar = requireActivity().findViewById(R.id.toolbar);
     }
 
     @Override
