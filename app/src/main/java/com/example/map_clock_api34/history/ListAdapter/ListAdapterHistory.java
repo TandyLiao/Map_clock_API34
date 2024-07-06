@@ -51,9 +51,10 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         HashMap<String, String> item = arrayList.get(position);
-        holder.RouteName.setText(item.get("placeName"));
-        holder.Latitude.setText(item.get("latitude"));
-        holder.Longitude.setText(item.get("longitude"));
+        holder.routeName.setText(item.get("placeName"));
+        holder.routeName2.setText(item.get("placeName2"));
+        holder.routeName3.setText(item.get("placeName3"));
+        holder.time.setText(item.get("time"));
 
         // 設置背景顏色
         if (item.getOrDefault("isSelected", "false").equals("true")) {
@@ -92,15 +93,15 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView RouteName;
-        TextView Latitude;
-        TextView Longitude;
+        TextView routeName, routeName2, routeName3;
+        TextView time;
 
         ViewHolder(View itemView) {
             super(itemView);
-            RouteName = itemView.findViewById(R.id.textRouteName);
-            Latitude = itemView.findViewById(R.id.textLantitude);
-            Longitude = itemView.findViewById(R.id.textLongtitude);
+            routeName = itemView.findViewById(R.id.textRouteName);
+            routeName2 = itemView.findViewById(R.id.textRouteName2);
+            routeName3 = itemView.findViewById(R.id.textRouteName3);
+            time = itemView.findViewById(R.id.textTime);
         }
     }
 }

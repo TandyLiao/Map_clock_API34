@@ -101,34 +101,8 @@ public class HistoryFragment extends Fragment {
         btnSelect = rootView.findViewById(R.id.SelectButton);
         btnSelect.setOnClickListener(v -> {
             if (isDelete) {
-                //ShowPopupWindow();
+                ShowPopupWindow();
                 // 套用按鈕在這實現功能
-                // 獲取選中的項目
-                ArrayList<HashMap<String, String>> selectedItems = new ArrayList<>();
-                for (HashMap<String, String> item : arrayList) {
-                    if ("true".equals(item.get("isSelected"))) {
-                        selectedItems.add(item);
-                    }
-                }
-
-                // 從數據庫中刪除選中的項目
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                db.beginTransaction();
-                try {
-                    for (HashMap<String, String> item : selectedItems) {
-                        String placeName = item.get("placeName");
-                        db.execSQL("DELETE FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_ALARM_NAME + " = ?", new String[]{placeName});
-                    }
-                    db.setTransactionSuccessful();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    db.endTransaction();
-                    db.close();
-                }
-                // 從 arrayList 中刪除選中的項目
-                arrayList.removeAll(selectedItems);
-                listAdapterHistory.notifyDataSetChanged();
 
             } else {
 
@@ -156,24 +130,36 @@ public class HistoryFragment extends Fragment {
     }
 
     private void addFromDB() {
-        String placeName;
-        String lan;
-        String lon;
+
+        String time;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM history WHERE arranged_id=0", null);
 
         if (cursor != null) {
-
             while (cursor.moveToNext()) {
-                placeName = cursor.getString(2);
-                lan = cursor.getString(3);
-                lon=cursor.getString(4);
+
+                String placeNameTemp = cursor.getString(2);
+                //找到"->"的位置
+                int index = placeNameTemp.indexOf("->");
+                //把"->"前的資料抓出來
+                String beforeArrow = placeNameTemp.substring(0,index);
+                if(beforeArrow.length()>20){
+                    beforeArrow=beforeArrow.substring(0,20)+"...";
+                }
+                //把"->"後的資料抓出來
+                String afterArrow = placeNameTemp.substring(index+2);
+                if(afterArrow.length()>20){
+                    afterArrow=afterArrow.substring(0,20)+"...";
+                }
+
+                time = cursor.getString(3);
 
                 HashMap<String, String> hashMap = new HashMap<>();
-                hashMap.put("placeName", placeName);
-                hashMap.put("latitude", lan);
-                hashMap.put("longitude", lon);
+                hashMap.put("placeName", beforeArrow);
+                hashMap.put("placeName2", "\u2193");
+                hashMap.put("placeName3", afterArrow);
+                hashMap.put("time", time);
                 arrayList.add(hashMap);
             }
             cursor.close();
@@ -338,7 +324,7 @@ public class HistoryFragment extends Fragment {
 
         // PopupWindow的文字顯示
         TextView warning = view.findViewById(R.id.txtNote);
-        warning.setText("功能還沒寫好喔，請參考全部刪除!");
+        warning.setText("資料即將刪除");
 
         // PopUpWindow的取消按鈕
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
@@ -349,33 +335,40 @@ public class HistoryFragment extends Fragment {
         });
 
         // PopupWindow的確認按鈕
-        /*Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
-            AppDatabaseHelper dbHelper = new AppDatabaseHelper(getActivity());
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            deleteFromDB();
 
-            for (HashMap<String, String> item : arrayList) {
-                if ("true".equals(item.get("isSelected"))) {
-                    toRemove.add(item);
-                    // 使用 SQL DELETE 語句刪除資料庫中的相應項目
-                    String alarm_name = item.get("alarm_name");
-                    db.execSQL("DELETE FROM history WHERE place_name = ?", new String[]{alarm_name});
-                }
-            }
-            db.close();
-            arrayList.removeAll(toRemove);
-            listAdapterHistory.notifyDataSetChanged();
-            removeOverlayView();
-            popupWindow.dismiss();
-            updateButtonState(); // 更新按鈕狀態
-            if (arrayList.isEmpty()) {
-                isEdit = false;
-                isDelete = false;
-                updateButtonState();
-            }
-        });*/
+        });
     }
 
+    private void deleteFromDB(){
+        ArrayList<HashMap<String, String>> selectedItems = new ArrayList<>();
+        for (HashMap<String, String> item : arrayList) {
+            if ("true".equals(item.get("isSelected"))) {
+                selectedItems.add(item);
+            }
+        }
+
+        // 從數據庫中刪除選中的項目
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (HashMap<String, String> item : selectedItems) {
+                String placeName = item.get("placeName");
+                db.execSQL("DELETE FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_ALARM_NAME + " = ?", new String[]{placeName});
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+        // 從 arrayList 中刪除選中的項目
+        arrayList.removeAll(selectedItems);
+        listAdapterHistory.notifyDataSetChanged();
+    }
     // 把疊加在底層的View刪掉
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {
