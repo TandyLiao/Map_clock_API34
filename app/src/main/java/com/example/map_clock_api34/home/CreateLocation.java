@@ -104,6 +104,8 @@ public class CreateLocation extends Fragment {
         //初始化路線表和功能表
         setupRecyclerViews();
 
+
+
         //換頁回來再召喚漢堡選單
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);

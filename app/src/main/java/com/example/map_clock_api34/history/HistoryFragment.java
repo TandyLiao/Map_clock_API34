@@ -37,6 +37,12 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.example.map_clock_api34.home.CreateLocation;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
+
 public class HistoryFragment extends Fragment {
 
     boolean isEdit, isDelete;
@@ -102,7 +108,7 @@ public class HistoryFragment extends Fragment {
         btnSelect.setOnClickListener(v -> {
             if (isDelete) {
                 //ShowPopupWindow();
-                // 套用按鈕在這實現功能
+
                 // 獲取選中的項目
                 ArrayList<HashMap<String, String>> selectedItems = new ArrayList<>();
                 for (HashMap<String, String> item : arrayList) {
@@ -131,8 +137,9 @@ public class HistoryFragment extends Fragment {
                 listAdapterHistory.notifyDataSetChanged();
 
             } else {
+                // 套用按鈕在這實現功能
 
-            }
+                }
         });
 
         updateButtonState(); // 初始化按鈕狀態
