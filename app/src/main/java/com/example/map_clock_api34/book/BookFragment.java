@@ -51,11 +51,12 @@ public class BookFragment extends Fragment {
     RecyclerView recyclerViewBook;
     ListAdapterHistory listAdapterBook;
 
-    private AppDatabaseHelper dbHelper;
+    private BookDatabaseHelper dbHelper;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
+        dbHelper= new BookDatabaseHelper(requireContext());
 
         // Initialize ImageViews
         addbook_imageView = rootView.findViewById(R.id.bookadd_imageView);
@@ -83,7 +84,7 @@ public class BookFragment extends Fragment {
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
         }
-        dbHelper = new AppDatabaseHelper(requireContext());
+        dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
 
         return rootView;
@@ -101,7 +102,8 @@ public class BookFragment extends Fragment {
         super.onResume();
         setupActionBar();
     }
-    private void setupActionBar(){
+
+    private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             // Ensure drawerLayout is not null
@@ -165,6 +167,7 @@ public class BookFragment extends Fragment {
             }
         }
     }
+
     private void setupRecyclerViews() {
         recyclerViewBook = rootView.findViewById(R.id.recycleView_book);
         recyclerViewBook.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -178,6 +181,7 @@ public class BookFragment extends Fragment {
     private void updateButtonState() {
         // 根據選擇狀態更新按鈕狀態
     }
+
     @Override
     public void onPause() {
         super.onPause();
