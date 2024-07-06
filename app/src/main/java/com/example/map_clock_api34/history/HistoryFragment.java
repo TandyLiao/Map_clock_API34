@@ -160,6 +160,7 @@ public class HistoryFragment extends Fragment {
         addFromDB();
         listAdapterHistory.notifyDataSetChanged();
         updateButtonState(); // 更新按鈕狀態
+
     }
 
     private void addFromDB() {
