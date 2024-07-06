@@ -45,6 +45,8 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycleviewitem_history, parent, false);
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        layoutParams.height = 400;
         return new ViewHolder(view);
     }
 

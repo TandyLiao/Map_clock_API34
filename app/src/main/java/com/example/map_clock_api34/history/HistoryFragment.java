@@ -174,8 +174,8 @@ public class HistoryFragment extends Fragment {
         if (cursor != null) {
 
             while (cursor.moveToNext()) {
-                placeName = cursor.getString(2);
-                lan = cursor.getString(3);
+                placeName = cursor.getString(3);
+                lan = cursor.getString(2);
                 lon=cursor.getString(4);
 
                 HashMap<String, String> hashMap = new HashMap<>();
