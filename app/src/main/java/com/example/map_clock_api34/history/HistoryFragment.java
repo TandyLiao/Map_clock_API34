@@ -137,11 +137,10 @@ public class HistoryFragment extends Fragment {
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM history WHERE arranged_id=0", null);
-
         if (cursor != null) {
             while (cursor.moveToNext()) {
 
-                String placeNameTemp = cursor.getString(2);
+                String placeNameTemp = cursor.getString(3);
                 //找到"->"的位置
                 int index = placeNameTemp.indexOf("->");
                 //把"->"前的資料抓出來
@@ -155,7 +154,7 @@ public class HistoryFragment extends Fragment {
                     afterArrow=afterArrow.substring(0,20)+"...";
                 }
 
-                time = cursor.getString(3);
+                time = cursor.getString(1);
 
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName", beforeArrow);
