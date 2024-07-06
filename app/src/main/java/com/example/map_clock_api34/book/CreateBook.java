@@ -21,11 +21,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.map_clock_api34.R;
-import com.example.map_clock_api34.setting.SettingFragment;
 
 public class CreateBook extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.book_create, container, false);
+        View view = inflater.inflate(R.layout.book_set, container, false);
         setupActionBar();
         return view;
     }
