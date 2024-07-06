@@ -104,6 +104,8 @@ public class CreateLocation extends Fragment {
         //初始化路線表和功能表
         setupRecyclerViews();
 
+
+
         //換頁回來再召喚漢堡選單
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
@@ -200,9 +202,10 @@ public class CreateLocation extends Fragment {
             while (cursor.moveToNext()) {
                 if (Historynames != null) {
                     ContentValues values = new ContentValues();
+                    values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
                     values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
                     values.put(HistoryTable.COLUMN_LOCATION_ID, cursor.getString(0));
-                    values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
+
                     //arranged_id_local存入History表後再+1
                     values.put(HistoryTable.COLUMN_ARRANGED_ID, arranged_id_local++);
                     writeDB.insert(HistoryTable.TABLE_NAME, null, values);

@@ -105,8 +105,9 @@ public class HistoryFragment extends Fragment {
                 // 套用按鈕在這實現功能
 
             } else {
+                // 套用按鈕在這實現功能
 
-            }
+                }
         });
 
         updateButtonState(); // 初始化按鈕狀態
@@ -127,6 +128,7 @@ public class HistoryFragment extends Fragment {
         addFromDB();
         listAdapterHistory.notifyDataSetChanged();
         updateButtonState(); // 更新按鈕狀態
+
     }
 
     private void addFromDB() {

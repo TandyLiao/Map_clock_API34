@@ -7,8 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
-    private static final int DATABASE_VERSION = 7;
-
+    private static final int DATABASE_VERSION = 9;
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -50,9 +49,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     public static class HistoryTable {
         public static final String TABLE_NAME = "history";
         public static final String COLUMN_ROUTE_ID = "route_id";
+        public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_LOCATION_ID = "location_id";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
-        public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_ARRANGED_ID = "arranged_id";
         public static final String COLUMN_NOTE_ID = "note_id";
         public static final String COLUMN_SETTING_ID = "setting_id";
@@ -61,9 +60,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
                 "CREATE TABLE " + TABLE_NAME + "("
                         + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
+                        + COLUMN_START_TIME + " DATETIME,"
                         + COLUMN_LOCATION_ID + " INTEGER,"
                         + COLUMN_ALARM_NAME + " TEXT,"
-                        + COLUMN_START_TIME + " DATETIME,"
                         + COLUMN_ARRANGED_ID + " TEXT,"
                         + COLUMN_NOTE_ID + " INTEGER,"
                         + COLUMN_SETTING_ID + " INTEGER,"
@@ -80,6 +79,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LATITUDE = "latitude";
         public static final String COLUMN_PLACE_NAME = "place_name";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
+        public static final String COLUMN_CITY_NAME = "city_name";
+        public static final String COLUMN_AREA_NAME = "area_name";
 
 
 
@@ -89,7 +90,9 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_LONGITUDE + " REAL,"
                         + COLUMN_LATITUDE + " REAL,"
                         + COLUMN_PLACE_NAME + " TEXT,"
-                        + COLUMN_ALARM_NAME + " TEXT"
+                        + COLUMN_ALARM_NAME + " TEXT,"
+                        + COLUMN_CITY_NAME + " TEXT,"
+                        + COLUMN_AREA_NAME + " TEXT"
                         + ")";
     }
 
