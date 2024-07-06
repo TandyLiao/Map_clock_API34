@@ -38,7 +38,7 @@
             android:layout_weight="6"
             android:gravity="center_horizontal"
             android:padding="5dp"
-            android:text="歷史名稱"
+            android:text="紀錄名稱"
             android:textColor="@color/black"
             android:textSize="20dp" />
     </LinearLayout>
