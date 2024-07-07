@@ -39,6 +39,7 @@ import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
 import com.example.map_clock_api34.home.CreateLocation;
+import com.example.map_clock_api34.home.HomeFragment;
 import com.example.map_clock_api34.home.StartMapping;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -466,7 +467,7 @@ public class HistoryFragment extends Fragment {
     }
     //打開導航頁面
     private void openCreaLocationFragment() {
-        CreateLocation createLocationFragment = new CreateLocation();
+        HomeFragment createLocationFragment = new HomeFragment();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_container, createLocationFragment); // 確保R.id.fl_container是你的Fragment容器ID
         transaction.addToBackStack(null);
