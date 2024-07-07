@@ -1,6 +1,5 @@
-package com.example.map_clock_api34.note;
+package com.example.map_clock_api34.Weather;
 
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -15,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -27,23 +25,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.book.BookFragment;
-import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.Weather.ListAdapter.ListAdapterWeather;
 import com.example.map_clock_api34.home.CreateLocation;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
-import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Note extends Fragment {
-
+public class WheatherFragment extends Fragment {
     View rootView;
 
     SharedViewModel sharedViewModel;
-    RecyclerView recyclerViewRoute;
-    ListAdapterRoute listAdapterRoute;
+    RecyclerView recyclerViewWeather;
+    ListAdapterWeather listAdapterWeather;
+
+    WeatherService weatherService = new WeatherService();
+    private TextView weatherInfoTextView;
 
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
@@ -51,7 +48,8 @@ public class Note extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.note_fragment_note, container, false);
+        rootView = inflater.inflate(R.layout.weather_fragment_weather, container, false);
+        weatherInfoTextView = rootView.findViewById(R.id.text_wheather);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -79,7 +77,7 @@ public class Note extends Fragment {
 
         // ImageView放置圖案
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.anya062516);
+        mark.setImageResource(R.drawable.weather);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
@@ -89,7 +87,7 @@ public class Note extends Fragment {
 
         // 創建TextView
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("記事");
+        bookTitle.setText("天氣");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
@@ -158,7 +156,6 @@ public class Note extends Fragment {
             actionBar.show();
         }
 
-        // 设置返回按钮点击事件
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -209,17 +206,16 @@ public class Note extends Fragment {
             }
         }
         //套用更新
-        listAdapterRoute.notifyDataSetChanged();
+        listAdapterWeather.notifyDataSetChanged();
 
     }
     //初始化設定表和功能表
     private void setupRecyclerViews() {
         // 初始化路線的表
-        recyclerViewRoute = rootView.findViewById(R.id.recycleViewnote);
-        recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, false); // 禁用拖動功能，啟用單選功能
-        recyclerViewRoute.setAdapter(listAdapterRoute);
+        recyclerViewWeather = rootView.findViewById(R.id.recycleView_wheather);
+        recyclerViewWeather.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewWeather.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        listAdapterWeather = new ListAdapterWeather(arrayList, sharedViewModel, weatherService, getActivity()); // 禁用拖動功能，啟用單選功能
+        recyclerViewWeather.setAdapter(listAdapterWeather);
     }
-
 }

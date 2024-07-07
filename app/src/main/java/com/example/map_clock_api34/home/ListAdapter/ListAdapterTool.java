@@ -18,6 +18,7 @@ import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
 import com.example.map_clock_api34.Weather.WeatherService;
+import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.note.Note;
 
 import java.util.ArrayList;
@@ -85,7 +86,11 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 Toast.makeText(context,"你還沒有選擇地點喔",Toast.LENGTH_SHORT).show();
                 return;
             }
-            weatherAdviceHelper.getWeatherAdvice(view);
+            //weatherAdviceHelper.getWeatherAdvice(view);
+            WheatherFragment  wheatherfragment= new WheatherFragment();
+            fragmentTransaction.replace(R.id.home_fragment_container, wheatherfragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
         }
         else if (position == 3) {
             if(sharedViewModel.getLocationCount()==-1){
@@ -131,7 +136,6 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         } else if (data.equals("鈴聲")) {
             holder.horecycleimageView.setImageResource(R.drawable.bell);
         }
-        // 可以继续添加其他条目的处理逻辑
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

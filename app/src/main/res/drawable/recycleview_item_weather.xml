@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 圆角边框 -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" /> <!-- 设置圆角半径 -->
+            <stroke
+                android:width="2dp"
+                android:color="@color/darkyellow"
+                />
+        </shape>
+    </item>
+    <item >
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" /> <!-- 设置圆角半径 -->
+            <solid android:color="@color/white" />
+        </shape>
+    </item>
+</layer-list>

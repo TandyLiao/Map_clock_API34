@@ -2,23 +2,15 @@ package com.example.map_clock_api34.Weather;
 
 import android.content.Context;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WeatherAdviceHelper {
@@ -26,8 +18,6 @@ public class WeatherAdviceHelper {
     private SharedViewModel sharedViewModel;
     private WeatherService weatherService;
     private Context context;
-    private View overlayView;
-    private  StringBuilder weatherSuggestions;
 
     public WeatherAdviceHelper(SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.sharedViewModel = sharedViewModel;
@@ -35,27 +25,40 @@ public class WeatherAdviceHelper {
         this.context = context;
     }
 
-    public void getWeatherAdvice(View view) {
+    public void getWeatherAdvice(int index, WeatherAdviceCallback callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    weatherSuggestions = new StringBuilder();
+                    String capital = sharedViewModel.getCapital(index);
+                    String area = sharedViewModel.getArea(index);
+                    String weatherJson = weatherService.getWeather(capital, area);
+                    // 確保這裡傳遞的是正確的 Context 對象
+                    String[] advice = WeatherService.getAdvice(capital, weatherJson, context);
 
-                    for (int x = 0; x <= sharedViewModel.getLocationCount(); x++) {
+                    //advice存的資料分別放到List<String>到時候分別傳到各自的textview 摁對我目前只想到這方法
+                    List<String> locationAdvices = new ArrayList<>();
+                    locationAdvices.add(sharedViewModel.getDestinationName(index));
 
-                        String weatherJson = weatherService.getWeather(sharedViewModel.getCapital(x), sharedViewModel.getArea(x));
-                        List<String> advices = Collections.singletonList(WeatherService.getAdvice(sharedViewModel.getCapital(x), weatherJson));
-
-                        for (String advice : advices) {
-                            weatherSuggestions.append(sharedViewModel.getDestinationName(x)).append("：").append(advice).append("\n");
-                        }
+                    List<String> descriptionAdvices = new ArrayList<>();
+                    if (advice.length > 1) {
+                        descriptionAdvices.add("\n" + advice[1]+ "\n"+advice[2]);
                     }
+
+                    List<String> temperatureAdvices = new ArrayList<>();
+                    temperatureAdvices.add(advice[0]);
+
+                    List<String> imageAdvices = new ArrayList<>();
+                    imageAdvices.add(advice[3]);
+
+
+
                     if (context instanceof FragmentActivity) {
                         ((FragmentActivity) context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showRainyLocations(view, sharedViewModel);
+                                Log.d("WeatherAdviceHelper", "Weather Advice Received: " + descriptionAdvices+temperatureAdvices);
+                                callback.onWeatherAdviceReceived(locationAdvices,descriptionAdvices,temperatureAdvices,imageAdvices);
                             }
                         });
                     }
@@ -74,65 +77,9 @@ public class WeatherAdviceHelper {
             }
         }).start();
     }
-    //顯示各地天氣
-    private void showRainyLocations(View view, SharedViewModel sharedViewModel) {
 
-        if(sharedViewModel.getCapital(0)!=null){
-            //呼叫PopupWindow顯示天氣
-            weatherPopWindow(view, sharedViewModel);
-        }
-        else {
-            Toast.makeText(context, "你還沒有選擇地區喔", Toast.LENGTH_SHORT).show();
-        }
+    public interface WeatherAdviceCallback {
+        void onWeatherAdviceReceived( List<String> locationAdvices,List<String> descriptionAdvices, List<String> temperatureAdvices,List<String> imageAdvices);
     }
 
-    public void weatherPopWindow(View v, SharedViewModel sharedViewModel) {
-
-        View view = LayoutInflater.from(context).inflate(R.layout.popupwindow_weather, null, false);
-        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setWidth(700);
-        popupWindow.setFocusable(false);
-        popupWindow.setOutsideTouchable(false);
-
-        TextView weatherInfoTextView = view.findViewById(R.id.txtWeatherNote);
-
-        //疊加View在底下，讓她不會按到底層就跳掉
-        overlayView = new View(context);
-        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
-        overlayView.setClickable(true);
-        ((ViewGroup) ((FragmentActivity) context).findViewById(android.R.id.content)).addView(overlayView);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                ((FragmentActivity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 將天氣資訊顯示在 TextView 中
-                        weatherInfoTextView.setText(weatherSuggestions);
-                        // 設置取消按鈕的點擊事件
-                        Button btnCancel = view.findViewById(R.id.PopupYes);
-                        btnCancel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                popupWindow.dismiss();
-                                removeOverlayView();
-                            }
-                        });
-                        // 顯示彈出視窗
-                        popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
-                    }
-                });
-            }
-        }).start();
-    }
-    //把疊加在底層的View刪掉
-    private void removeOverlayView() {
-        if (overlayView != null && overlayView.getParent() != null) {
-            ((ViewGroup) overlayView.getParent()).removeView(overlayView);
-            overlayView = null;
-        }
-    }
 }
