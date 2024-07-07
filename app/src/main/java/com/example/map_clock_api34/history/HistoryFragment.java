@@ -1,9 +1,13 @@
 package com.example.map_clock_api34.history;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,15 +26,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
+import com.example.map_clock_api34.home.CreateLocation;
+import com.example.map_clock_api34.home.StartMapping;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationView;
+
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -49,14 +63,20 @@ public class HistoryFragment extends Fragment {
     ListAdapterHistory listAdapterHistory;
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
     ArrayList<HashMap<String, String>> toRemove = new ArrayList<>();
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    SharedViewModel sharedViewModel;
 
     private AppDatabaseHelper dbHelper;
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
+
         dbHelper= new AppDatabaseHelper(requireContext());
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         setupActionBar();
         setupButtons();
@@ -102,12 +122,18 @@ public class HistoryFragment extends Fragment {
         btnSelect.setOnClickListener(v -> {
             if (isDelete) {
                 ShowPopupWindow();
-                // 套用按鈕在這實現功能
 
             } else {
-                // 套用按鈕在這實現功能
-
+                //如果他沒同意定位需求則跳else叫他打開
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    // 套用按鈕在這實現功能
+                    saveInShareviewModel();
+                } else {
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                    Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
                 }
+
+            }
         });
 
         updateButtonState(); // 初始化按鈕狀態
@@ -305,6 +331,63 @@ public class HistoryFragment extends Fragment {
         updateButtonState(); // 更新按鈕狀態
     }
 
+    private void saveInShareviewModel() {
+        sharedViewModel.clearAll();
+        String time="";
+        for (HashMap<String, String> item : arrayList) {
+            if ("true".equals(item.get("isSelected"))) {
+                time = item.get("time");
+            }
+        }
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
+        db.beginTransaction();
+        try {
+            while (cursor.moveToNext()){
+                String locationId = cursor.getString(0);
+                Cursor locationCursor = db.rawQuery("SELECT * FROM " + AppDatabaseHelper.LocationTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                if (locationCursor.moveToFirst()) {
+                    String placeName = locationCursor.getString(3);
+                    Double latitude = locationCursor.getDouble(2);
+                    Double longitude = locationCursor.getDouble(1);
+                    String city = locationCursor.getString(5);
+                    String area = locationCursor.getString(6);
+
+                    sharedViewModel.setDestination(placeName, latitude, longitude);
+                    sharedViewModel.setCapital(city);
+                    sharedViewModel.setArea(area);
+                    getLastKnownLocation();
+                }
+                locationCursor.close();
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+        openCreaLocationFragment();
+    }
+    @SuppressLint("MissingPermission")
+    private void getLastKnownLocation() {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            sharedViewModel.setnowLocation(location.getLatitude(),location.getLongitude());
+                            // Logic to handle location object
+                            Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
+                        } else {
+                            Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
     private void ShowPopupWindow() {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
@@ -339,7 +422,18 @@ public class HistoryFragment extends Fragment {
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
             deleteFromDB();
+            popupWindow.dismiss();
+            removeOverlayView();
+            updateButtonState();
 
+            // 檢查是否已經全部刪除，如果是則設置按鈕狀態為 "套用" 和 "編輯"
+            if (arrayList.isEmpty()) {
+                isEdit = false;
+                isDelete = false;
+            }
+
+            // 再次更新按鈕狀態以反映更改
+            updateButtonState();
         });
     }
 
@@ -356,8 +450,8 @@ public class HistoryFragment extends Fragment {
         db.beginTransaction();
         try {
             for (HashMap<String, String> item : selectedItems) {
-                String placeName = item.get("placeName");
-                db.execSQL("DELETE FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_ALARM_NAME + " = ?", new String[]{placeName});
+                String time = item.get("time");
+                db.execSQL("DELETE FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
             }
             db.setTransactionSuccessful();
         } catch (Exception e) {
@@ -369,6 +463,17 @@ public class HistoryFragment extends Fragment {
         // 從 arrayList 中刪除選中的項目
         arrayList.removeAll(selectedItems);
         listAdapterHistory.notifyDataSetChanged();
+    }
+    //打開導航頁面
+    private void openCreaLocationFragment() {
+        CreateLocation createLocationFragment = new CreateLocation();
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fl_container, createLocationFragment); // 確保R.id.fl_container是你的Fragment容器ID
+        transaction.addToBackStack(null);
+        transaction.commit();
+
+        NavigationView navigationView = getActivity().findViewById(R.id.navigation_view);
+        navigationView.setCheckedItem(R.id.action_home);
     }
     // 把疊加在底層的View刪掉
     private void removeOverlayView() {

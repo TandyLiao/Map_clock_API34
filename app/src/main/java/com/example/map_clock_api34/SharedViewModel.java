@@ -82,6 +82,18 @@ public class SharedViewModel extends ViewModel {
         locationCount--;
     }
 
+    public void clearAll(){
+        locationCount = -1;
+        destinationName = new String[7];
+        destinationCapital = new String[7];
+        destinationArea = new String[7];
+        latitude = new double[7];
+        longitude = new double[7];
+        nowLantitude = 0;
+        nowLontitude = 0;
+
+    }
+
     public int getLocationCount() {
         return locationCount;
     }
