@@ -25,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,6 +42,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.Weather.WeatherService;
+import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
@@ -57,13 +57,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 
 public class CreateLocation extends Fragment {
 
-    private AppDatabaseHelper dbHelper;
+    private AppDatabaseHelper dbHistoryHelper;
+
     String names;
     String Historynames;
     double latitudes;
@@ -92,7 +91,8 @@ public class CreateLocation extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
 
-        dbHelper = new AppDatabaseHelper(requireContext());
+        dbHistoryHelper = new AppDatabaseHelper(requireContext());
+
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         //初始化ActionBar
@@ -187,8 +187,8 @@ public class CreateLocation extends Fragment {
     private void saveInHistoryDB() {
 
         try {
-            SQLiteDatabase writeDB = dbHelper.getWritableDatabase();
-            SQLiteDatabase readDB = dbHelper.getReadableDatabase();
+            SQLiteDatabase writeDB = dbHistoryHelper.getWritableDatabase();
+            SQLiteDatabase readDB = dbHistoryHelper.getReadableDatabase();
 
             Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[]{uniqueID});
 
@@ -225,7 +225,7 @@ public class CreateLocation extends Fragment {
         //用這ID去做Location_id和History做配對
         uniqueID = UUID.randomUUID().toString();
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHistoryHelper.getWritableDatabase();
 
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
 

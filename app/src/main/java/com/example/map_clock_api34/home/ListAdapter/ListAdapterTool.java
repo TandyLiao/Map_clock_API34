@@ -1,5 +1,7 @@
 package com.example.map_clock_api34.home.ListAdapter;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,11 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.map_clock_api34.BusAdvice.BusStationFinderHelper;
+import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
 import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
+import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
 
 import java.util.ArrayList;
@@ -29,15 +33,16 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     private ArrayList<HashMap<String, String>> arrayList;
     private FragmentTransaction fragmentTransaction;
     private WeatherAdviceHelper weatherAdviceHelper;
-    private BusStationFinderHelper stationFinder;
     private SharedViewModel sharedViewModel;
+
+    private BookDatabaseHelper dbBookHelper;
 
     public ListAdapterTool(FragmentTransaction fragmentTransaction, SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.fragmentTransaction = fragmentTransaction;
         this.arrayList = new ArrayList<>();
         this.weatherAdviceHelper = new WeatherAdviceHelper(sharedViewModel, weatherService, context);
-        this.stationFinder = new BusStationFinderHelper(context,sharedViewModel);
         this.sharedViewModel=sharedViewModel;
+        dbBookHelper = new BookDatabaseHelper(context);
         initData();
     }
 
@@ -97,7 +102,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 Toast.makeText(context,"你還沒有選擇地點喔",Toast.LENGTH_SHORT).show();
                 return;
             }
-            stationFinder.findNearbyStations(view);
+            busMapsFragment busfragment= new busMapsFragment();
+            fragmentTransaction.replace(R.id.home_fragment_container, busfragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
         }
 
         else if (position == 4) {

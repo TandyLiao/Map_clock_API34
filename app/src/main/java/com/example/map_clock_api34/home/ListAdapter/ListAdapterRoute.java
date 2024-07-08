@@ -94,7 +94,7 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
-
+        
         if (!enableDrag) {
             // 設置選擇狀態的背景顏色和圖標變化
             if (position == selectedPosition) {
