@@ -123,13 +123,13 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             holder.horecycleimageView.setImageResource(R.drawable.note);
         }
         else if (data.equals("加入書籤")) {
-            holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+            holder.horecycleimageView.setImageResource(R.drawable.addbookmark);
         }
         else if (data.equals("天氣")) {
             holder.horecycleimageView.setImageResource(R.drawable.weather);
         }
         else if (data.equals("推薦路線")) {
-            holder.horecycleimageView.setImageResource(R.drawable.anya062516);
+            holder.horecycleimageView.setImageResource(R.drawable.route_well2);
         }
         else if (data.equals("震動")) {
             holder.horecycleimageView.setImageResource(R.drawable.vibrate);
