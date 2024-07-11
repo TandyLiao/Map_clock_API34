@@ -13,10 +13,8 @@
         android:layout_height="353dp"
         android:layout_marginStart="4dp"
         android:background="@drawable/recyclerview"
-        app:layout_constraintBottom_toTopOf="@+id/btn_addnote"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btn_reset"
@@ -49,17 +47,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.966"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:id="@+id/btn_addnote"
-        android:layout_width="112dp"
-        android:layout_height="80dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
-        android:padding="10dp"
-        android:scaleType="centerInside"
-        app:layout_constraintBottom_toTopOf="@+id/btn_note"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/_0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

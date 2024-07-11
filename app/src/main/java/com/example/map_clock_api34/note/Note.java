@@ -1,6 +1,5 @@
 package com.example.map_clock_api34.note;
 
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -15,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -27,12 +25,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.book.BookFragment;
-import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.home.CreateLocation;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
-import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
+import com.example.map_clock_api34.home.SelectPlace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,6 +82,9 @@ public class Note extends Fragment {
         params.setMarginStart(10); // 设置左边距
         mark.setLayoutParams(params);
 
+
+
+
         // 創建TextView
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("記事");
@@ -107,6 +105,7 @@ public class Note extends Fragment {
                 100 // 设置高度为 100 像素
         );
         returnButton.setLayoutParams(returnButtonParams);
+
 
         // 建立ActionBar的父LinearLayout
         LinearLayout actionBarLayout = new LinearLayout(requireContext());
@@ -212,6 +211,18 @@ public class Note extends Fragment {
         listAdapterRoute.notifyDataSetChanged();
 
     }
+
+    //換頁
+    // 跳到記事Fragment
+    // 獲取 FragmentManager
+    private void openWritingFragment() {
+        NoteEnterContent noteEnterContent = new NoteEnterContent();
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.home_fragment_container, noteEnterContent);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
     //初始化設定表和功能表
     private void setupRecyclerViews() {
         // 初始化路線的表

@@ -28,7 +28,7 @@ import com.example.map_clock_api34.note.Note;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHolder> {
+public class  ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHolder> {
 
     private ArrayList<HashMap<String, String>> arrayList;
     private FragmentTransaction fragmentTransaction;
