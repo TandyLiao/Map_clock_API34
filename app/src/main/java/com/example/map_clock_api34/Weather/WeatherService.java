@@ -1,13 +1,16 @@
 package com.example.map_clock_api34.Weather;
 
+import android.content.Context;
 import android.net.Uri;
-import android.widget.Toast;
+import android.util.Log;
+
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -50,22 +53,23 @@ public class WeatherService {
         }
     }
 
-    public static String getAdvice(String capital, String jsonResponse) {
+    public static String[] getAdvice(String capital, String jsonResponse, Context context) {
 
         try {
-            if(capital.equals("金門縣") || capital.equals("連江縣")){
-                return getSpecialRegionAdvice(jsonResponse);
+            if (capital.equals("金門縣") || capital.equals("連江縣")) {
+                return getSpecialRegionAdvice(jsonResponse, context);
             }
             JSONObject jsonObject = new JSONObject(jsonResponse);
             JSONArray locationsArray = jsonObject.getJSONObject("records").getJSONArray("locations");
 
             if (locationsArray.length() == 0) {
-                return "找不到該地區的天氣資訊";
+                return new String[]{"找不到該地區的天氣資訊"};
             }
 
 
             String weatherDescription = "";
             int rainProbability = -1;
+            int temperature = -1;
 
             //去Json檔抓資料
             for (int i = 0; i < locationsArray.length(); i++) {
@@ -76,9 +80,20 @@ public class WeatherService {
                 //抓鄉鎮市區的名字
                 JSONArray locationArray = locations.getJSONArray("location");
 
+
                 for (int k = 0; k < locationArray.length(); k++) {
                     JSONObject location = locationArray.getJSONObject(k);
                     JSONArray weatherElements = location.getJSONArray("weatherElement");
+
+                    //找氣溫
+                    for (int j = 0; j < weatherElements.length(); j++) {
+                        JSONObject element = weatherElements.getJSONObject(j);
+                        if (element.getString("elementName").equals("T")) {
+                            temperature = element.getJSONArray("time").getJSONObject(0).getJSONArray("elementValue").getJSONObject(0).getInt("value");
+                            System.out.println(temperature + "度 ");
+                            break;
+                        }
+                    }
 
                     // 找降雨機率
                     for (int j = 0; j < weatherElements.length(); j++) {
@@ -100,66 +115,88 @@ public class WeatherService {
                         }
                     }
 
-                    // 根據天氣描述和降雨機率給出建議
-                    if (weatherDescription.contains("雨") && rainProbability >= 40) {
-                        return " 降雨概率為" + rainProbability + "，建議攜帶雨傘";
-                    }else{
-                        return "天氣良好";
-                    }
+
+                    //把上面資料分別存到result
+                    String[] result = new String[4];
+                    result[0] = temperature + "˚C";
+                    result[1] = "降雨概率為" + rainProbability;
+                    result[2] = (weatherDescription.contains("雨") && rainProbability >= 40) ? weatherDescription + "\n" + "建議攜帶雨傘" : weatherDescription;
+                   //存狀態判斷天氣改變背景
+                    result[3] = (weatherDescription.contains("雨") && rainProbability >= 40) ? "rain" : "sun";
+                    return result;
+
                 }
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception: " + e.getMessage());
-            return "無法獲取天氣建議";
+            return new String[]{"找不到該地區的天氣資訊"};
         }
         return null;
     }
 
-    private static String getSpecialRegionAdvice(String jsonResponse) {
+    private static String[] getSpecialRegionAdvice(String jsonResponse, Context context) {
+        String[] result = new String[4];
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
             JSONArray locationArray = jsonObject.getJSONObject("records").getJSONArray("location");
 
             if (locationArray.length() == 0) {
-                return "找不到該地區的天氣資訊";
+                return new String[]{"找不到該地區的天氣資訊"};
             }
 
-            String weatherDescription = "";
+            String weatherDescription = "未知天氣描述";
             int rainProbability = -1;
+            int temperature = -1;
 
             for (int i = 0; i < locationArray.length(); i++) {
                 JSONObject location = locationArray.getJSONObject(i);
-                String cityName = location.getString("locationName");
                 JSONArray weatherElements = location.getJSONArray("weatherElement");
 
+                //沒有氣溫只好找最高氣溫
+                for (int j = 0; j < weatherElements.length(); j++) {
+                    JSONObject element = weatherElements.getJSONObject(j);
+                    if (element.getString("elementName").equals("MaxT")) {
+                        temperature = element.getJSONArray("time").getJSONObject(0).getJSONObject("parameter").getInt("parameterName");
+                        System.out.println(temperature + "度 ");
+                        break;
+                    }
+                }
                 for (int j = 0; j < weatherElements.length(); j++) {
                     JSONObject element = weatherElements.getJSONObject(j);
                     if (element.getString("elementName").equals("PoP")) {
                         rainProbability = element.getJSONArray("time").getJSONObject(0).getJSONObject("parameter").getInt("parameterName");
                         System.out.println("Rain Probability: " + rainProbability);
+                        break;
                     }
-
+                }
+                for (int j = 0; j < weatherElements.length(); j++) {
+                    JSONObject element = weatherElements.getJSONObject(j);
                     if (element.getString("elementName").equals("Wx")) {
                         weatherDescription = element.getJSONArray("time").getJSONObject(0).getJSONObject("parameter").getString("parameterName");
                         System.out.println("Weather Description: " + weatherDescription);
+                        break;
                     }
                 }
 
-                if (weatherDescription.contains("雨") && rainProbability >= 40) {
-                    return "降雨概率為" + rainProbability + "，建議攜帶雨傘";
-                } else {
-                    return "天氣良好";
-                }
+                result[0] = (temperature != -1) ? temperature + "˚C" : "?˚C";
+                result[1] = (rainProbability != -1) ? "降雨概率為" + rainProbability : "未知降雨概率";
+                result[2] = (weatherDescription.contains("雨") && rainProbability >= 40) ? weatherDescription + "\n" + "建議攜帶雨傘" : weatherDescription;
+                result[3] = (weatherDescription.contains("雨") && rainProbability >= 40) ? "rain" : "sun";
+
+                return result;
             }
-        } catch (Exception e) {
+        } catch (JSONException e) {
             e.printStackTrace();
-            System.out.println("Exception: " + e.getMessage());
-            return "無法獲取天氣建議";
+            result[0] = "未知温度1";
+            result[1] = "未知降雨概率2";
+            result[2] = "未知天氣描述3";
+            result[3] = "default";
+            return result;
         }
-        return "無法獲取天氣建議";
+        return new String[]{"無法獲取天氣建議"};
     }
+
 
 }

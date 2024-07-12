@@ -3,7 +3,6 @@ package com.example.map_clock_api34.book;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.example.map_clock_api34.SharedViewModel;
 import android.content.ContentValues;
 
 public class BookDatabaseHelper extends SQLiteOpenHelper {
@@ -20,6 +19,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(LocationTable.CREATE_TABLE);
         db.execSQL(NoteTable.CREATE_TABLE);
         db.execSQL(SettingTable.CREATE_TABLE);
+        db.execSQL(BookTable.CREATE_TABLE);
     }
 
     @Override
@@ -48,8 +48,16 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void addBookmark(String alarmName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(BookTable.COLUMN_ALARM_NAME, alarmName);
+        db.insert(BookTable.TABLE_NAME, null, values);
+        db.close();
+    }
+
     public static class BookTable {
-        public static final String TABLE_NAME = "history";
+        public static final String TABLE_NAME = "book";
         public static final String COLUMN_ROUTE_ID = "route_id";
         public static final String COLUMN_LOCATION_ID = "location_id";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
@@ -58,18 +66,16 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_SETTING_ID = "setting_id";
 
         public static final String CREATE_TABLE =
-
-                "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
-                        + COLUMN_LOCATION_ID + " INTEGER,"
-                        + COLUMN_ALARM_NAME + " TEXT,"
-                        + COLUMN_START_TIME + " DATETIME,"
-                        + COLUMN_NOTE_ID + " INTEGER,"
-                        + COLUMN_SETTING_ID + " INTEGER,"
-                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "),"
-                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "),"
-                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + ")"
-                        + ")";
+                "CREATE TABLE " + TABLE_NAME + " ("
+                        + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY, "
+                        + COLUMN_LOCATION_ID + " INTEGER, "
+                        + COLUMN_ALARM_NAME + " TEXT, "
+                        + COLUMN_START_TIME + " DATETIME, "
+                        + COLUMN_NOTE_ID + " INTEGER, "
+                        + COLUMN_SETTING_ID + " INTEGER, "
+                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "), "
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "), "
+                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + "))";
     }
 
     public static class LocationTable {
@@ -80,16 +86,13 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_PLACE_NAME = "place_name";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
 
-
-
         public static final String CREATE_TABLE =
-                "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY,"
-                        + COLUMN_LONGITUDE + " REAL,"
-                        + COLUMN_LATITUDE + " REAL,"
-                        + COLUMN_PLACE_NAME + " TEXT,"
-                        + COLUMN_ALARM_NAME + " TEXT"
-                        + ")";
+                "CREATE TABLE " + TABLE_NAME + " ("
+                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY, "
+                        + COLUMN_LONGITUDE + " REAL, "
+                        + COLUMN_LATITUDE + " REAL, "
+                        + COLUMN_PLACE_NAME + " TEXT, "
+                        + COLUMN_ALARM_NAME + " TEXT)";
     }
 
     public static class NoteTable {
@@ -99,12 +102,11 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_SETTING_ID = "setting_id";
 
         public static final String CREATE_TABLE =
-                "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY,"
-                        + COLUMN_CONTENT + " TEXT,"
-                        + COLUMN_SETTING_ID + " INTEGER,"
-                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + ")"
-                        + ")";
+                "CREATE TABLE " + TABLE_NAME + " ("
+                        + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY, "
+                        + COLUMN_CONTENT + " TEXT, "
+                        + COLUMN_SETTING_ID + " INTEGER, "
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "))";
     }
 
     public static class SettingTable {
@@ -116,13 +118,13 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_RINGTONE = "ringtone";
 
         public static final String CREATE_TABLE =
-                "CREATE TABLE " + TABLE_NAME + "("
-                        + COLUMN_SETTING_ID + " INTEGER PRIMARY KEY,"
-                        + COLUMN_REMINDER_TIME + " TEXT,"
-                        + COLUMN_REMINDER_DISTANCE + " REAL,"
-                        + COLUMN_VIBRATE + " INTEGER,"
-                        + COLUMN_RINGTONE + " TEXT"
-                        + ")";
+                "CREATE TABLE " + TABLE_NAME + " ("
+                        + COLUMN_SETTING_ID + " INTEGER PRIMARY KEY, "
+                        + COLUMN_REMINDER_TIME + " TEXT, "
+                        + COLUMN_REMINDER_DISTANCE + " REAL, "
+                        + COLUMN_VIBRATE + " INTEGER, "
+                        + COLUMN_RINGTONE + " TEXT)";
     }
+
 
 }

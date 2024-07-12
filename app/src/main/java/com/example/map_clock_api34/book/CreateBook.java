@@ -87,7 +87,7 @@ public class CreateBook extends Fragment {
 
         // 创建自定义返回按钮
         ImageView returnButton = new ImageView(requireContext());
-        returnButton.setImageResource(R.drawable.returnpage);
+        returnButton.setImageResource(R.drawable.back);
         LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 11;
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -28,7 +28,12 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + SettingTable.TABLE_NAME);
         onCreate(db);
     }
-
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        // Enable foreign key constraints
+        db.setForeignKeyConstraintsEnabled(true);
+    }
     public void clearAllTables() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
@@ -68,7 +73,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_SETTING_ID + " INTEGER,"
                         + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "),"
                         + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "),"
-                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + ")"
+                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + ")ON DELETE CASCADE"
                         + ")";
     }
 

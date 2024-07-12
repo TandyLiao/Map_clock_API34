@@ -1,8 +1,6 @@
 package com.example.map_clock_api34.home.ListAdapter;
 
 
-import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,8 +49,10 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
 
             // 處理圖片點擊事件
             dragHandle.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View v) {
+
                     if (!enableDrag) { // 如果禁用拖動，則進行選擇操作
                         int previousSelectedPosition = selectedPosition;
                         if (selectedPosition == getAdapterPosition()) {
@@ -63,6 +63,7 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
                         notifyItemChanged(previousSelectedPosition);
                         notifyItemChanged(selectedPosition);
                     }
+
                 }
             });
 
@@ -94,7 +95,7 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
-
+        
         if (!enableDrag) {
             // 設置選擇狀態的背景顏色和圖標變化
             if (position == selectedPosition) {
