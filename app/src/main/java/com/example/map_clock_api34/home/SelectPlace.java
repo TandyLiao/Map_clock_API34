@@ -176,6 +176,8 @@ public class SelectPlace extends Fragment {
             }
         });
 
+
+
     }
 
 
@@ -272,6 +274,7 @@ public class SelectPlace extends Fragment {
                 sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
                 sharedViewModel.setCapital(cityName);
                 sharedViewModel.setArea(areaName);
+
 
                 sharedViewModel.setnowLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
 

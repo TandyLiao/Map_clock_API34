@@ -14,18 +14,25 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import com.example.map_clock_api34.R;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import com.example.map_clock_api34.Distance;
-import android.util.Log;
+import com.example.map_clock_api34.R;
+
 import java.util.Arrays;
 
 public class LocationService extends Service {
 
     private static final String CHANNEL_ID = "location_service_channel";
+    private static final String WORK_TAG = "location_update_work";
     private LocationManager locationManager;
     private LocationListener locationListener;
 
@@ -40,19 +47,25 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("LocationService", "Service is being created");
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
+                Log.d("LocationService", "Location updated: " + location.toString());
                 handleLocationUpdate(location);
             }
 
             @Override
-            public void onProviderEnabled(@NonNull String provider) {}
+            public void onProviderEnabled(@NonNull String provider) {
+                Log.d("LocationService", "Provider enabled: " + provider);
+            }
 
             @Override
-            public void onProviderDisabled(@NonNull String provider) {}
+            public void onProviderDisabled(@NonNull String provider) {
+                Log.d("LocationService", "Provider disabled: " + provider);
+            }
         };
 
         createNotificationChannel();
@@ -70,35 +83,51 @@ public class LocationService extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("LocationService", "Service is being destroyed");
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener);
+        }
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("LocationService", "Service is starting");
+
         if (intent != null) {
             latitude = intent.getDoubleArrayExtra("latitude");
             longitude = intent.getDoubleArrayExtra("longitude");
             destinationName = intent.getStringArrayExtra("destinationName");
 
+            if (latitude == null || longitude == null || destinationName == null) {
+                Log.e("LocationService", "Invalid data received, stopping service");
+                stopSelf();
+                return START_NOT_STICKY;
+            }
+
             Log.d("LocationService", "Received latitude: " + Arrays.toString(latitude));
             Log.d("LocationService", "Received longitude: " + Arrays.toString(longitude));
             Log.d("LocationService", "Received destinationName: " + Arrays.toString(destinationName));
         } else {
+            Log.d("LocationService", "Intent is null, stopping service");
             stopSelf();
             return START_NOT_STICKY;
         }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Request location updates
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
+            Log.d("LocationService", "Location updates requested");
+
+            // Start WorkManager for periodic location updates
+            startLocationUpdateWorker();
         } else {
+            Log.d("LocationService", "Location permission not granted, stopping service");
             stopSelf();
         }
 
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (locationManager != null) {
-            locationManager.removeUpdates(locationListener);
-        }
     }
 
     @Nullable
@@ -115,11 +144,21 @@ public class LocationService extends Service {
                     NotificationManager.IMPORTANCE_DEFAULT
             );
             NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(serviceChannel);
+            if (manager != null) {
+                manager.createNotificationChannel(serviceChannel);
+                Log.d("LocationService", "Notification channel created");
+            }
         }
     }
 
     private void handleLocationUpdate(Location nowLocation) {
+        Log.d("LocationService", "Handling location update");
+
+        if (nowLocation == null) {
+            Log.e("LocationService", "Current location is null");
+            return;
+        }
+
         if (startLocation == null) {
             startLocation = nowLocation;
         }
@@ -128,9 +167,14 @@ public class LocationService extends Service {
         pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
         last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
 
+        Log.d("LocationService", "Pre-distance: " + pre_distance + " km");
+        Log.d("LocationService", "Last-distance: " + last_distance + " km");
+
         if (pre_distance > 0.020) {
             speed = pre_distance / (totalTime / 60 / 60);
             time = Math.round(last_distance / speed * 60);
+            Log.d("LocationService", "Speed: " + speed + " km/h");
+            Log.d("LocationService", "Estimated time: " + time + " minutes");
         } else {
             totalTime -= 60;
         }
@@ -138,14 +182,20 @@ public class LocationService extends Service {
         if (last_distance < 0.05 && time < 3) {
             sendNotification("快到了!(背景執行的)");
         }
+
         destinationIndex++;
         if (destinationIndex < latitude.length && destinationIndex < longitude.length && destinationIndex < destinationName.length) {
-            // 更新 startLocation 到当前位置，并继续追踪
             startLocation = nowLocation;
+            Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
+        } else {
+            Log.d("LocationService", "All destinations reached, stopping service");
+            stopSelf();
         }
     }
 
     private void sendNotification(String message) {
+        Log.d("LocationService", "Sending notification: " + message);
+
         Intent intent = new Intent(this, StartMapping.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
@@ -158,6 +208,29 @@ public class LocationService extends Service {
                 .setAutoCancel(true);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, builder.build());
+        if (notificationManager != null) {
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
     }
+
+    private void startLocationUpdateWorker() {
+        Data.Builder dataBuilder = new Data.Builder();
+        dataBuilder.putDoubleArray("latitude", latitude);
+        dataBuilder.putDoubleArray("longitude", longitude);
+        dataBuilder.putStringArray("destinationName", destinationName);
+
+        OneTimeWorkRequest locationUpdateWork = new OneTimeWorkRequest.Builder(LocationWorker.class)
+                .setInputData(dataBuilder.build())
+                .addTag(WORK_TAG)
+                .build();
+
+        WorkManager.getInstance(this).enqueueUniqueWork(
+                WORK_TAG,
+                ExistingWorkPolicy.REPLACE,
+                locationUpdateWork
+        );
+
+        Log.d("LocationService", "Location update worker started");
+    }
+
 }
