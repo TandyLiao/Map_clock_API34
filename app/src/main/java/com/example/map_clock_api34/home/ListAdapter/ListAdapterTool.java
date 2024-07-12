@@ -83,36 +83,46 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
         }
         else if (position == 1) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
             builder.setTitle("請輸入書籤名稱");
 
-            // 設置輸入框
+            // 设置输入框
             final EditText input = new EditText(context);
             input.setInputType(InputType.TYPE_CLASS_TEXT);
+            input.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT)); // 设置输入框布局参数
             builder.setView(input);
 
-            // 設置按鈕
+            // 设置确定按钮
             builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String bookmarkName = input.getText().toString();
-                    // 在這裡處理書籤名稱，例如保存到數據庫
-                    dbBookHelper.addBookmark(bookmarkName);
-                    Toast.makeText(context, "書籤 '" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
+                    if (!bookmarkName.isEmpty()) {
+                        // 处理确定按钮点击事件
+                        dbBookHelper.addBookmark(bookmarkName);
+                        Toast.makeText(context, "書籤 '" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "請輸入書籤名稱", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
+            // 设置取消按钮
             builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    // 处理取消按钮点击事件
                     dialog.cancel();
                 }
             });
 
-            // 創建並顯示對話框
+            // 创建并显示对话框
             AlertDialog dialog = builder.create();
             dialog.show();
         }
+
 
 
         else if (position == 2) {
