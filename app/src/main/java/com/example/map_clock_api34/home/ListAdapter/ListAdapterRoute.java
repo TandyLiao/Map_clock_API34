@@ -27,7 +27,14 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
     private ItemTouchHelper itemTouchHelper;
     private int selectedPosition = RecyclerView.NO_POSITION; // 用於跟踪選擇的項目
     private boolean enableDrag; // 是否啟用拖動功能
+    private OnItemClickListener onItemClickListener;
 
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
     public ListAdapterRoute(ArrayList<HashMap<String, String>> arrayList, SharedViewModel sharedViewModel, boolean enableDrag) {
         this.arrayList = arrayList;
         this.sharedViewModel = sharedViewModel;
@@ -63,7 +70,9 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
                         notifyItemChanged(previousSelectedPosition);
                         notifyItemChanged(selectedPosition);
                     }
-
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemClick(getAdapterPosition());
+                    }
                 }
             });
 
