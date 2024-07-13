@@ -55,11 +55,11 @@ public class BookFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
-        dbHelper= new BookDatabaseHelper(requireContext());
+        dbHelper = new BookDatabaseHelper(requireContext());
 
         setupActionBar();
 
-        createbook_imageView=rootView.findViewById(R.id.bookcreate_imageView);
+        createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
         setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
 
         // Set click listeners for ImageViews
@@ -80,7 +80,6 @@ public class BookFragment extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
-
 
 
         if (getActivity() != null) {
@@ -186,6 +185,38 @@ public class BookFragment extends Fragment {
             actionBar.setDisplayShowCustomEnabled(false);
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // Restore title display
+        }
+    }
+
+    private void saveInShareviewModel() {
+        String time = "";
+        for (HashMap<String, String> item : arrayList) {
+            if ("true".equals(item.get("isSelected"))) {
+                time = item.get("time");
+            }
+        }
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+        db.beginTransaction();
+        try {
+            while (cursor.moveToNext()) {
+                String locationId = cursor.getString(0);
+                Cursor locationCursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.LocationTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                if (locationCursor.moveToFirst()) {
+                    String placeName = locationCursor.getString(3);
+                    Double latitude = locationCursor.getDouble(2);
+                    Double longitude = locationCursor.getDouble(1);
+                    String city = locationCursor.getString(5);
+                    String area = locationCursor.getString(6);
+                }
+                locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("BookFragment", "Error while trying to save in ShareViewModel", e);
+        } finally {
+            db.endTransaction();
+            cursor.close(); // Ensure the cursor is closed to avoid memory leaks
         }
     }
 }
