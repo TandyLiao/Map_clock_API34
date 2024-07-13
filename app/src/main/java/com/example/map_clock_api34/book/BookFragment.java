@@ -89,6 +89,8 @@ public class BookFragment extends Fragment {
         dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
 
+        addFromDB();
+
         return rootView;
     }
 
@@ -186,6 +188,44 @@ public class BookFragment extends Fragment {
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // Restore title display
         }
+        saveInShareviewModel();
+    }
+
+    private void addFromDB() {
+
+        String time;
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM history WHERE arranged_id=0", null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+
+                String placeNameTemp = cursor.getString(3);
+                //找到"->"的位置
+                int index = placeNameTemp.indexOf("->");
+                //把"->"前的資料抓出來
+                String beforeArrow = placeNameTemp.substring(0,index);
+                if(beforeArrow.length()>20){
+                    beforeArrow=beforeArrow.substring(0,20)+"...";
+                }
+                //把"->"後的資料抓出來
+                String afterArrow = placeNameTemp.substring(index+2);
+                if(afterArrow.length()>20){
+                    afterArrow=afterArrow.substring(0,20)+"...";
+                }
+
+                time = cursor.getString(1);
+
+                HashMap<String, String> hashMap = new HashMap<>();
+                hashMap.put("placeName", beforeArrow);
+                hashMap.put("placeName2", "\u2193");
+                hashMap.put("placeName3", afterArrow);
+                hashMap.put("time", time);
+                arrayList.add(hashMap);
+            }
+            cursor.close();
+        }
+        db.close();
     }
 
     private void saveInShareviewModel() {
