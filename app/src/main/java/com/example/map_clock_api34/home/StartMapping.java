@@ -2,6 +2,8 @@ package com.example.map_clock_api34.home;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -10,12 +12,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.content.Context;
 
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +30,7 @@ import android.widget.Toast;
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-
+import android.content.Context;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -63,8 +65,8 @@ public class StartMapping extends Fragment {
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
-    int j,i=0;
-    double pre_distance, last_distance, speed, time, totalTime=0;
+    int j, i = 0;
+    double pre_distance, last_distance, speed, time, totalTime = 0;
     Location startLocation;
     LatLngBounds.Builder builder;
     LatLng destiantion_LatLng;
@@ -97,20 +99,31 @@ public class StartMapping extends Fragment {
             mapFragment.getMapAsync(callback);
         }
 
-        for(j=0 ; j<=sharedViewModel.getLatitude(j) ; j++){
-            destinationName[j]=sharedViewModel.getDestinationName(j);
-            latitude[j]=sharedViewModel.getLatitude(j);
-            longitude[j]=sharedViewModel.getLongitude(j);
+        for (j = 0; j <= sharedViewModel.getLatitude(j); j++) {
+            destinationName[j] = sharedViewModel.getDestinationName(j);
+            latitude[j] = sharedViewModel.getLatitude(j);
+            longitude[j] = sharedViewModel.getLongitude(j);
         }
 
         createNotificationChannel();//這行設定組新增
         checkAndRequestPermissions();//這行設定組新增
+        // 其他代码...
 
+        loadSettings();
 
         return rootView;
-
     }
-
+    private void loadSettings() {
+        SharedPreferences preferences = getActivity().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+        boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
+        boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
+        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
+        Log.d("Settings", "Ringtone Enabled: " + isRingtoneEnabled);
+        Log.d("Settings", "Vibration Enabled: " + isVibrationEnabled);
+        Log.d("Settings", "Notification Time: " + notificationTime);
+        // 这里可以根据需要应用这些设置值
+        // 例如，更新 UI 或者应用其他逻辑
+    }
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
@@ -188,6 +201,11 @@ public class StartMapping extends Fragment {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+            SharedPreferences preferences = getActivity().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false);
+            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false);
+            int notificationTime = preferences.getInt("notification_time", 1);
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle("地圖鬧鐘")
@@ -195,6 +213,14 @@ public class StartMapping extends Fragment {
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
+            if (isRingtoneEnabled) {
+                // 設置鈴聲
+                // builder.setSound(ringtoneUri);
+            }
+            if (isVibrationEnabled) {
+                // 設置震動
+                // builder.setVibrate(new long[]{1000, 1000});
+            }
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
             notificationManager.notify(0, builder.build());
@@ -210,6 +236,9 @@ public class StartMapping extends Fragment {
         public void onLocationChanged(@NonNull Location nowLocation) {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) //這個if設定組加的
             {
+                SharedPreferences preferences = getActivity().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+               int notificationTime = preferences.getInt("notification_time", 5);
+
                 totalTime = totalTime + 10;
                 pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
                 last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
@@ -227,7 +256,7 @@ public class StartMapping extends Fragment {
                 }
 
                 //設定組新增
-                if ((last_distance < 0.05 && time < 3) && !notificationSent) {
+                if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
                     sendNotification("快到了!");
                     resetNotificationSent(); // 新增重製通知(6/2新增)
 
@@ -351,7 +380,16 @@ public class StartMapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
-
+    public static void updateSettings(Context context, boolean isRingtoneEnabled, boolean isVibrationEnabled, int notificationTime) {
+        // 更新設置的邏輯，比如保存到 SharedPreferences
+        SharedPreferences preferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("ringtone_enabled", isRingtoneEnabled);
+        editor.putBoolean("vibration_enabled", isVibrationEnabled);
+        editor.putInt("notification_time", notificationTime);
+        editor.apply();
+        // 可以在這裡添加更多邏輯來應用這些設置
+    }
 
 
 }

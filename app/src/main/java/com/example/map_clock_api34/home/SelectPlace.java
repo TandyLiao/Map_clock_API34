@@ -1,6 +1,11 @@
 package com.example.map_clock_api34.home;
 
 
+import static com.example.map_clock_api34.R.id.btnCancel;
+import static com.example.map_clock_api34.R.id.btnSettings;
+import static com.example.map_clock_api34.R.id.button;
+import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -40,9 +45,13 @@ import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
+import android.widget.Switch;
+import android.widget.RadioGroup;
+import android.widget.RadioButton;
+import android.widget.Button;
+import android.widget.TextView;
 
 import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -67,7 +76,9 @@ public class SelectPlace extends Fragment {
     String destiantion_Name, cityName, areaName;
     private Geocoder geocoder;
     private View overlayView;
-
+    private boolean isRingtoneEnabled;
+    private boolean isVibrationEnabled;
+    private int notificationTime;
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
@@ -237,10 +248,21 @@ public class SelectPlace extends Fragment {
     private PopupWindow popupWindow;
     private FragmentTransaction fragmentTransaction;
 
-    private void showPopupWindow(String destiantion_Name,double destination_latitude,double destination_longitude) {
+    // 定义全局变量来保存目的地信息
+    private String currentDestinationName;
+    private double currentDestinationLatitude;
+    private double currentDestinationLongitude;
+
+    private void showPopupWindow(String destiantion_Name, double destination_latitude, double destination_longitude) {
         if (popupWindow != null && popupWindow.isShowing()) {
             popupWindow.dismiss();
         }
+
+        // 更新全局变量
+        currentDestinationName = destiantion_Name;
+        currentDestinationLatitude = destination_latitude;
+        currentDestinationLongitude = destination_longitude;
+
         // Get layout inflater service
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // Inflate the popup layout
@@ -254,13 +276,14 @@ public class SelectPlace extends Fragment {
 
         Button btnCancel = popupView.findViewById(R.id.btnCancel);
         Button btnNext = popupView.findViewById(R.id.btnNext);
+        Button btnSettings = popupView.findViewById(R.id.btnSettings);
 
-        if(isUnknown!=true){
+        if (!isUnknown) {
             destinationNameTextView.setText(destiantion_Name);
             destinationAreaTextView.setText(areaName);
         }
         // Set the destination name
-        destination_latitudeTextView.setText(String.valueOf( destination_latitude));
+        destination_latitudeTextView.setText(String.valueOf(destination_latitude));
         destination_longitudeTextView.setText(String.valueOf(destination_longitude));
 
         // Set button click event to navigate to the next page
@@ -274,7 +297,6 @@ public class SelectPlace extends Fragment {
                 sharedViewModel.setDestination(destiantion_Name, destination_latitude, destination_longitude);
                 sharedViewModel.setCapital(cityName);
                 sharedViewModel.setArea(areaName);
-
 
                 sharedViewModel.setnowLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
 
@@ -292,8 +314,13 @@ public class SelectPlace extends Fragment {
                 mMap.clear();
                 // Close the popup window
                 closePopupWindow();
+            }
+        });
 
-
+        btnSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showSettingsPopupWindow();
             }
         });
 
@@ -311,21 +338,109 @@ public class SelectPlace extends Fragment {
         overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
         overlayView.setClickable(true);
         ((ViewGroup) getView()).addView(overlayView);
+    }
 
+    private void showSettingsPopupWindow() {
+        if (popupWindow != null && popupWindow.isShowing()) {
+            popupWindow.dismiss();
+        }
+
+        // Get layout inflater service
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // Inflate the popup layout
+        View popupView = inflater.inflate(R.layout.popupwindow_settings, null);
+
+        // Get the views
+        Switch switchRingtone = popupView.findViewById(R.id.switchRingtone);
+        Switch switchVibration = popupView.findViewById(R.id.switchVibration);
+        RadioGroup radioGroupNotificationTime = popupView.findViewById(R.id.radioGroupNotificationTime);
+        RadioButton OneMinute = popupView.findViewById(R.id.radioOneMinute);
+        RadioButton radioThreeMinutes = popupView.findViewById(R.id.radioThreeMinutes);
+        RadioButton radioFiveMinutes = popupView.findViewById(R.id.radioFiveMinutes);
+        Button btnCancel = popupView.findViewById(R.id.PopupCancel);
+        Button btnConfirm = popupView.findViewById(R.id.PopupConfirm);
+
+        // Set the listeners
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closePopupWindow();
+                showPopupWindow(currentDestinationName, currentDestinationLatitude, currentDestinationLongitude);
+            }
+        });
+
+        btnConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Handle the settings confirmation
+                boolean isRingtoneEnabled = switchRingtone.isChecked();
+                boolean isVibrationEnabled = switchVibration.isChecked();
+                int selectedNotificationTime = 1; // Default to 1 minute
+
+                // Save the settings
+                saveSettings(isRingtoneEnabled, isVibrationEnabled, selectedNotificationTime);
+
+                closePopupWindow();
+                showPopupWindow(currentDestinationName, currentDestinationLatitude, currentDestinationLongitude);
+            }
+        });
+        SharedPreferences preferences = getContext().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+        boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // Default value if not found
+        boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // Default value if not found
+        int notificationTime = preferences.getInt("notification_time",5); // Default value if not found
+
+        // Apply settings to UI components
+        switchRingtone.setChecked(isRingtoneEnabled);
+        switchVibration.setChecked(isVibrationEnabled);
+        // Apply notification time selection
+        switch (notificationTime) {
+            case 1:
+                OneMinute.setChecked(true);
+                break;
+            case 3:
+                radioThreeMinutes.setChecked(true);
+                break;
+            case 5:
+                radioFiveMinutes.setChecked(true);
+                break;
+
+        }
+        // Create the popup window object
+        popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        popupWindow.setFocusable(false);
+        popupWindow.setOutsideTouchable(false);
+
+        // Show the popup window
+        popupWindow.showAtLocation(getView(), Gravity.BOTTOM, 0, 0);
+
+        // Add an overlay view to prevent interaction outside the popup
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setClickable(true);
+        ((ViewGroup) getView()).addView(overlayView);
+    }
+
+    public void saveSettings(boolean isRingtoneEnabled, boolean isVibrationEnabled, int notificationTime) {
+        // Save settings to SharedPreferences (example)
+        SharedPreferences preferences = getContext().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("ringtone_enabled", isRingtoneEnabled);
+        editor.putBoolean("vibration_enabled", isVibrationEnabled);
+        editor.putInt("notification_time", notificationTime);
+        editor.apply();
     }
 
     private void closePopupWindow() {
         if (popupWindow != null && popupWindow.isShowing()) {
             popupWindow.dismiss();
-
-            destiantion_Name = null;
-            destination_latitude = 0;
-            destination_longitude = 0;
             if (overlayView != null && overlayView.getParent() != null) {
                 ((ViewGroup) overlayView.getParent()).removeView(overlayView);
             }
         }
     }
+
     private String getCityNameCustom(double latitude, double longitude) {
         // 金門縣的經緯度範圍
         if (latitude >= 24.4 && latitude <= 24.6 && longitude >= 118.2 && longitude <= 118.5) {
