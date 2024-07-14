@@ -241,7 +241,7 @@ public class BookFragment extends Fragment {
         try {
             while (cursor.moveToNext()) {
                 String locationId = cursor.getString(0);
-                Cursor locationCursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.LocationTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                Cursor locationCursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
                 if (locationCursor.moveToFirst()) {
                     String placeName = locationCursor.getString(3);
                     Double latitude = locationCursor.getDouble(2);
