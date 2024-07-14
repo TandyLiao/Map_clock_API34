@@ -42,23 +42,30 @@ public class WeatherAdviceHelper {
 
                     List<String> descriptionAdvices = new ArrayList<>();
                     if (advice.length > 1) {
-                        descriptionAdvices.add("\n" + advice[1]+ "\n"+advice[2]);
+                        descriptionAdvices.add("\n" + advice[1] + "\n" + advice[2]);
                     }
 
                     List<String> temperatureAdvices = new ArrayList<>();
-                    temperatureAdvices.add(advice[0]);
+                    if (advice.length > 0) {
+                        temperatureAdvices.add(advice[0]);
+                    }
 
                     List<String> imageAdvices = new ArrayList<>();
-                    imageAdvices.add(advice[3]);
+                    if (advice.length > 3) {
+                        imageAdvices.add(advice[3]);
+                    }
 
-
+                    List<String> cityAdvices = new ArrayList<>();
+                    if (advice.length > 4) {
+                        cityAdvices.add(advice[4] + advice[5]);
+                    }
 
                     if (context instanceof FragmentActivity) {
                         ((FragmentActivity) context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Log.d("WeatherAdviceHelper", "Weather Advice Received: " + descriptionAdvices+temperatureAdvices);
-                                callback.onWeatherAdviceReceived(locationAdvices,descriptionAdvices,temperatureAdvices,imageAdvices);
+                                callback.onWeatherAdviceReceived(locationAdvices,descriptionAdvices,temperatureAdvices,imageAdvices,cityAdvices);
                             }
                         });
                     }
@@ -73,13 +80,24 @@ public class WeatherAdviceHelper {
                             }
                         });
                     }
+                }catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("WeatherAdviceHelper", "Exception occurred: " + e.getMessage());
+                    if (context != null && context instanceof FragmentActivity) {
+                        ((FragmentActivity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(context, "發生錯誤", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 }
             }
         }).start();
     }
 
     public interface WeatherAdviceCallback {
-        void onWeatherAdviceReceived( List<String> locationAdvices,List<String> descriptionAdvices, List<String> temperatureAdvices,List<String> imageAdvices);
+        void onWeatherAdviceReceived( List<String> locationAdvices,List<String> descriptionAdvices, List<String> temperatureAdvices,List<String> imageAdvices,List<String> cityAdvices);
     }
 
 }

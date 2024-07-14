@@ -54,7 +54,7 @@ public class WeatherService {
     }
 
     public static String[] getAdvice(String capital, String jsonResponse, Context context) {
-
+        String[] result = new String[6];
         try {
             if (capital.equals("金門縣") || capital.equals("連江縣")) {
                 return getSpecialRegionAdvice(jsonResponse, context);
@@ -70,6 +70,8 @@ public class WeatherService {
             String weatherDescription = "";
             int rainProbability = -1;
             int temperature = -1;
+            String locationArrayString = "";
+
 
             //去Json檔抓資料
             for (int i = 0; i < locationsArray.length(); i++) {
@@ -83,6 +85,7 @@ public class WeatherService {
 
                 for (int k = 0; k < locationArray.length(); k++) {
                     JSONObject location = locationArray.getJSONObject(k);
+                    locationArrayString = location.getString("locationName");
                     JSONArray weatherElements = location.getJSONArray("weatherElement");
 
                     //找氣溫
@@ -116,13 +119,19 @@ public class WeatherService {
                     }
 
 
+                    System.out.println(cityName);
+                    System.out.println(locationArrayString);
+
                     //把上面資料分別存到result
-                    String[] result = new String[4];
+
                     result[0] = temperature + "˚C";
-                    result[1] = "降雨概率為" + rainProbability;
+                    result[1] = "降雨概率為" + rainProbability + "%";
                     result[2] = (weatherDescription.contains("雨") && rainProbability >= 40) ? weatherDescription + "\n" + "建議攜帶雨傘" : weatherDescription;
-                   //存狀態判斷天氣改變背景
+                    //存狀態判斷天氣改變背景
                     result[3] = (weatherDescription.contains("雨") && rainProbability >= 40) ? "rain" : "sun";
+                    result[4] = cityName;
+                    result[5] = locationArrayString;
+
                     return result;
 
                 }
@@ -130,14 +139,19 @@ public class WeatherService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Exception: " + e.getMessage());
-            return new String[]{"找不到該地區的天氣資訊"};
+            result[0] = "未知温度1";
+            result[1] = "未知降雨概率2";
+            result[2] = "未知天氣描述3";
+            result[3] = "default";
+            result[4] = "4";
+            result[5] = "5";
+            return result;
         }
         return null;
     }
 
     private static String[] getSpecialRegionAdvice(String jsonResponse, Context context) {
-        String[] result = new String[4];
+        String[] result = new String[6];
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
             JSONArray locationArray = jsonObject.getJSONObject("records").getJSONArray("location");
@@ -149,9 +163,11 @@ public class WeatherService {
             String weatherDescription = "未知天氣描述";
             int rainProbability = -1;
             int temperature = -1;
+            String cityname;
 
             for (int i = 0; i < locationArray.length(); i++) {
                 JSONObject location = locationArray.getJSONObject(i);
+                cityname = location.getString("locationName");
                 JSONArray weatherElements = location.getJSONArray("weatherElement");
 
                 //沒有氣溫只好找最高氣溫
@@ -184,7 +200,8 @@ public class WeatherService {
                 result[1] = (rainProbability != -1) ? "降雨概率為" + rainProbability : "未知降雨概率";
                 result[2] = (weatherDescription.contains("雨") && rainProbability >= 40) ? weatherDescription + "\n" + "建議攜帶雨傘" : weatherDescription;
                 result[3] = (weatherDescription.contains("雨") && rainProbability >= 40) ? "rain" : "sun";
-
+                result[4] = cityname;
+                result[5] = "";
                 return result;
             }
         } catch (JSONException e) {
@@ -193,6 +210,8 @@ public class WeatherService {
             result[1] = "未知降雨概率2";
             result[2] = "未知天氣描述3";
             result[3] = "default";
+            result[4] = "4";
+            result[5] = "5";
             return result;
         }
         return new String[]{"無法獲取天氣建議"};

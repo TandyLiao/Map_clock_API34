@@ -41,6 +41,7 @@ public class ListAdapterWeather extends RecyclerView.Adapter<ListAdapterWeather.
         private TextView Weather_info;
         private TextView Weather_temp;
         private ImageView Weather_image;
+        private TextView Weather_city;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -48,6 +49,7 @@ public class ListAdapterWeather extends RecyclerView.Adapter<ListAdapterWeather.
             Weather_info = itemView.findViewById(R.id.text_wheather);
             Weather_temp = itemView.findViewById(R.id.temperature);
             Weather_image = itemView.findViewById(R.id.weather_imageView);
+            Weather_city= itemView.findViewById(R.id.cityname);
         }
     }
 
@@ -63,7 +65,7 @@ public class ListAdapterWeather extends RecyclerView.Adapter<ListAdapterWeather.
         weatherAdviceHelper.getWeatherAdvice(position, new WeatherAdviceHelper.WeatherAdviceCallback() {
             @Override
             //把List<String>分別丟到textview
-            public void onWeatherAdviceReceived( List<String> locationAdvices,List<String> descriptionAdvices, List<String> temperatureAdvices, List<String> imageAdvices) {
+            public void onWeatherAdviceReceived( List<String> locationAdvices,List<String> descriptionAdvices, List<String> temperatureAdvices, List<String> imageAdvices, List<String> cityAdvices) {
                 if (!imageAdvices.isEmpty()) {
                     String imageResource = imageAdvices.get(0);
                     holder.Weather_location.setText(locationAdvices.get(0));
@@ -82,6 +84,11 @@ public class ListAdapterWeather extends RecyclerView.Adapter<ListAdapterWeather.
                         holder.Weather_temp.setText(temperatureAdvices.get(0));
                     } else {
                         holder.Weather_temp.setText("未知溫度");
+                    }
+                    if (!cityAdvices.isEmpty()) {
+                        holder.Weather_city.setText(cityAdvices.get(0));
+                    } else {
+                        holder.Weather_temp.setText("未知城市");
                     }
 
                 }
