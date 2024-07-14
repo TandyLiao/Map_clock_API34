@@ -159,11 +159,7 @@ public class WheatherFragment extends Fragment {
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.home_fragment_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
     }

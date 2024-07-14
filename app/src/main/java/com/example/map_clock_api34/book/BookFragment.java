@@ -55,11 +55,11 @@ public class BookFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
-        dbHelper= new BookDatabaseHelper(requireContext());
+        dbHelper = new BookDatabaseHelper(requireContext());
 
         setupActionBar();
 
-        createbook_imageView=rootView.findViewById(R.id.bookcreate_imageView);
+        createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
         setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
 
         // Set click listeners for ImageViews
@@ -82,13 +82,14 @@ public class BookFragment extends Fragment {
         });
 
 
-
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
             toolbar = requireActivity().findViewById(R.id.toolbar);
         }
         dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
+
+        addFromDB();
 
         return rootView;
     }
@@ -186,6 +187,76 @@ public class BookFragment extends Fragment {
             actionBar.setDisplayShowCustomEnabled(false);
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // Restore title display
+        }
+        saveInShareviewModel();
+    }
+
+    private void addFromDB() {
+
+        String time;
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM history WHERE arranged_id=0", null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+
+                String placeNameTemp = cursor.getString(3);
+                //找到"->"的位置
+                int index = placeNameTemp.indexOf("->");
+                //把"->"前的資料抓出來
+                String beforeArrow = placeNameTemp.substring(0,index);
+                if(beforeArrow.length()>20){
+                    beforeArrow=beforeArrow.substring(0,20)+"...";
+                }
+                //把"->"後的資料抓出來
+                String afterArrow = placeNameTemp.substring(index+2);
+                if(afterArrow.length()>20){
+                    afterArrow=afterArrow.substring(0,20)+"...";
+                }
+
+                time = cursor.getString(1);
+
+                HashMap<String, String> hashMap = new HashMap<>();
+                hashMap.put("placeName", beforeArrow);
+                hashMap.put("placeName2", "\u2193");
+                hashMap.put("placeName3", afterArrow);
+                hashMap.put("time", time);
+                arrayList.add(hashMap);
+            }
+            cursor.close();
+        }
+        db.close();
+    }
+
+    private void saveInShareviewModel() {
+        String time = "";
+        for (HashMap<String, String> item : arrayList) {
+            if ("true".equals(item.get("isSelected"))) {
+                time = item.get("time");
+            }
+        }
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+        db.beginTransaction();
+        try {
+            while (cursor.moveToNext()) {
+                String locationId = cursor.getString(0);
+                Cursor locationCursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                if (locationCursor.moveToFirst()) {
+                    String placeName = locationCursor.getString(3);
+                    Double latitude = locationCursor.getDouble(2);
+                    Double longitude = locationCursor.getDouble(1);
+                    String city = locationCursor.getString(5);
+                    String area = locationCursor.getString(6);
+                }
+                locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("BookFragment", "Error while trying to save in ShareViewModel", e);
+        } finally {
+            db.endTransaction();
+            cursor.close(); // Ensure the cursor is closed to avoid memory leaks
         }
     }
 }

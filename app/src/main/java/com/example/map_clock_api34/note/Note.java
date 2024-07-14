@@ -230,6 +230,13 @@ public class Note extends Fragment {
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, false); // 禁用拖動功能，啟用單選功能
+        listAdapterRoute.setOnItemClickListener(new ListAdapterRoute.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                openWritingFragment();
+            }
+        });
+
         recyclerViewRoute.setAdapter(listAdapterRoute);
     }
 
