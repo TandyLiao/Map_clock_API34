@@ -35,9 +35,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
-import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
-import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
+
+import com.example.map_clock_api34.book.BookDatabaseHelper;
+import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
+import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
+
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherService;
@@ -55,10 +57,10 @@ import java.util.UUID;
 
 public class FakeCreateLocation extends Fragment {
 
-    private AppDatabaseHelper dbHistoryHelper;
+    private BookDatabaseHelper dbBookHelper;
 
     String names;
-    String Historynames;
+    String Booknames;
     double latitudes;
     double longitudes;
     String uniqueID;
@@ -85,7 +87,7 @@ public class FakeCreateLocation extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
 
-        dbHistoryHelper = new AppDatabaseHelper(requireContext());
+        dbBookHelper = new BookDatabaseHelper(requireContext());
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -137,7 +139,7 @@ public class FakeCreateLocation extends Fragment {
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
-                Historynames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInHistoryDB();
 
@@ -181,8 +183,8 @@ public class FakeCreateLocation extends Fragment {
     private void saveInHistoryDB() {
 
         try {
-            SQLiteDatabase writeDB = dbHistoryHelper.getWritableDatabase();
-            SQLiteDatabase readDB = dbHistoryHelper.getReadableDatabase();
+            SQLiteDatabase writeDB = dbBookHelper.getWritableDatabase();
+            SQLiteDatabase readDB = dbBookHelper.getReadableDatabase();
 
             Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[]{uniqueID});
 
@@ -194,15 +196,15 @@ public class FakeCreateLocation extends Fragment {
             int arranged_id_local=0;
 
             while (cursor.moveToNext()) {
-                if (Historynames != null) {
+                if (Booknames != null) {
                     ContentValues values = new ContentValues();
-                    values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
-                    values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
-                    values.put(HistoryTable.COLUMN_LOCATION_ID, cursor.getString(0));
+                    values.put(BookTable.COLUMN_START_TIME, formattedDate);
+                    values.put(BookTable.COLUMN_ALARM_NAME, Booknames);
+                    values.put(BookTable.COLUMN_LOCATION_ID, cursor.getString(0));
 
                     //arranged_id_local存入History表後再+1
-                    values.put(HistoryTable.COLUMN_ARRANGED_ID, arranged_id_local++);
-                    writeDB.insert(HistoryTable.TABLE_NAME, null, values);
+                    values.put(BookTable.COLUMN_ARRANGED_ID, arranged_id_local++);
+                    writeDB.insert(BookTable.TABLE_NAME, null, values);
                 }
             }
 
@@ -219,7 +221,7 @@ public class FakeCreateLocation extends Fragment {
         //用這ID去做Location_id和History做配對
         uniqueID = UUID.randomUUID().toString();
 
-        SQLiteDatabase db = dbHistoryHelper.getWritableDatabase();
+        SQLiteDatabase db = dbBookHelper.getWritableDatabase();
 
         for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
 
@@ -231,14 +233,14 @@ public class FakeCreateLocation extends Fragment {
 
             if (name != null) {
                 ContentValues values = new ContentValues();
-                values.put(LocationTable.COLUMN_PLACE_NAME, name);
-                values.put(LocationTable.COLUMN_LATITUDE, latitude);
-                values.put(LocationTable.COLUMN_LONGITUDE, longitude);
-                values.put(LocationTable.COLUMN_ALARM_NAME, uniqueID);
-                values.put(LocationTable.COLUMN_CITY_NAME, CityName);
-                values.put(LocationTable.COLUMN_AREA_NAME, AreaName);
+                values.put(LocationTable2.COLUMN_PLACE_NAME, name);
+                values.put(LocationTable2.COLUMN_LATITUDE, latitude);
+                values.put(LocationTable2.COLUMN_LONGITUDE, longitude);
+                values.put(LocationTable2.COLUMN_ALARM_NAME, uniqueID);
+                values.put(LocationTable2.COLUMN_CITY_NAME, CityName);
+                values.put(LocationTable2.COLUMN_AREA_NAME, AreaName);
 
-                db.insert(LocationTable.TABLE_NAME, null, values);
+                db.insert(LocationTable2.TABLE_NAME, null, values);
             }
         }
         db.close();
