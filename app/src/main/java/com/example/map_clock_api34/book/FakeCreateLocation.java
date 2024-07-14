@@ -141,7 +141,7 @@ public class FakeCreateLocation extends Fragment {
 
                 Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
-                saveInHistoryDB();
+                saveInBookDB();
 
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
@@ -180,7 +180,7 @@ public class FakeCreateLocation extends Fragment {
 
     }
 
-    private void saveInHistoryDB() {
+    private void saveInBookDB() {
 
         try {
             SQLiteDatabase writeDB = dbBookHelper.getWritableDatabase();

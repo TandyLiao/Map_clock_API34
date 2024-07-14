@@ -1,5 +1,9 @@
 package com.example.map_clock_api34.home.ListAdapter;
-
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.InputType;
@@ -11,11 +15,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.example.map_clock_api34.home.HomeFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import com.example.map_clock_api34.BusAdvice.BusStationFinderHelper;
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.R;
@@ -25,7 +30,8 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -144,7 +150,15 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (position == 4) {
-            Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
+            //換頁功能book_create_route
+            /*Button editButton = view.findViewById(R.id.book_create_route);
+            editButton.setOnClickListener(v -> {
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
+                transaction.addToBackStack(null); // 將這個交易添加到後退堆棧中，以便用戶可以按返回按鈕返回
+                transaction.commit();
+            });*/
+            //Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         } else if (position == 5) {
             Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         }
