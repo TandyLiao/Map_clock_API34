@@ -10,7 +10,7 @@ import com.example.map_clock_api34.Database.AppDatabaseHelper;
 public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_book";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public BookDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -60,6 +60,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     public static class BookTable {
         public static final String TABLE_NAME = "book";
+        public static final String COLUMN_DISPLAY_NAME = "display_name";
         public static final String COLUMN_ROUTE_ID = "route_id";
         public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_LOCATION_ID = "location_id";
@@ -72,6 +73,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
 
                 "CREATE TABLE " + TABLE_NAME + "("
                         + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
+                        + COLUMN_DISPLAY_NAME + " TEXT,"
                         + COLUMN_START_TIME + " DATETIME,"
                         + COLUMN_LOCATION_ID + " INTEGER,"
                         + COLUMN_ALARM_NAME + " TEXT,"
