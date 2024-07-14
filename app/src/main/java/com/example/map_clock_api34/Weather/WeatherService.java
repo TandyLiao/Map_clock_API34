@@ -217,5 +217,4 @@ public class WeatherService {
         return new String[]{"無法獲取天氣建議"};
     }
 
-
 }

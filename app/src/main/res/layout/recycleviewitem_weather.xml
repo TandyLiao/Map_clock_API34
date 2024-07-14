@@ -60,7 +60,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:layout_weight="2"
-                    android:text="城市"
+                    android:text="找城市"
                     android:textColor="@color/white"
                     android:textSize="15dp" />
 

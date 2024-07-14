@@ -88,7 +88,7 @@ public class ListAdapterWeather extends RecyclerView.Adapter<ListAdapterWeather.
                     if (!cityAdvices.isEmpty()) {
                         holder.Weather_city.setText(cityAdvices.get(0));
                     } else {
-                        holder.Weather_temp.setText("未知城市");
+                        holder.Weather_city.setText("未知城市");
                     }
 
                 }

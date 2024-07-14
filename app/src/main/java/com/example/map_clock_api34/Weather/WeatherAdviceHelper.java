@@ -87,7 +87,7 @@ public class WeatherAdviceHelper {
                         ((FragmentActivity) context).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(context, "發生錯誤", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "超出範圍", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
