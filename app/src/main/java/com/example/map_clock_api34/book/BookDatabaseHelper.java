@@ -5,10 +5,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.content.ContentValues;
 
+import com.example.map_clock_api34.Database.AppDatabaseHelper;
+
 public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_book";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
 
     public BookDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -16,7 +18,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(LocationTable.CREATE_TABLE);
+        db.execSQL(LocationTable2.CREATE_TABLE);
         db.execSQL(NoteTable.CREATE_TABLE);
         db.execSQL(SettingTable.CREATE_TABLE);
         db.execSQL(BookTable.CREATE_TABLE);
@@ -25,7 +27,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + BookTable.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + LocationTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + LocationTable2.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + NoteTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + SettingTable.TABLE_NAME);
         onCreate(db);
@@ -36,7 +38,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             db.execSQL("DELETE FROM " + BookTable.TABLE_NAME);
-            db.execSQL("DELETE FROM " + LocationTable.TABLE_NAME);
+            db.execSQL("DELETE FROM " + LocationTable2.TABLE_NAME);
             db.execSQL("DELETE FROM " + NoteTable.TABLE_NAME);
             db.execSQL("DELETE FROM " + SettingTable.TABLE_NAME);
             db.setTransactionSuccessful();
@@ -58,41 +60,54 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     public static class BookTable {
         public static final String TABLE_NAME = "book";
+        public static final String COLUMN_DISPLAY_NAME = "display_name";
         public static final String COLUMN_ROUTE_ID = "route_id";
+        public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_LOCATION_ID = "location_id";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
-        public static final String COLUMN_START_TIME = "start_time";
+        public static final String COLUMN_ARRANGED_ID = "arranged_id";
         public static final String COLUMN_NOTE_ID = "note_id";
         public static final String COLUMN_SETTING_ID = "setting_id";
 
         public static final String CREATE_TABLE =
-                "CREATE TABLE " + TABLE_NAME + " ("
-                        + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY, "
-                        + COLUMN_LOCATION_ID + " INTEGER, "
-                        + COLUMN_ALARM_NAME + " TEXT, "
-                        + COLUMN_START_TIME + " DATETIME, "
-                        + COLUMN_NOTE_ID + " INTEGER, "
-                        + COLUMN_SETTING_ID + " INTEGER, "
-                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "), "
-                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "), "
-                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + "))";
+
+                "CREATE TABLE " + TABLE_NAME + "("
+                        + COLUMN_ROUTE_ID + " INTEGER PRIMARY KEY,"
+                        + COLUMN_DISPLAY_NAME + " TEXT,"
+                        + COLUMN_START_TIME + " DATETIME,"
+                        + COLUMN_LOCATION_ID + " INTEGER,"
+                        + COLUMN_ALARM_NAME + " TEXT,"
+                        + COLUMN_ARRANGED_ID + " TEXT,"
+                        + COLUMN_NOTE_ID + " INTEGER,"
+                        + COLUMN_SETTING_ID + " INTEGER,"
+                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + AppDatabaseHelper.NoteTable.TABLE_NAME + "(" + AppDatabaseHelper.NoteTable.COLUMN_NOTE_ID + "),"
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + AppDatabaseHelper.SettingTable.TABLE_NAME + "(" + AppDatabaseHelper.SettingTable.COLUMN_SETTING_ID + "),"
+                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + AppDatabaseHelper.LocationTable.TABLE_NAME + "(" + AppDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + ")ON DELETE CASCADE"
+                        + ")";
     }
 
-    public static class LocationTable {
+    public static class LocationTable2 {
         public static final String TABLE_NAME = "location";
         public static final String COLUMN_LOCATION_ID = "location_id";
         public static final String COLUMN_LONGITUDE = "longitude";
         public static final String COLUMN_LATITUDE = "latitude";
         public static final String COLUMN_PLACE_NAME = "place_name";
         public static final String COLUMN_ALARM_NAME = "alarm_name";
+        public static final String COLUMN_CITY_NAME = "city_name";
+        public static final String COLUMN_AREA_NAME = "area_name";
+
+
 
         public static final String CREATE_TABLE =
-                "CREATE TABLE " + TABLE_NAME + " ("
-                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY, "
-                        + COLUMN_LONGITUDE + " REAL, "
-                        + COLUMN_LATITUDE + " REAL, "
-                        + COLUMN_PLACE_NAME + " TEXT, "
-                        + COLUMN_ALARM_NAME + " TEXT)";
+                "CREATE TABLE " + TABLE_NAME + "("
+                        + COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY,"
+                        + COLUMN_LONGITUDE + " REAL,"
+                        + COLUMN_LATITUDE + " REAL,"
+                        + COLUMN_PLACE_NAME + " TEXT,"
+                        + COLUMN_ALARM_NAME + " TEXT,"
+                        + COLUMN_CITY_NAME + " TEXT,"
+                        + COLUMN_AREA_NAME + " TEXT"
+                        + ")";
     }
 
     public static class NoteTable {

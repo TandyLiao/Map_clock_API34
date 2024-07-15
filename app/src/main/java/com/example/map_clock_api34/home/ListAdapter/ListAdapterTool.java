@@ -1,5 +1,9 @@
 package com.example.map_clock_api34.home.ListAdapter;
-
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.InputType;
@@ -11,11 +15,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.example.map_clock_api34.home.HomeFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import com.example.map_clock_api34.BusAdvice.BusStationFinderHelper;
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.R;
@@ -25,7 +30,8 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -83,36 +89,46 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
         }
         else if (position == 1) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
             builder.setTitle("請輸入書籤名稱");
 
-            // 設置輸入框
+            // 设置输入框
             final EditText input = new EditText(context);
             input.setInputType(InputType.TYPE_CLASS_TEXT);
+            input.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT)); // 设置输入框布局参数
             builder.setView(input);
 
-            // 設置按鈕
+            // 设置确定按钮
             builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String bookmarkName = input.getText().toString();
-                    // 在這裡處理書籤名稱，例如保存到數據庫
-                    dbBookHelper.addBookmark(bookmarkName);
-                    Toast.makeText(context, "書籤 '" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
+                    if (!bookmarkName.isEmpty()) {
+                        // 处理确定按钮点击事件
+                        dbBookHelper.addBookmark(bookmarkName);
+                        Toast.makeText(context, "書籤 '" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "請輸入書籤名稱", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
+            // 设置取消按钮
             builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    // 处理取消按钮点击事件
                     dialog.cancel();
                 }
             });
 
-            // 創建並顯示對話框
+            // 创建并显示对话框
             AlertDialog dialog = builder.create();
             dialog.show();
         }
+
 
 
         else if (position == 2) {
@@ -134,7 +150,15 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (position == 4) {
-            Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
+            //換頁功能book_create_route
+            /*Button editButton = view.findViewById(R.id.book_create_route);
+            editButton.setOnClickListener(v -> {
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
+                transaction.addToBackStack(null); // 將這個交易添加到後退堆棧中，以便用戶可以按返回按鈕返回
+                transaction.commit();
+            });*/
+            //Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         } else if (position == 5) {
             Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         }

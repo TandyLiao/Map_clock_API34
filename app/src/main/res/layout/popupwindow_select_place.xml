@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -44,30 +45,45 @@
 
         <Button
             android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="40dp"
+            android:layout_weight="1"
             android:textSize="15sp"
             android:background="@drawable/btn_additem"
             android:textColor="@color/green"
             app:backgroundTint="@null"
             android:layout_gravity="center"
-            android:text="取消" />
+            android:text="取消"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
 
-        <View
+        <Button
+            android:id="@+id/btnSettings"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="@drawable/btn_additem"
+            android:text="設定"
+            android:textColor="@color/green"
+            app:backgroundTint="@null"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:onClick="onSettingsClicked" />
 
         <Button
             android:id="@+id/btnNext"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="40dp"
+            android:layout_weight="1"
             android:textSize="15sp"
             android:background="@drawable/btn_additem"
             android:textColor="@color/green"
             app:backgroundTint="@null"
             android:layout_gravity="center"
-            android:text="下一步" />
+            android:text="下一步"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"  />
 
     </LinearLayout>
 </LinearLayout>
