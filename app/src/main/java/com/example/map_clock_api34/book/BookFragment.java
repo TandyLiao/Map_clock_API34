@@ -64,9 +64,9 @@ public class BookFragment extends Fragment {
 
         // Set click listeners for ImageViews
         createbook_imageView.setOnClickListener(v -> {
-            CreateBook createbook = new CreateBook();
+            FakeCreateLocation createFbook = new FakeCreateLocation();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, createbook);
+            transaction.replace(R.id.fl_container, createFbook);
             transaction.addToBackStack(null);
             transaction.commit();
 

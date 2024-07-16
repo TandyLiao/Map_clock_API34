@@ -85,7 +85,7 @@ public class FakeCreateLocation extends Fragment {
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
+        rootView = inflater.inflate(R.layout.fake_fragment_creatlocation, container, false);
 
         dbBookHelper = new BookDatabaseHelper(requireContext());
 
@@ -137,18 +137,33 @@ public class FakeCreateLocation extends Fragment {
         btnMapping.setOnClickListener(v -> {
             //如有選擇地點就導航，沒有就跳提醒，加上吳俊廷的匯入資料庫的程式
             if (sharedViewModel.getLocationCount() >= 0) {
-                openStartMappingFragment();
+                //openStartMappingFragment();
 
                 Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInBookDB();
-
+                // 導航到 book_fragment_book.xml
+                /*FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                Fragment bookFragment = new BookFragment(); // 需要你自己創建這個 Fragment
+                transaction.replace(R.id.fragment_container, bookFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();*/
+                getActivity().getSupportFragmentManager().popBackStack();
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
         });
+        //換頁功能book_create_route
+            /*Button editButton = view.findViewById(R.id.book_create_route);
+            editButton.setOnClickListener(v -> {
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
+                transaction.addToBackStack(null); // 將這個交易添加到後退堆棧中，以便用戶可以按返回按鈕返回
+                transaction.commit();
+            });*/
         /*吳俊廷的實驗區。都別給我碰(#`Д´)ﾉ
-    public void insertDataToDatabase() {
+
+        public void insertDataToDatabase() {
         //Get data from SharedViewModel
         String[] names = sharedViewModel.getDestinationNameArray();
         double[] latitudes = sharedViewModel.getLatitudeArray();

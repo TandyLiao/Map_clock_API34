@@ -22,7 +22,6 @@
             tools:layout_editor_absoluteY="63dp" />
 
 
-
         <Button
             android:id="@+id/btn_addItem"
             android:layout_width="100dp"
@@ -32,10 +31,9 @@
             android:padding="0dp"
             android:text="新增"
             android:textColor="@color/green"
-            app:backgroundTint="@null"
             android:textSize="15dp"
+            app:backgroundTint="@null"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/recycleViewTool"
             app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
 
         <Button
@@ -46,21 +44,114 @@
             android:background="@drawable/btn_additem"
             android:text="重置"
             android:textColor="@color/green"
-            app:backgroundTint="@null"
             android:textSize="15dp"
-            app:layout_constraintBottom_toTopOf="@+id/recycleViewTool"
+            app:backgroundTint="@null"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleViewTool"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@drawable/recyclerview"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/controls_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_sure"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_addItem"
-            app:layout_constraintBottom_toTopOf="@id/btn_sure" _toBottomOf="@+id/btn_addItem"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/btn_reset">
+
+            <!-- Book Add Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/bookadd_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/lightyellow"
+                app:cardCornerRadius="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.3"
+                app:strokeColor="@color/darkyellow"
+                app:strokeWidth="2dp">
+
+                <LinearLayout
+                    android:id="@+id/book_LinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:id="@+id/bookcreate_imageView"
+                        android:layout_width="81dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/addbookmark"
+                        android:clickable="true"
+                        android:padding="20dp" />
+
+                    <TextView
+                        android:id="@+id/bookcreate_Name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:padding="8dp"
+                        android:text="建立書籤"
+                        android:textColor="@color/green"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Book Set Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/bookset_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/lightyellow"
+                app:cardCornerRadius="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.3"
+                app:strokeColor="@color/darkyellow"
+                app:strokeWidth="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:id="@+id/bookset_imageView"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bookmark2"
+                        android:clickable="true"
+                        android:padding="20dp" />
+
+                    <TextView
+                        android:id="@+id/bookset_Name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:padding="8dp"
+                        android:text="修改書籤"
+                        android:textColor="@color/green"
+                        android:textSize="15sp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
             android:id="@+id/btn_sure"
