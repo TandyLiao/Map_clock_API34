@@ -1,27 +1,23 @@
 package com.example.map_clock_api34.home.ListAdapter;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.ColorDrawable;
+
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupWindow;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.InputType;
-import android.util.Log;
+
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.example.map_clock_api34.home.HomeFragment;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import com.example.map_clock_api34.BusAdvice.BusStationFinderHelper;
+
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
@@ -30,8 +26,6 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 

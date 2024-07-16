@@ -28,10 +28,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
+
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
+import com.example.map_clock_api34.book.BookDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public class BookFragment extends Fragment {
         dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
 
-        addFromDB();
+        //addFromDB();
 
         return rootView;
     }

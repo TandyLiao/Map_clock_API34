@@ -13,9 +13,18 @@ public class SharedViewModel extends ViewModel {
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
 
+    //使用者現在經緯度
     private double nowLantitude;
     private double nowLontitude;
 
+    //記事
+    private String[] note = new String[7];
+
+    //震動鈴聲
+    private Boolean[] vibrate = new Boolean[7];
+    private Boolean[] ringtone = new Boolean[7];
+    //7個地點有3個提醒時間可供選擇;
+    private Boolean[][] notification = new Boolean[7][3];
 
     public void setDestination(String name, double latitude, double longitude) {
         locationCount++;
@@ -24,25 +33,33 @@ public class SharedViewModel extends ViewModel {
         this.longitude[locationCount] = longitude;
     }
 
-    public void setCapital(String capital) {
-        this.destinationCapital[locationCount] = capital;
-    }
+    public void setNote(String note, int position){    this.note[position]=note;  }
 
-    public void setArea(String area) {
-        this.destinationArea[locationCount] = area;
-    }
+    public void setNotification(Boolean check, int position, int whichTime){ this.notification[position][whichTime] = check; }
+    public void setVibrate(Boolean check, int position){ this.vibrate[position] = check; }
+    public void setRingtone(Boolean check, int position){ this.ringtone[position] = check; }
+
+    public void setCapital(String capital) {    this.destinationCapital[locationCount] = capital;   }
+
+    public void setArea(String area) {  this.destinationArea[locationCount] = area; }
 
     public void setnowLocation(double lantitude, double longtitude){
         this.nowLantitude=lantitude;
         this.nowLontitude=longtitude;
     }
 
-    public String getCapital(int j) {
-        return destinationCapital[j];
+    public String getNote(int position){    return note[position];  }
+
+    public Boolean getNotification(int position, int whichTime){ return notification[position][whichTime]; }
+    public Boolean getVibrate(int position){ return vibrate[position]; }
+    public Boolean getRingtone(int position){ return ringtone[position]; }
+
+    public String getCapital(int position) {
+        return destinationCapital[position];
     }
 
-    public String getArea(int j) {
-        return destinationArea[j];
+    public String getArea(int position) {
+        return destinationArea[position];
     }
 
     public Double getNowLantitude(){ return nowLantitude; }
@@ -89,6 +106,7 @@ public class SharedViewModel extends ViewModel {
         destinationArea = new String[7];
         latitude = new double[7];
         longitude = new double[7];
+        note = new String[7];
         nowLantitude = 0;
         nowLontitude = 0;
 
@@ -102,16 +120,16 @@ public class SharedViewModel extends ViewModel {
         locationCount--;
     }
 
-    public String getDestinationName(int j) {
-        return destinationName[j];
+    public String getDestinationName(int position) {
+        return destinationName[position];
     }
 
-    public double getLatitude(int j) {
-        return latitude[j];
+    public double getLatitude(int position) {
+        return latitude[position];
     }
 
-    public double getLongitude(int j) {
-        return longitude[j];
+    public double getLongitude(int position) {
+        return longitude[position];
     }
 
 }
