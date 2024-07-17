@@ -19,7 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.widget.EditText;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -36,7 +37,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
 import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 
@@ -58,7 +58,7 @@ import java.util.UUID;
 public class FakeCreateLocation extends Fragment {
 
     private BookDatabaseHelper dbBookHelper;
-
+    private EditText bookNameEditText;
     String names;
     String Booknames;
     double latitudes;
@@ -142,17 +142,20 @@ public class FakeCreateLocation extends Fragment {
                 Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInBookDB();
-                // 導航到 book_fragment_book.xml
-                /*FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                Fragment bookFragment = new BookFragment(); // 需要你自己創建這個 Fragment
-                transaction.replace(R.id.fragment_container, bookFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();*/
+
+                //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // 導航到 book_fragment_book.xml
+                /*FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                Fragment bookFragment = new BookFragment(); // 需要你自己創建這個 Fragment
+                transaction.replace(R.id.fragment_container, bookFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();*/
         //換頁功能book_create_route
             /*Button editButton = view.findViewById(R.id.book_create_route);
             editButton.setOnClickListener(v -> {
@@ -214,7 +217,8 @@ public class FakeCreateLocation extends Fragment {
                 if (Booknames != null) {
                     ContentValues values = new ContentValues();
                     values.put(BookTable.COLUMN_START_TIME, formattedDate);
-                    values.put(BookTable.COLUMN_ALARM_NAME, Booknames);
+                    //values.put(BookTable.COLUMN_ALARM_NAME, Booknames);
+
                     values.put(BookTable.COLUMN_LOCATION_ID, cursor.getString(0));
 
                     //arranged_id_local存入History表後再+1
@@ -222,11 +226,23 @@ public class FakeCreateLocation extends Fragment {
                     writeDB.insert(BookTable.TABLE_NAME, null, values);
                 }
             }
+            //存書籤名字
+            ContentValues name1 = new ContentValues();
+            bookNameEditText = rootView.findViewById(R.id.BookName);
+            name1.put(BookTable.COLUMN_ALARM_NAME, Booknames);
 
             writeDB.close();
             readDB.close();
         } catch (Exception e) {
             Log.d("DBProblem", e.getMessage());
+        }
+    }
+
+    public String getBookName() {
+        if (bookNameEditText != null) {
+            return bookNameEditText.getText().toString();
+        } else {
+            return "";
         }
     }
 
@@ -260,6 +276,7 @@ public class FakeCreateLocation extends Fragment {
         }
         db.close();
     }
+
 
     //打開選地點頁面
     private void openSelectPlaceFragment() {

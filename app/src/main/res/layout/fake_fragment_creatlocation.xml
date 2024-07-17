@@ -12,6 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <EditText
+            android:id="@+id/BookName"
+            android:layout_width="270dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:hint="請輸入名稱"
+            android:inputType="numberDecimal"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycleViewRoute"
@@ -26,39 +38,46 @@
             android:id="@+id/btn_addItem"
             android:layout_width="100dp"
             android:layout_height="40dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/btn_additem"
             android:padding="0dp"
             android:text="新增"
             android:textColor="@color/green"
             android:textSize="15dp"
             app:backgroundTint="@null"
+            app:layout_constraintBottom_toTopOf="@+id/controls_container"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
         <Button
             android:id="@+id/btn_reset"
             android:layout_width="100dp"
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/btn_additem"
             android:text="重置"
             android:textColor="@color/green"
             android:textSize="15dp"
             app:backgroundTint="@null"
+            app:layout_constraintBottom_toTopOf="@+id/controls_container"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/controls_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="84dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toTopOf="@+id/btn_sure"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_reset">
+            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute">
 
             <!-- Book Add Card -->
             <com.google.android.material.card.MaterialCardView
@@ -91,7 +110,8 @@
                         android:layout_gravity="center"
                         android:background="@drawable/addbookmark"
                         android:clickable="true"
-                        android:padding="20dp" />
+                        android:padding="20dp"
+                        app:srcCompat="@drawable/anya062516" />
 
                     <TextView
                         android:id="@+id/bookcreate_Name"
@@ -99,7 +119,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:padding="8dp"
-                        android:text="建立書籤"
+                        android:text="建立記事"
                         android:textColor="@color/green"
                         android:textSize="15sp" />
                 </LinearLayout>
@@ -136,7 +156,8 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bookmark2"
                         android:clickable="true"
-                        android:padding="20dp" />
+                        android:padding="20dp"
+                        app:srcCompat="@drawable/anya062516" />
 
                     <TextView
                         android:id="@+id/bookset_Name"
@@ -144,7 +165,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:padding="8dp"
-                        android:text="修改書籤"
+                        android:text="設定"
                         android:textColor="@color/green"
                         android:textSize="15sp" />
 
@@ -168,6 +189,17 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="4dp"
+            android:text="請為書籤命名:"
+            android:textSize="19sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycleViewRoute" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
