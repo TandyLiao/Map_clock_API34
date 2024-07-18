@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        //有紅線別理他，它可以鎖定返回鍵，現在所有頁面按返回都不會有反應，除了設定內頁
+        //有紅線別理他，它可以鎖定返回鍵，現在所有頁面按返回都不會有反應
     }
 
     @Override

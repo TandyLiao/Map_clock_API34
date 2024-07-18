@@ -26,6 +26,8 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
+import com.example.map_clock_api34.setting.CreatLocation_setting;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -62,10 +64,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         item4.put("data", "推薦路線");
         arrayList.add(item4);
         HashMap<String, String> item5 = new HashMap<>();
-        item5.put("data", "震動");
+        item5.put("data", "地點設定");
         arrayList.add(item5);
         HashMap<String, String> item6 = new HashMap<>();
-        item6.put("data", "鈴聲");
+        item6.put("data", "哇哭哇哭");
         arrayList.add(item6);
     }
 
@@ -144,8 +146,11 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (position == 4) {
+            CreatLocation_setting createlocation_setting = new CreatLocation_setting();
+            fragmentTransaction.replace(R.id.home_fragment_container, createlocation_setting);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
 
-            Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         } else if (position == 5) {
             Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
         }
@@ -170,10 +175,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             case "推薦路線":
                 holder.horecycleimageView.setImageResource(R.drawable.route_well2);
                 break;
-            case "震動":
+            case "地點設定":
                 holder.horecycleimageView.setImageResource(R.drawable.vibrate);
                 break;
-            case "鈴聲":
+            case "哇哭哇哭":
                 holder.horecycleimageView.setImageResource(R.drawable.bell);
                 break;
         }
