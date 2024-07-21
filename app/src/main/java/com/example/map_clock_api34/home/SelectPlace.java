@@ -320,7 +320,7 @@ public class SelectPlace extends Fragment {
         btnSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showSettingsPopupWindow();
+
             }
         });
 
@@ -340,7 +340,7 @@ public class SelectPlace extends Fragment {
         ((ViewGroup) getView()).addView(overlayView);
     }
 
-    private void showSettingsPopupWindow() {
+    /*private void showSettingsPopupWindow() {
         if (popupWindow != null && popupWindow.isShowing()) {
             popupWindow.dismiss();
         }
@@ -377,8 +377,6 @@ public class SelectPlace extends Fragment {
                 boolean isVibrationEnabled = switchVibration.isChecked();
                 int selectedNotificationTime = 1; // Default to 1 minute
 
-                // Save the settings
-                saveSettings(isRingtoneEnabled, isVibrationEnabled, selectedNotificationTime);
 
                 closePopupWindow();
                 showPopupWindow(currentDestinationName, currentDestinationLatitude, currentDestinationLongitude);
@@ -422,15 +420,8 @@ public class SelectPlace extends Fragment {
         ((ViewGroup) getView()).addView(overlayView);
     }
 
-    public void saveSettings(boolean isRingtoneEnabled, boolean isVibrationEnabled, int notificationTime) {
-        // Save settings to SharedPreferences (example)
-        SharedPreferences preferences = getContext().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("ringtone_enabled", isRingtoneEnabled);
-        editor.putBoolean("vibration_enabled", isVibrationEnabled);
-        editor.putInt("notification_time", notificationTime);
-        editor.apply();
-    }
+     */
+
 
     private void closePopupWindow() {
         if (popupWindow != null && popupWindow.isShowing()) {

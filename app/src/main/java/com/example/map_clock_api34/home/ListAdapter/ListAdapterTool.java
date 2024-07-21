@@ -32,6 +32,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
+import android.widget.PopupWindow;
+
+
+
 
 public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHolder> {
 
@@ -40,6 +44,11 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     private WeatherAdviceHelper weatherAdviceHelper;
     private SharedViewModel sharedViewModel;
     private BookDatabaseHelper dbBookHelper;
+    private SettingsHandler settingsHandler;
+
+
+    private PopupWindow popupWindow;
+    private View overlayView;
 
     public ListAdapterTool(FragmentTransaction fragmentTransaction, SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.fragmentTransaction = fragmentTransaction;
@@ -47,6 +56,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         this.weatherAdviceHelper = new WeatherAdviceHelper(sharedViewModel, weatherService, context);
         this.sharedViewModel = sharedViewModel;
         this.dbBookHelper = new BookDatabaseHelper(context);
+        this.settingsHandler = new SettingsHandler(context);
         initData();
     }
 
@@ -152,8 +162,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
 
         } else if (position == 5) {
-            Toast.makeText(context, "設定組等你開發", Toast.LENGTH_SHORT).show();
-        }
+            settingsHandler.showSettingsPopupWindow();        }
     }
 
     @Override
@@ -217,6 +226,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 .inflate(R.layout.recyclerviewitem_tool, parent, false);
         return new ViewHolder(view);
     }
+
 
     @Override
     public int getItemCount() {
