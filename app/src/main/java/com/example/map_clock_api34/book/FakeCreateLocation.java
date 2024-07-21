@@ -287,15 +287,6 @@ public class FakeCreateLocation extends Fragment {
         transaction.commit();
     }
 
-    //打開導航頁面
-    private void openStartMappingFragment() {
-        StartMapping StartMapping = new StartMapping();
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fl_container, StartMapping);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
     //初始化漢堡選單
     private void setupNavigationDrawer() {
     }
@@ -307,11 +298,13 @@ public class FakeCreateLocation extends Fragment {
             actionBar.hide();
             actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
         }
+
         CardView cardViewtitle = new CardView(requireContext());
-        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,
-                ActionBar.LayoutParams.MATCH_PARENT));
+        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewtitle.setBackground(drawable);
+
         //建立LinearLayout在CardView等等放圖案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
@@ -319,6 +312,7 @@ public class FakeCreateLocation extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
         //設置右上角的小圖示
         ImageView bookmark = new ImageView(requireContext());
         bookmark.setImageResource(R.drawable.route);
@@ -327,28 +321,84 @@ public class FakeCreateLocation extends Fragment {
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
         );
+
         params.setMarginStart(10); // 设置左边距
         bookmark.setLayoutParams(params);
+
         // 創建右上角的名字
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("路線規劃");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+
         linearLayout.addView(bookmark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
-        // 將cardview新增到actionBar
-        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+
+        // 创建自定义返回按钮
+        ImageView returnButton = new ImageView(requireContext());
+        returnButton.setImageResource(R.drawable.back);
+        LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(
+                100, // 设置宽度为 100 像素
+                100 // 设置高度为 100 像素
+        );
+        returnButton.setLayoutParams(returnButtonParams);
+
+        // 建立ActionBar的父LinearLayout
+        LinearLayout actionBarLayout = new LinearLayout(requireContext());
+        actionBarLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+        ));
+        actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
+        actionBarLayout.setWeightSum(1.0f);
+
+        // 子LinearLayout用于返回按钮
+        LinearLayout leftLayout = new LinearLayout(requireContext());
+        leftLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0.1f
+        ));
+        leftLayout.setOrientation(LinearLayout.HORIZONTAL);
+        leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        leftLayout.addView(returnButton);
+
+        // 子LinearLayout用于cardViewtitle
+        LinearLayout rightLayout = new LinearLayout(requireContext());
+        rightLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0.9f
+        ));
+        rightLayout.setOrientation(LinearLayout.HORIZONTAL);
+        rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        rightLayout.addView(cardViewtitle);
+
+        // 将子LinearLayout添加到父LinearLayout
+        actionBarLayout.addView(leftLayout);
+        actionBarLayout.addView(rightLayout);
+
+        androidx.appcompat.widget.Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
+
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    Gravity.END));
+            actionBar.setCustomView(actionBarLayout, new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.MATCH_PARENT,
+                    ActionBar.LayoutParams.MATCH_PARENT
+            ));
             actionBar.show();
         }
+
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
     }
 
     //初始化設定表和功能表
@@ -451,16 +501,7 @@ public class FakeCreateLocation extends Fragment {
         //換頁回來再召喚漢堡選單
         if (actionBar != null) {
             // Ensure drawerLayout is not null
-            if (drawerLayout != null) {
-                // Set up ActionBarDrawerToggle
-                if (toggle == null) {
-                    toggle = new ActionBarDrawerToggle(
-                            requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
-                    drawerLayout.addDrawerListener(toggle);
-                    toggle.syncState();
-                }
-                toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
-            }
+            setupActionBar();
         }
     }
 

@@ -86,6 +86,7 @@ public class BookFragment extends Fragment {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
             toolbar = requireActivity().findViewById(R.id.toolbar);
         }
+
         dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
 
@@ -162,6 +163,7 @@ public class BookFragment extends Fragment {
 
                 actionBar.show();
             }
+
         }
     }
 
