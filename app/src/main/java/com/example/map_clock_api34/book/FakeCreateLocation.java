@@ -217,7 +217,7 @@ public class FakeCreateLocation extends Fragment {
                 if (Booknames != null) {
                     ContentValues values = new ContentValues();
                     values.put(BookTable.COLUMN_START_TIME, formattedDate);
-                    //values.put(BookTable.COLUMN_ALARM_NAME, Booknames);
+                    values.put(BookTable.COLUMN_ALARM_NAME, Booknames);
 
                     values.put(BookTable.COLUMN_LOCATION_ID, cursor.getString(0));
 
@@ -226,13 +226,10 @@ public class FakeCreateLocation extends Fragment {
                     writeDB.insert(BookTable.TABLE_NAME, null, values);
                 }
             }
-            //存書籤名字
-            ContentValues name1 = new ContentValues();
-            bookNameEditText = rootView.findViewById(R.id.BookName);
-            name1.put(BookTable.COLUMN_ALARM_NAME, Booknames);
 
             writeDB.close();
             readDB.close();
+
         } catch (Exception e) {
             Log.d("DBProblem", e.getMessage());
         }

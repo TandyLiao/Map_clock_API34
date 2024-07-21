@@ -90,7 +90,7 @@ public class BookFragment extends Fragment {
         dbHelper = new BookDatabaseHelper(requireContext());
         setupRecyclerViews();
 
-        //addFromDB();
+        addFromDB();
 
         return rootView;
     }
@@ -100,8 +100,13 @@ public class BookFragment extends Fragment {
         super.onResume();
         setupActionBar();
         setupNavigationDrawer();
+        RecycleViewReset();
     }
-
+    private void RecycleViewReset() {
+        arrayList.clear();
+        addFromDB();
+        listAdapterBook.notifyDataSetChanged();
+    }
     private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -207,7 +212,7 @@ public class BookFragment extends Fragment {
         String time;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM history WHERE arranged_id=0", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM book WHERE arranged_id=0", null);
         if (cursor != null) {
             while (cursor.moveToNext()) {
 
