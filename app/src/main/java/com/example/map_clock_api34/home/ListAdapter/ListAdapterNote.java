@@ -1,16 +1,14 @@
 package com.example.map_clock_api34.home.ListAdapter;
 
-import android.view.View;
-import android.view.ViewGroup;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.InputType;
-
 import android.view.LayoutInflater;
-
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
+import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
@@ -26,18 +25,14 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
+import com.example.map_clock_api34.note.NoteEnterContent;
 import com.example.map_clock_api34.setting.CreatLocation_setting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
-import android.widget.PopupWindow;
-
-
-
-
-public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHolder> {
+public class ListAdapterNote extends RecyclerView.Adapter<ListAdapterNote.ViewHolder> {
 
     private ArrayList<HashMap<String, String>> arrayList;
     private FragmentTransaction fragmentTransaction;
@@ -50,7 +45,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     private PopupWindow popupWindow;
     private View overlayView;
 
-    public ListAdapterTool(FragmentTransaction fragmentTransaction, SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
+    public ListAdapterNote(FragmentTransaction fragmentTransaction, SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.fragmentTransaction = fragmentTransaction;
         this.arrayList = new ArrayList<>();
         this.weatherAdviceHelper = new WeatherAdviceHelper(sharedViewModel, weatherService, context);
@@ -169,47 +164,32 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         HashMap<String, String> item = arrayList.get(position);
         String data = item.get("data");
-        holder.horecycleName.setText(data);
-        //holder.textView.setText(data);
-        //benson
-        //holder.noteView.setText(data);
 
-        switch (data) {
-            case "記事":
-                holder.horecycleimageView.setImageResource(R.drawable.note);
-                break;
-            case "加入書籤":
-                holder.horecycleimageView.setImageResource(R.drawable.addbookmark);
-                break;
-            case "天氣":
-                holder.horecycleimageView.setImageResource(R.drawable.weather);
-                break;
-            case "推薦路線":
-                holder.horecycleimageView.setImageResource(R.drawable.route_well2);
-                break;
-            case "地點設定":
-                holder.horecycleimageView.setImageResource(R.drawable.vibrate);
-                break;
-            case "哇哭哇哭":
-                holder.horecycleimageView.setImageResource(R.drawable.bell);
-                break;
+        holder.textView.setText(data);
+        //benson
+        //holder.noteView.setText(data); // 假設 noteView 是顯示 note 資料的 TextView
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedViewModel.setSelectedItem(data);
+                ((MainActivity) v.getContext()).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.home_fragment_container, new NoteEnterContent())
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
         }
-    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView horecycleName;
-        private ImageView horecycleimageView;
-        //private TextView textView;
-        //private TextView noteView;
+        private TextView textView;
+        private TextView noteView;
 //benson
         public ViewHolder(View itemView) {
             super(itemView);
-            horecycleName = itemView.findViewById(R.id.horecycle_Name);
-            horecycleimageView = itemView.findViewById(R.id.horecycle_imageView);
-//在幹嘛
-/*
-            noteView=itemView.findViewById(R.id.textView3);
-            noteView.setOnClickListener(new View.OnClickListener() {
+
+            textView=itemView.findViewById(R.id.textView3);
+            /*noteView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
@@ -217,21 +197,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 }
             });*/
 
-            horecycleimageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int position = getAdapterPosition();
-                    handleImageClick(v, position);
-                }
-            });
 
-            horecycleName.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int position = getAdapterPosition();
-                    handleImageClick(v, position);
-                }
-            });
         }
     }
 

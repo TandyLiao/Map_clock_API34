@@ -20,20 +20,30 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.home.CreateLocation;
 
 public class NoteEnterContent extends Fragment {
 
     View rootView;
-
+    private SharedViewModel sharedViewModel;
+    private TextView detailTextView;
+    
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_note_enter_content, container, false);
-
+        detailTextView = rootView.findViewById(R.id.textView3);//benson
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        sharedViewModel.getSelectedItem().observe(getViewLifecycleOwner(), item -> {
+            detailTextView.setText(item);
+        });//benson 目標 Fragment 中觀察 SharedViewModel 中的資料變化，並在資料變化時更新 UI
         setupActionBar();
 
         return rootView;
+
+
     }
     private void setupActionBar() {
         CardView cardViewtitle = new CardView(requireContext());
@@ -138,6 +148,8 @@ public class NoteEnterContent extends Fragment {
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
+
+
     }
 }
 

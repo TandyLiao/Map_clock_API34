@@ -1,5 +1,6 @@
 package com.example.map_clock_api34.note;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -27,6 +28,7 @@ import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.home.CreateLocation;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.SelectPlace;
 
 import java.util.ArrayList;
@@ -232,12 +234,18 @@ public class Note extends Fragment {
         listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, false); // 禁用拖動功能，啟用單選功能
         listAdapterRoute.setOnItemClickListener(new ListAdapterRoute.OnItemClickListener() {
             @Override
+            //benson
             public void onItemClick(int position) {
                 openWritingFragment();
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.recycleViewnote, new NoteEnterContent())
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 
         recyclerViewRoute.setAdapter(listAdapterRoute);
     }
+
 
 }

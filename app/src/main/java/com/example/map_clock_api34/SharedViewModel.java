@@ -1,5 +1,7 @@
 package com.example.map_clock_api34;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class SharedViewModel extends ViewModel {
@@ -34,7 +36,15 @@ public class SharedViewModel extends ViewModel {
     }
 
     public void setNote(String note, int position){    this.note[position]=note;  }
+    //benson
+    private final MutableLiveData<String> selectedItem = new MutableLiveData<>();
 
+    public void setSelectedItem(String item) {
+        selectedItem.setValue(item);
+    }
+    public LiveData<String> getSelectedItem() {
+        return selectedItem;
+    }
     public void setNotification(Boolean check, int position, int whichTime){ this.notification[position][whichTime] = check; }
     public void setVibrate(Boolean check, int position){ this.vibrate[position] = check; }
     public void setRingtone(Boolean check, int position){ this.ringtone[position] = check; }
@@ -47,9 +57,16 @@ public class SharedViewModel extends ViewModel {
         this.nowLantitude=lantitude;
         this.nowLontitude=longtitude;
     }
-
+//benson
     public String getNote(int position){    return note[position];  }
+    public void setNote(int position, String value) {
+        note[position] = value;
+    }
 
+    public void setSelectedItem(int position) {
+        selectedItem.setValue(getNote(position));
+    }
+    //benson
     public Boolean getNotification(int position, int whichTime){ return notification[position][whichTime]; }
     public Boolean getVibrate(int position){ return vibrate[position]; }
     public Boolean getRingtone(int position){ return ringtone[position]; }
