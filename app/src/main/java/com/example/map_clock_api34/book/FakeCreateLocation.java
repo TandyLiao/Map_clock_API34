@@ -142,6 +142,7 @@ public class FakeCreateLocation extends Fragment {
                 Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
                 saveInDB();
                 saveInBookDB();
+                sharedViewModel.clearAll();
 
                 //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
@@ -226,6 +227,7 @@ public class FakeCreateLocation extends Fragment {
                     writeDB.insert(BookTable.TABLE_NAME, null, values);
                 }
             }
+
 
             writeDB.close();
             readDB.close();
