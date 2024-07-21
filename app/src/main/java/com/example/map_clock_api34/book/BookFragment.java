@@ -99,6 +99,7 @@ public class BookFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setupActionBar();
+        setupNavigationDrawer();
     }
 
     private void setupActionBar() {
@@ -166,7 +167,15 @@ public class BookFragment extends Fragment {
 
         }
     }
-
+    private void setupNavigationDrawer() {
+        drawerLayout = requireActivity().findViewById(R.id.drawerLayout);
+        toolbar = requireActivity().findViewById(R.id.toolbar);
+        toggle = new ActionBarDrawerToggle(
+                requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+    }
     private void setupRecyclerViews() {
         recyclerViewBook = rootView.findViewById(R.id.recycleView_book);
         recyclerViewBook.setLayoutManager(new LinearLayoutManager(getActivity()));
