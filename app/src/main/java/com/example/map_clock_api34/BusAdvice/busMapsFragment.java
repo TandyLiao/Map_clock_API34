@@ -2,20 +2,13 @@ package com.example.map_clock_api34.BusAdvice;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,34 +16,21 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 public class busMapsFragment extends Fragment implements BusStationFinderHelper.BusStationFinderCallback {
 
@@ -63,8 +43,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
     private BusStationFinderHelper stationFinder;
 
-    private Map<String, String> secondNearByStop;
-    private Map<String, String> secondDesStop;
+    private List<BusStationFinderHelper.BusStation> secondNearByStop;
+    private List<BusStationFinderHelper.BusStation> secondDesStop;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -134,24 +114,22 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         });
     }
 
-    private void displayBusStopsOnMap(Map<String, String> busStops, float color) {
+    private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color) {
         if (busStops == null || busStops.isEmpty()) {
             return;
         }
 
-        for (Map.Entry<String, String> entry : busStops.entrySet()) {
-            String stopName = entry.getKey();
-            String[] latLon = entry.getValue().split(",");
-            LatLng position = new LatLng(Double.parseDouble(latLon[0]), Double.parseDouble(latLon[1]));
+        for (BusStationFinderHelper.BusStation station : busStops) {
+            LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
             mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(stopName)
+                    .title(station.getStopName())
                     .icon(BitmapDescriptorFactory.defaultMarker(color)));
         }
     }
 
     @Override
-    public void onBusStationsFound(Map<String, String> nearbyStops, Map<String, String> destinationStops) {
+    public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops, List<BusStationFinderHelper.BusStation> destinationStops) {
         secondNearByStop = nearbyStops;
         secondDesStop = destinationStops;
 
