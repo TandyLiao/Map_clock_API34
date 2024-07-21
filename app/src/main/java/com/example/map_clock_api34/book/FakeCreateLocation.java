@@ -20,7 +20,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.EditText;
-import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -282,7 +282,7 @@ public class FakeCreateLocation extends Fragment {
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.home_fragment_container, mapFragment);
+        transaction.replace(R.id.fl_container, mapFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -291,7 +291,7 @@ public class FakeCreateLocation extends Fragment {
     private void openStartMappingFragment() {
         StartMapping StartMapping = new StartMapping();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.home_fragment_container, StartMapping);
+        transaction.replace(R.id.fl_container, StartMapping);
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -354,7 +354,7 @@ public class FakeCreateLocation extends Fragment {
     //初始化設定表和功能表
     private void setupRecyclerViews() {
         // 初始化路線的表
-        recyclerViewRoute = rootView.findViewById(R.id.recycleViewRoute);
+        recyclerViewRoute = rootView.findViewById(R.id.recycleViewRouteBook);
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, true); // 啟用拖動功能
@@ -363,14 +363,6 @@ public class FakeCreateLocation extends Fragment {
         // 讓路線表可以交換、刪除...等動作
         recyclerViewActionHome = new RecyclerViewActionHome();
         recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
-
-        // 初始化下面工具列的表
-        recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
-        recyclerViewTool.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        // 由於ListAdapter獨立出去了，所以要創建換頁的動作並傳給他
-        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-        ListAdapterTool listAdapterTool = new ListAdapterTool(fragmentTransaction, sharedViewModel, weatherService, getActivity());
-        recyclerViewTool.setAdapter(listAdapterTool);
     }
 
     //每次回到路線規劃都會重製路線表，不然會疊加

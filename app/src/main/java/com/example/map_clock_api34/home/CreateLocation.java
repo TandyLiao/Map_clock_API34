@@ -42,7 +42,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.Weather.WeatherService;
-import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
@@ -326,7 +325,7 @@ public class CreateLocation extends Fragment {
     //初始化設定表和功能表
     private void setupRecyclerViews() {
         // 初始化路線的表
-        recyclerViewRoute = rootView.findViewById(R.id.recycleViewRoute);
+        recyclerViewRoute = rootView.findViewById(R.id.recycleViewRouteBook);
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, true); // 啟用拖動功能

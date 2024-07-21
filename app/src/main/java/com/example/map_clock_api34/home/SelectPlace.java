@@ -300,11 +300,7 @@ public class SelectPlace extends Fragment {
 
                 sharedViewModel.setnowLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
 
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.home_fragment_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 
