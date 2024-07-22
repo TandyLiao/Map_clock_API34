@@ -27,19 +27,22 @@ public class NoteEnterContent extends Fragment {
     View rootView;
     private SharedViewModel sharedViewModel;
     private EditText detailTextView;
+    private TextView title;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_note_enter_content, container, false);
 
         detailTextView = rootView.findViewById(R.id.textView3);//benson
+        title = rootView.findViewById(R.id.textView4);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         setupActionBar();
-
+        title.setText(sharedViewModel.getDestinationName(sharedViewModel.getPosition()));
         Button verify = rootView.findViewById(R.id.verifyButton);
         verify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sharedViewModel.setNote(detailTextView.getText().toString(), sharedViewModel.getPosition());
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 

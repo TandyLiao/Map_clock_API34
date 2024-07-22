@@ -355,8 +355,8 @@ public class CreateLocation extends Fragment {
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
             while (sharedViewModel.getLocationCount() >= 0) {
-                arrayList.remove(sharedViewModel.getLocationCount());
-                sharedViewModel.setLocationCount();
+                arrayList.clear();
+                sharedViewModel.clearAll();
             }
             recyclerViewRoute.setAdapter(listAdapterRoute);
             //改變重置按鈕狀態
