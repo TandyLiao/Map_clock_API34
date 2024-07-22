@@ -21,6 +21,7 @@ public class SharedViewModel extends ViewModel {
 
     //記事
     private String[] note = new String[7];
+    private int position=0;
 
     //震動鈴聲
     private Boolean[] vibrate = new Boolean[7];
@@ -35,16 +36,9 @@ public class SharedViewModel extends ViewModel {
         this.longitude[locationCount] = longitude;
     }
 
+    public void setPosition(int position){ this.position = position;}
     public void setNote(String note, int position){    this.note[position]=note;  }
     //benson
-    private final MutableLiveData<String> selectedItem = new MutableLiveData<>();
-
-    public void setSelectedItem(String item) {
-        selectedItem.setValue(item);
-    }
-    public LiveData<String> getSelectedItem() {
-        return selectedItem;
-    }
     public void setNotification(Boolean check, int position, int whichTime){ this.notification[position][whichTime] = check; }
     public void setVibrate(Boolean check, int position){ this.vibrate[position] = check; }
     public void setRingtone(Boolean check, int position){ this.ringtone[position] = check; }
@@ -57,15 +51,9 @@ public class SharedViewModel extends ViewModel {
         this.nowLantitude=lantitude;
         this.nowLontitude=longtitude;
     }
-//benson
+    public int getPosition(){ return position; }
+    //benson
     public String getNote(int position){    return note[position];  }
-    public void setNote(int position, String value) {
-        note[position] = value;
-    }
-
-    public void setSelectedItem(int position) {
-        selectedItem.setValue(getNote(position));
-    }
     //benson
     public Boolean getNotification(int position, int whichTime){ return notification[position][whichTime]; }
     public Boolean getVibrate(int position){ return vibrate[position]; }

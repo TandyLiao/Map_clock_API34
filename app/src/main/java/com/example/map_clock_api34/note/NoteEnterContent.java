@@ -6,44 +6,45 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
 
 public class NoteEnterContent extends Fragment {
 
     View rootView;
     private SharedViewModel sharedViewModel;
-    private TextView detailTextView;
+    private EditText detailTextView;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_note_enter_content, container, false);
+
         detailTextView = rootView.findViewById(R.id.textView3);//benson
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        sharedViewModel.getSelectedItem().observe(getViewLifecycleOwner(), item -> {
-            detailTextView.setText(item);
-        });//benson 目標 Fragment 中觀察 SharedViewModel 中的資料變化，並在資料變化時更新 UI
         setupActionBar();
 
+        Button verify = rootView.findViewById(R.id.verifyButton);
+        verify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedViewModel.setNote(detailTextView.getText().toString(), sharedViewModel.getPosition());
+            }
+        });
+
+
         return rootView;
-
-
     }
     private void setupActionBar() {
         CardView cardViewtitle = new CardView(requireContext());
@@ -150,6 +151,12 @@ public class NoteEnterContent extends Fragment {
         });
 
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        detailTextView.setText(sharedViewModel.getNote(sharedViewModel.getPosition()));
     }
 }
 

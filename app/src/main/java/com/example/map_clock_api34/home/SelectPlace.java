@@ -1,11 +1,6 @@
 package com.example.map_clock_api34.home;
 
 
-import static com.example.map_clock_api34.R.id.btnCancel;
-import static com.example.map_clock_api34.R.id.btnSettings;
-import static com.example.map_clock_api34.R.id.button;
-import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;

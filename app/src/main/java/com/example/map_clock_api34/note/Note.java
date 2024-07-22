@@ -236,11 +236,8 @@ public class Note extends Fragment {
             @Override
             //benson
             public void onItemClick(int position) {
+                sharedViewModel.setPosition(position);
                 openWritingFragment();
-                requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.recycleViewnote, new NoteEnterContent())
-                        .addToBackStack(null)
-                        .commit();
             }
         });
 
