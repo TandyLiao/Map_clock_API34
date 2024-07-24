@@ -24,12 +24,14 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
@@ -45,6 +47,7 @@ public class BookFragment extends Fragment {
     private ImageView setbook_imageView;
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawerLayout;
+    SharedViewModel sharedViewModel;
 
     private View rootView;
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
@@ -61,8 +64,13 @@ public class BookFragment extends Fragment {
 
         setupActionBar();
 
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
         setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
+
+        // 禁用 setbook_imageView，直到選擇了一個項目
+        setbook_imageView.setEnabled(false);
 
         // Set click listeners for ImageViews
         createbook_imageView.setOnClickListener(v -> {
@@ -74,15 +82,56 @@ public class BookFragment extends Fragment {
 
         });
 
-
         setbook_imageView.setOnClickListener(v -> {
-            FakeCreateLocation fakeCreateLocation = new FakeCreateLocation();
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, fakeCreateLocation);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        });
 
+            HashMap<String, String> selectedItem = listAdapterBook.getSelectedItem();
+
+            if (selectedItem != null) {
+                sharedViewModel.routeName = selectedItem.get("placeName2");
+                sharedViewModel.time = selectedItem.get("time");
+                sharedViewModel.clearAll();
+                String time = sharedViewModel.time;
+
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor cursor = db.rawQuery("SELECT * FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                try {
+                    while (cursor.moveToNext()){
+
+                        String locationId = cursor.getString(0);
+                        Cursor locationCursor = db.rawQuery("SELECT * FROM " + LocationTable2.TABLE_NAME + " WHERE " + LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+
+                        if (locationCursor.moveToFirst()) {
+                            String placeName = locationCursor.getString(3);
+                            Double latitude = locationCursor.getDouble(2);
+                            Double longitude = locationCursor.getDouble(1);
+                            String city = locationCursor.getString(5);
+                            String area = locationCursor.getString(6);
+
+                            sharedViewModel.uuid = locationCursor.getString(4);
+                            sharedViewModel.setDestination(placeName, latitude, longitude);
+                            sharedViewModel.setCapital(city);
+                            sharedViewModel.setArea(area);
+                        }
+
+                        locationCursor.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    db.close();
+                    cursor.close();
+                }
+
+                // 處理選擇的項目
+                // 你可以在這裡執行與選擇的項目相關的邏輯
+                EditCreateLocation editCreateLocation = new EditCreateLocation();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, editCreateLocation);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
 
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
@@ -188,9 +237,18 @@ public class BookFragment extends Fragment {
         recyclerViewBook.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewBook.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         listAdapterBook = new ListAdapterHistory(arrayList);
-        //檢測是否有選擇RecycleView的監聽器
-        listAdapterBook.setOnItemSelectedListener(this::updateButtonState);
+
+        // 設置選項選擇監聽器
+        listAdapterBook.setOnItemSelectedListener(new ListAdapterHistory.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected() {
+                // 當選擇了項目時啟用 setbook_imageView
+                setbook_imageView.setEnabled(listAdapterBook.getSelectedPosition() != RecyclerView.NO_POSITION);
+            }
+        });
+
         recyclerViewBook.setAdapter(listAdapterBook);
+
     }
 
     private void updateButtonState() {
@@ -206,7 +264,7 @@ public class BookFragment extends Fragment {
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // Restore title display
         }
-        saveInShareviewModel();
+        //saveInShareviewModel();
     }
 
     private void addFromDB() {

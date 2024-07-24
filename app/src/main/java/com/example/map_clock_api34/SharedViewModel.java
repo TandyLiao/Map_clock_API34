@@ -29,6 +29,8 @@ public class SharedViewModel extends ViewModel {
     //7個地點有3個提醒時間可供選擇;
     private Boolean[][] notification = new Boolean[7][3];
 
+    public String time, routeName, uuid;
+
     public void setDestination(String name, double latitude, double longitude) {
         locationCount++;
         this.destinationName[locationCount] = name;

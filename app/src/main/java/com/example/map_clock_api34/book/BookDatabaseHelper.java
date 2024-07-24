@@ -5,12 +5,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.content.ContentValues;
 
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
-
 public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_book";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public BookDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -23,7 +21,12 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SettingTable.CREATE_TABLE);
         db.execSQL(BookTable.CREATE_TABLE);
     }
-
+    @Override
+    public void onConfigure(SQLiteDatabase bookDB) {
+        super.onConfigure(bookDB);
+        // Enable foreign key constraints
+        bookDB.setForeignKeyConstraintsEnabled(true);
+    }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + BookTable.TABLE_NAME);
@@ -78,9 +81,9 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_ARRANGED_ID + " TEXT,"
                         + COLUMN_NOTE_ID + " INTEGER,"
                         + COLUMN_SETTING_ID + " INTEGER,"
-                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + AppDatabaseHelper.NoteTable.TABLE_NAME + "(" + AppDatabaseHelper.NoteTable.COLUMN_NOTE_ID + "),"
-                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + AppDatabaseHelper.SettingTable.TABLE_NAME + "(" + AppDatabaseHelper.SettingTable.COLUMN_SETTING_ID + "),"
-                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + AppDatabaseHelper.LocationTable.TABLE_NAME + "(" + AppDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + ")ON DELETE CASCADE"
+                        + "FOREIGN KEY(" + COLUMN_NOTE_ID + ") REFERENCES " + NoteTable.TABLE_NAME + "(" + NoteTable.COLUMN_NOTE_ID + "),"
+                        + "FOREIGN KEY(" + COLUMN_SETTING_ID + ") REFERENCES " + SettingTable.TABLE_NAME + "(" + SettingTable.COLUMN_SETTING_ID + "),"
+                        + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable2.TABLE_NAME + "(" + LocationTable2.COLUMN_LOCATION_ID + ")ON DELETE CASCADE"
                         + ")";
     }
 

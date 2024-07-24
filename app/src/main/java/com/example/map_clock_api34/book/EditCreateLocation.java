@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,12 +15,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -36,12 +37,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
-import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
-
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
+import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
@@ -52,19 +51,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class FakeCreateLocation extends Fragment {
+public class EditCreateLocation extends Fragment {
 
     private BookDatabaseHelper dbBookHelper;
-    private EditText bookNameEditText;
-    String names;
-    String Booknames;
-    double latitudes;
-    double longitudes;
     String uniqueID;
 
     ActionBar actionBar;
     private Toolbar toolbar;
-    private ActionBarDrawerToggle toggle;
     private DrawerLayout drawerLayout;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
@@ -92,14 +85,24 @@ public class FakeCreateLocation extends Fragment {
 
         //初始化ActionBar
         setupActionBar();
-        //初始化漢堡選單
-        setupNavigationDrawer();
         //初始化按鈕
         setupButtons();
         //初始化路線表和功能表
         setupRecyclerViews();
 
 
+        EditText editText = rootView.findViewById(R.id.BookName);
+        editText.setText(sharedViewModel.routeName);
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    String inputText = editText.getText().toString();
+                    // 提交数据
+                    sharedViewModel.routeName=inputText;
+                }
+            }
+        });
 
         //換頁回來再召喚漢堡選單
         if (getActivity() != null) {
@@ -110,7 +113,6 @@ public class FakeCreateLocation extends Fragment {
 
         return rootView;
     }
-
 
     //初始化按鈕(包含定位請求)
     private void setupButtons() {
@@ -129,8 +131,10 @@ public class FakeCreateLocation extends Fragment {
         });
         //重置按鈕初始化
         btnReset = rootView.findViewById(R.id.btn_reset);
-        btnReset.setOnClickListener(v -> ShowPopupWindow());
-
+        //btnReset.setOnClickListener(v -> ShowPopupWindow());
+        btnReset.setOnClickListener(v ->{
+            Toast.makeText(getActivity(), sharedViewModel.getDestinationName(sharedViewModel.getLocationCount()), Toast.LENGTH_SHORT).show();
+        });
 
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
@@ -141,64 +145,37 @@ public class FakeCreateLocation extends Fragment {
                     Toast.makeText(getActivity(), "你沒有輸入書籤名稱!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                deleteDB();
                 saveInLocationDB();
                 saveInBookDB();
                 sharedViewModel.clearAll();
-
+                arrayList.clear();
                 //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private void deleteDB() {
+        SQLiteDatabase bookDB = dbBookHelper.getWritableDatabase();
+        bookDB.beginTransaction();
+        try {
+            // 刪除 book 表中的記錄
+            String sql = "DELETE FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + "=?";
+            bookDB.execSQL(sql, new String[]{sharedViewModel.time});
 
-        // 導航到 book_fragment_book.xml
-                /*FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                Fragment bookFragment = new BookFragment(); // 需要你自己創建這個 Fragment
-                transaction.replace(R.id.fragment_container, bookFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();*/
-        //換頁功能book_create_route
-            /*Button editButton = view.findViewById(R.id.book_create_route);
-            editButton.setOnClickListener(v -> {
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
-                transaction.addToBackStack(null); // 將這個交易添加到後退堆棧中，以便用戶可以按返回按鈕返回
-                transaction.commit();
-            });*/
-        /*吳俊廷的實驗區。都別給我碰(#`Д´)ﾉ
+            // 刪除 location 表中的記錄
+            String locationSql = "DELETE FROM " + LocationTable2.TABLE_NAME + " WHERE " + LocationTable2.COLUMN_ALARM_NAME + "=?";
+            bookDB.execSQL(locationSql, new String[]{sharedViewModel.uuid});
 
-        public void insertDataToDatabase() {
-        //Get data from SharedViewModel
-        String[] names = sharedViewModel.getDestinationNameArray();
-        double[] latitudes = sharedViewModel.getLatitudeArray();
-        double[] longitudes = sharedViewModel.getLongitudeArray();
-        //Open database in write mode
-        SQLiteDatabase db = this.getWritableDatabase();
-        //Insert data into the database
-        for (int i = 0; i < names.length; i++) {
-            if (names[i] != null && latitudes[i] != 0 && longitudes[i] != 0) {
-                ContentValues values = new ContentValues();
-                values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
-                values.put(LocationTable.COLUMN_LATITUDE, latitudes[i]);
-                values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
-                db.insert(LocationTable.TABLE_NAME, null, values);
-            }
+            bookDB.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            bookDB.endTransaction();
+            bookDB.close();
         }
-        Close the database
-        db.close();
-    }
-    public class Example {
-    public static void main(String[] args) {
-        long currentTimeMillis = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = sdf.format(new Date(currentTimeMillis));
-        System.out.println("Current time: " + formattedDate);
-    }
-}
-    */
-
     }
 
     private void saveInBookDB() {
@@ -233,7 +210,6 @@ public class FakeCreateLocation extends Fragment {
 
             writeDB.close();
             readDB.close();
-            cursor.close();
 
         } catch (Exception e) {
             Log.d("DBProblem", e.getMessage());
@@ -279,10 +255,6 @@ public class FakeCreateLocation extends Fragment {
         transaction.replace(R.id.fl_container, mapFragment);
         transaction.addToBackStack(null);
         transaction.commit();
-    }
-
-    //初始化漢堡選單
-    private void setupNavigationDrawer() {
     }
 
     //ActionBar初始設定
@@ -374,7 +346,7 @@ public class FakeCreateLocation extends Fragment {
         actionBarLayout.addView(leftLayout);
         actionBarLayout.addView(rightLayout);
 
-        androidx.appcompat.widget.Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
 
         if (actionBar != null) {

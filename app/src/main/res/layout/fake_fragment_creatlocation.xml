@@ -18,6 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="1dp"
             android:hint="請輸入名稱"
+            android:textColorHint="@color/gray"
             android:inputType="text"
             android:textColor="#4E4E4E"
             android:textSize="12sp"
@@ -198,6 +199,7 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="4dp"
             android:text="請為書籤命名:"
+            android:textColor="@color/black"
             android:textSize="19sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recycleViewRouteBook" />

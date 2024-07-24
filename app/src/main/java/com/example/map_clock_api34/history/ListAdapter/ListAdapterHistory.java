@@ -20,6 +20,8 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
     private boolean isEditMode = false;
     private boolean isMultiSelect = false;
     private OnItemSelectedListener onItemSelectedListener;
+    private int selectedPosition = RecyclerView.NO_POSITION;// 用來存儲選擇的位置
+    private String temp;
 
     //檢測是否有選擇RecycleView的監聽器
     public interface OnItemSelectedListener {
@@ -74,6 +76,7 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
                 } else {
                     clearSelections();
                     item.put("isSelected", isSelected ? "false" : "true");
+                    selectedPosition = isSelected ? RecyclerView.NO_POSITION : position; // 更新選擇的位置
                 }
                 notifyDataSetChanged();
                 if (onItemSelectedListener != null) {
@@ -92,6 +95,16 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
         for (HashMap<String, String> item : arrayList) {
             item.put("isSelected", "false");
         }
+        selectedPosition = RecyclerView.NO_POSITION;
+    }
+    public int getSelectedPosition() {
+        return selectedPosition;
+    }
+    public HashMap<String, String> getSelectedItem() {
+        if (selectedPosition != RecyclerView.NO_POSITION) {
+            return arrayList.get(selectedPosition);
+        }
+        return null;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
