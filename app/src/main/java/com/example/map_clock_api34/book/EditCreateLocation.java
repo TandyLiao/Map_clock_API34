@@ -131,10 +131,7 @@ public class EditCreateLocation extends Fragment {
         });
         //重置按鈕初始化
         btnReset = rootView.findViewById(R.id.btn_reset);
-        //btnReset.setOnClickListener(v -> ShowPopupWindow());
-        btnReset.setOnClickListener(v ->{
-            Toast.makeText(getActivity(), sharedViewModel.getDestinationName(sharedViewModel.getLocationCount()), Toast.LENGTH_SHORT).show();
-        });
+        btnReset.setOnClickListener(v -> ShowPopupWindow());
 
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
@@ -153,7 +150,8 @@ public class EditCreateLocation extends Fragment {
                 //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
             } else {
-                Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
+                deleteDB();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
     }

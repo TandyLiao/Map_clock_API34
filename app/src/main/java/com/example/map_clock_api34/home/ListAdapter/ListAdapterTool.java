@@ -101,7 +101,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
         }
         else if (position == 1) {
-
+            if (sharedViewModel.getLocationCount() == -1) {
+                Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
 
             //套用XML的布局
