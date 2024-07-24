@@ -219,7 +219,7 @@ public class BookFragment extends Fragment {
             while (cursor.moveToNext()) {
 
                 String placeNameTemp = cursor.getString(3);
-                //找到"->"的位置
+                /*//找到"->"的位置
                 int index = placeNameTemp.indexOf("->");
                 //把"->"前的資料抓出來
                 String beforeArrow = placeNameTemp.substring(0,index);
@@ -230,14 +230,15 @@ public class BookFragment extends Fragment {
                 String afterArrow = placeNameTemp.substring(index+2);
                 if(afterArrow.length()>20){
                     afterArrow=afterArrow.substring(0,20)+"...";
-                }
+                }*/
 
                 time = cursor.getString(1);
 
                 HashMap<String, String> hashMap = new HashMap<>();
-                hashMap.put("placeName", beforeArrow);
-                hashMap.put("placeName2", "\u2193");
-                hashMap.put("placeName3", afterArrow);
+                //hashMap.put("placeName", beforeArrow);
+                //hashMap.put("placeName2", "\u2193");
+                //hashMap.put("placeName3", afterArrow);
+                hashMap.put("placeName2", placeNameTemp);
                 hashMap.put("time", time);
                 arrayList.add(hashMap);
             }

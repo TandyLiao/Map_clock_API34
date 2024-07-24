@@ -1,5 +1,9 @@
 package com.example.map_clock_api34.home.ListAdapter;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -9,6 +13,7 @@ import android.text.InputType;
 
 import android.view.LayoutInflater;
 
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,8 +33,11 @@ import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.Note;
 import com.example.map_clock_api34.setting.CreatLocation_setting;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 
 import android.widget.PopupWindow;
@@ -46,9 +54,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     private BookDatabaseHelper dbBookHelper;
     private SettingsHandler settingsHandler;
 
-
-    private PopupWindow popupWindow;
-    private View overlayView;
+    String uniqueID;
 
     public ListAdapterTool(FragmentTransaction fragmentTransaction, SharedViewModel sharedViewModel, WeatherService weatherService, Context context) {
         this.fragmentTransaction = fragmentTransaction;
@@ -95,43 +101,50 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
         }
         else if (position == 1) {
+
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
-            builder.setTitle("請輸入書籤名稱");
 
-            // 设置输入框
-            final EditText input = new EditText(context);
+            //套用XML的布局
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View customView = inflater.inflate(R.layout.popupwindow_setbook, null);
+
+            //找到XML的輸入框
+            EditText input = customView.findViewById(R.id.input);
             input.setInputType(InputType.TYPE_CLASS_TEXT);
-            input.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT)); // 设置输入框布局参数
-            builder.setView(input);
+            builder.setView(customView);
 
-            // 设置确定按钮
-            builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+            // 创建并显示对话框
+            AlertDialog dialog = builder.create();
+            // 設置點擊對話框外部不會關閉對話框
+            dialog.setCanceledOnTouchOutside(false);
+
+            // 找到並設置按鈕事件
+            Button positiveButton = customView.findViewById(R.id.Popupsure);
+            Button negativeButton = customView.findViewById(R.id.PopupCancel);
+
+            positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(View v) {
                     String bookmarkName = input.getText().toString();
                     if (!bookmarkName.isEmpty()) {
-                        // 处理确定按钮点击事件
-                        dbBookHelper.addBookmark(bookmarkName);
+                        // 處理確定按鈕點擊事件
+                        saveInLocationDB();
+                        saveInBookDB(bookmarkName);
                         Toast.makeText(context, "書籤 '" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
                     } else {
                         Toast.makeText(context, "請輸入書籤名稱", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
-            // 设置取消按钮
-            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            negativeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // 处理取消按钮点击事件
+                public void onClick(View v) {
                     dialog.cancel();
                 }
             });
 
-            // 创建并显示对话框
-            AlertDialog dialog = builder.create();
             dialog.show();
         }
 
@@ -246,5 +259,72 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     @Override
     public int getItemCount() {
         return arrayList.size();
+    }
+
+    private void saveInLocationDB() {
+
+        //產生一組獨一無二的ID存入區域變數內(重複機率近乎為0)
+        //用這ID去做Location_id和BookTable做配對
+        uniqueID = UUID.randomUUID().toString();
+
+        SQLiteDatabase db = dbBookHelper.getWritableDatabase();
+
+        for (int i = 0; i <= sharedViewModel.getLocationCount(); i++) {
+
+            String name = sharedViewModel.getDestinationName(i);
+            double latitude = sharedViewModel.getLatitude(i);
+            double longitude = sharedViewModel.getLongitude(i);
+            String CityName = sharedViewModel.getCapital(i);
+            String AreaName = sharedViewModel.getArea(i);
+
+            if (name != null) {
+                ContentValues values = new ContentValues();
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_PLACE_NAME, name);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_LATITUDE, latitude);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_LONGITUDE, longitude);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_ALARM_NAME, uniqueID);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_CITY_NAME, CityName);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_AREA_NAME, AreaName);
+
+                db.insert(BookDatabaseHelper.LocationTable2.TABLE_NAME, null, values);
+            }
+        }
+        db.close();
+    }
+
+    private void saveInBookDB(String bookName) {
+
+        try {
+            SQLiteDatabase writeDB = dbBookHelper.getWritableDatabase();
+            SQLiteDatabase readDB = dbBookHelper.getReadableDatabase();
+
+            Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[]{uniqueID});
+
+            long currentTimeMillis = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = sdf.format(new Date(currentTimeMillis));
+
+            //此變數要讓History的每筆路線都從0開始存入
+            int arranged_id_local=0;
+
+            while (cursor.moveToNext()) {
+                if (bookName != null) {
+                    ContentValues values = new ContentValues();
+                    values.put(BookDatabaseHelper.BookTable.COLUMN_START_TIME, formattedDate);
+                    values.put(BookDatabaseHelper.BookTable.COLUMN_ALARM_NAME, bookName);
+                    values.put(BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID, cursor.getString(0));
+                    //arranged_id_local存入History表後再+1
+                    values.put(BookDatabaseHelper.BookTable.COLUMN_ARRANGED_ID, arranged_id_local++);
+                    writeDB.insert(BookDatabaseHelper.BookTable.TABLE_NAME, null, values);
+                }
+            }
+
+
+            writeDB.close();
+            readDB.close();
+
+        } catch (Exception e) {
+            Log.d("DBProblem", e.getMessage());
+        }
     }
 }

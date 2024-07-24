@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="1dp"
             android:hint="請輸入名稱"
-            android:inputType="numberDecimal"
+            android:inputType="text"
             android:textColor="#4E4E4E"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"

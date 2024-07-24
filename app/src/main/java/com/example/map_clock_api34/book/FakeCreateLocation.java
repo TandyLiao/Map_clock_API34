@@ -42,12 +42,9 @@ import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
-import com.example.map_clock_api34.home.StartMapping;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -80,7 +77,7 @@ public class FakeCreateLocation extends Fragment {
     //獨立出來是因為要設置不可點擊狀態
     Button btnReset;
     SharedViewModel sharedViewModel;
-    WeatherService weatherService = new WeatherService();
+    EditText input;
 
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
@@ -90,6 +87,8 @@ public class FakeCreateLocation extends Fragment {
         dbBookHelper = new BookDatabaseHelper(requireContext());
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        input = rootView.findViewById(R.id.BookName);
 
         //初始化ActionBar
         setupActionBar();
@@ -137,10 +136,13 @@ public class FakeCreateLocation extends Fragment {
         btnMapping.setOnClickListener(v -> {
             //如有選擇地點就導航，沒有就跳提醒，加上吳俊廷的匯入資料庫的程式
             if (sharedViewModel.getLocationCount() >= 0) {
-                //openStartMappingFragment();
 
-                Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
-                saveInDB();
+                if(input.getText().toString().equals("")){
+                    Toast.makeText(getActivity(), "你沒有輸入書籤名稱!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                saveInLocationDB();
                 saveInBookDB();
                 sharedViewModel.clearAll();
 
@@ -215,10 +217,10 @@ public class FakeCreateLocation extends Fragment {
             int arranged_id_local=0;
 
             while (cursor.moveToNext()) {
-                if (Booknames != null) {
+                if (input.getText().toString() != null) {
                     ContentValues values = new ContentValues();
                     values.put(BookTable.COLUMN_START_TIME, formattedDate);
-                    values.put(BookTable.COLUMN_ALARM_NAME, Booknames);
+                    values.put(BookTable.COLUMN_ALARM_NAME, input.getText().toString());
 
                     values.put(BookTable.COLUMN_LOCATION_ID, cursor.getString(0));
 
@@ -245,7 +247,7 @@ public class FakeCreateLocation extends Fragment {
         }
     }
 
-    private void saveInDB() {
+    private void saveInLocationDB() {
 
         //產生一組獨一無二的ID存入區域變數內(重複機率近乎為0)
         //用這ID去做Location_id和History做配對
