@@ -2,6 +2,7 @@ package com.example.map_clock_api34.book;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -14,6 +15,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -147,6 +149,7 @@ public class EditCreateLocation extends Fragment {
                 saveInBookDB();
                 sharedViewModel.clearAll();
                 arrayList.clear();
+                hideKeyboard();
                 //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
             } else {
@@ -487,6 +490,15 @@ public class EditCreateLocation extends Fragment {
             btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
+        }
+    }
+    private void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
     }
 }
