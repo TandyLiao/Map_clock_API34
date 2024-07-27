@@ -155,51 +155,6 @@ public class FakeCreateLocation extends Fragment {
             }
         });
 
-        // 導航到 book_fragment_book.xml
-                /*FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                Fragment bookFragment = new BookFragment(); // 需要你自己創建這個 Fragment
-                transaction.replace(R.id.fragment_container, bookFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();*/
-        //換頁功能book_create_route
-            /*Button editButton = view.findViewById(R.id.book_create_route);
-            editButton.setOnClickListener(v -> {
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, new HistoryEditFragment());
-                transaction.addToBackStack(null); // 將這個交易添加到後退堆棧中，以便用戶可以按返回按鈕返回
-                transaction.commit();
-            });*/
-        /*吳俊廷的實驗區。都別給我碰(#`Д´)ﾉ
-
-        public void insertDataToDatabase() {
-        //Get data from SharedViewModel
-        String[] names = sharedViewModel.getDestinationNameArray();
-        double[] latitudes = sharedViewModel.getLatitudeArray();
-        double[] longitudes = sharedViewModel.getLongitudeArray();
-        //Open database in write mode
-        SQLiteDatabase db = this.getWritableDatabase();
-        //Insert data into the database
-        for (int i = 0; i < names.length; i++) {
-            if (names[i] != null && latitudes[i] != 0 && longitudes[i] != 0) {
-                ContentValues values = new ContentValues();
-                values.put(LocationTable.COLUMN_PLACE_NAME, names[i]);
-                values.put(LocationTable.COLUMN_LATITUDE, latitudes[i]);
-                values.put(LocationTable.COLUMN_LONGITUDE, longitudes[i]);
-                db.insert(LocationTable.TABLE_NAME, null, values);
-            }
-        }
-        Close the database
-        db.close();
-    }
-    public class Example {
-    public static void main(String[] args) {
-        long currentTimeMillis = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = sdf.format(new Date(currentTimeMillis));
-        System.out.println("Current time: " + formattedDate);
-    }
-}
-    */
 
     }
 
