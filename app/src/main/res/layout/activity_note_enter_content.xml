@@ -5,37 +5,50 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightyellow"
     tools:context=".note.NoteEnterContent">
 
     <Button
         android:id="@+id/verifyButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="140dp"
-        android:text="Button"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/btn_additem"
+        android:textColor="@color/darkgreen"
+        android:textSize="15sp"
+        app:backgroundTint="@null"
+        android:text="確認"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <EditText
-        android:id="@+id/textView3"
-        android:layout_width="255dp"
-        android:layout_height="138dp"
-        android:layout_marginTop="236dp"
-        android:text="TextView"
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="411dp"
+        android:layout_height="59dp"
+        android:background="@color/darkyellow"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:text=""
+        android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="216dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="104dp"
-        android:text=""
-        android:textSize="25sp"
+    <EditText
+        android:id="@+id/textView3"
+        android:layout_width="411dp"
+        android:layout_height="118dp"
+        android:layout_marginTop="56dp"
+        android:background="@color/lightgreen"
+        android:hint="請輸入內容"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

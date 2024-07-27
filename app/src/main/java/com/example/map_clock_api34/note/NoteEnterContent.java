@@ -34,6 +34,11 @@ public class NoteEnterContent extends Fragment {
 
         detailTextView = rootView.findViewById(R.id.textView3);//benson
         title = rootView.findViewById(R.id.textView4);
+        //改尺寸
+
+        title.setTextColor(getResources().getColor(R.color.black)); // 更改文字颜色
+
+
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         setupActionBar();
         title.setText(sharedViewModel.getDestinationName(sharedViewModel.getPosition()));
@@ -67,7 +72,7 @@ public class NoteEnterContent extends Fragment {
 
         // ImageView放置圖案
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.weather);
+        mark.setImageResource(R.drawable.note);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
@@ -77,7 +82,7 @@ public class NoteEnterContent extends Fragment {
 
         // 創建TextView
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("你好");
+        bookTitle.setText("記事");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
@@ -161,5 +166,6 @@ public class NoteEnterContent extends Fragment {
         super.onResume();
         detailTextView.setText(sharedViewModel.getNote(sharedViewModel.getPosition()));
     }
+
 }
 
