@@ -11,7 +11,7 @@
     <Button
         android:id="@+id/verifyButton"
         android:layout_width="100dp"
-        android:layout_height="40dp"
+        android:layout_height="60dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/btn_additem"
@@ -25,7 +25,7 @@
 
     <TextView
         android:id="@+id/textView4"
-        android:layout_width="411dp"
+        android:layout_width="match_parent"
         android:layout_height="59dp"
         android:background="@color/darkyellow"
         android:gravity="center_vertical"
@@ -37,19 +37,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/textView3"
-        android:layout_width="411dp"
-        android:layout_height="118dp"
-        android:layout_marginTop="56dp"
-        android:background="@color/lightgreen"
-        android:hint="請輸入內容"
-        android:gravity="center_vertical"
-        android:paddingLeft="20dp"
-        android:textSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="@color/lightgreen"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintTop_toBottomOf="@id/textView4"
+        app:layout_constraintBottom_toTopOf="@+id/verifyButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="請輸入內容"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:textSize="20dp"
+            android:background="@android:color/transparent" />
+
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

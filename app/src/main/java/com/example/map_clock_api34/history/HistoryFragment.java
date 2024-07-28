@@ -70,12 +70,14 @@ public class HistoryFragment extends Fragment {
     private AppDatabaseHelper dbHelper;
     private FusedLocationProviderClient fusedLocationClient;
 
+    private boolean isFirstEditClick = true;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
 
-        dbHelper= new AppDatabaseHelper(requireContext());
+        dbHelper = new AppDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
@@ -86,46 +88,38 @@ public class HistoryFragment extends Fragment {
     }
 
     private void setupButtons() {
-        // 編輯以及確認按鈕
+        // 編輯以及返回按鈕
         btnEdit = rootView.findViewById(R.id.EditButton);
         btnEdit.setOnClickListener(v -> {
             isEdit = !isEdit;
-            isDelete = !isDelete;
-
-            updateButtonState();
-            listAdapterHistory.setEditMode(isEdit, isEdit);
+            // 如果 isEdit 為 false，則進入初始狀態
             if (!isEdit) {
-                clearSelections();
-            }
-            else{
+                isDelete = false;
+                updateButtonState();
+                clearSelections();   // 清除選擇
+            } else {
                 listAdapterHistory.clearSelections();
                 updateButtonState();
             }
+            listAdapterHistory.setEditMode(isEdit, isEdit); // 設置適配器的編輯模式
+            updateButtonState();
+
         });
 
         // 清除資料庫按鈕
         btnClearAll = rootView.findViewById(R.id.ClearAllButton);
-        btnClearAll.setOnClickListener(v -> {
+        btnClearAll.setOnClickListener(v -> showPopupWindowForClearAll());
 
-            dbHelper.clearAllTables();
-            Toast.makeText(getActivity(), "已清除所有紀錄", Toast.LENGTH_SHORT).show();
 
-            arrayList.clear();
-            listAdapterHistory.notifyDataSetChanged();
 
-            isEdit = false;    // 回到初始状态
-            isDelete = false;  // 回到初始状态
-            updateButtonState(); // 更新按鈕狀態
-        });
+// 把疊加在底層的View刪掉
 
-        // 刪除以及套用按鈕
+
+        // 套用和刪除按鈕
         btnSelect = rootView.findViewById(R.id.SelectButton);
         btnSelect.setOnClickListener(v -> {
-            if (isDelete) {
-                ShowPopupWindow();
-
-            } else {
-                //如果他沒同意定位需求則跳else叫他打開
+            if (!isEdit) {
+                // 正常模式下的套用功能
                 if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     // 套用按鈕在這實現功能
                     saveInShareviewModel();
@@ -134,10 +128,72 @@ public class HistoryFragment extends Fragment {
                     Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
                 }
 
+
+            } else {
+                isEdit = true;
+                isDelete = !isDelete;
+                updateButtonState();
+                listAdapterHistory.setEditMode(isEdit, isEdit);
+
+                if (isDelete) {
+                    ShowPopupWindow();
+                } else {
+                    listAdapterHistory.clearSelections();
+                    updateButtonState();
+
+                }
             }
         });
 
         updateButtonState(); // 初始化按鈕狀態
+    }
+    private void showPopupWindowForClearAll() {
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
+        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setWidth(700);
+        popupWindow.setFocusable(false);
+        popupWindow.setOutsideTouchable(false);
+
+        // 讓PopupWindow顯示出來的關鍵句
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        // 疊加View在底下，讓她不會按到底層就跳掉
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setClickable(true);
+        ((ViewGroup) rootView).addView(overlayView);
+
+        // PopupWindow的文字顯示
+        TextView warning = view.findViewById(R.id.txtNote);
+        warning.setText("資料即將全部刪除");
+
+        // PopUpWindow的取消按鈕
+        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        BTNPopup.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            // 移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
+        });
+
+        // PopupWindow的確認按鈕
+        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        btnsure.setOnClickListener(v -> {
+            // 清除所有記錄
+            dbHelper.clearAllTables();
+            Toast.makeText(getActivity(), "已清除所有紀錄", Toast.LENGTH_SHORT).show();
+
+            arrayList.clear();
+            listAdapterHistory.notifyDataSetChanged();
+
+            isEdit = false;    // 回到初始狀態
+            isDelete = false;  // 回到初始狀態
+            updateButtonState(); // 更新按鈕狀態
+
+            popupWindow.dismiss();
+            removeOverlayView();
+        });
     }
 
     private void setupRecyclerViews() {
@@ -171,14 +227,14 @@ public class HistoryFragment extends Fragment {
                 //找到"->"的位置
                 int index = placeNameTemp.indexOf("->");
                 //把"->"前的資料抓出來
-                String beforeArrow = placeNameTemp.substring(0,index);
-                if(beforeArrow.length()>20){
-                    beforeArrow=beforeArrow.substring(0,20)+"...";
+                String beforeArrow = placeNameTemp.substring(0, index);
+                if (beforeArrow.length() > 20) {
+                    beforeArrow = beforeArrow.substring(0, 20) + "...";
                 }
                 //把"->"後的資料抓出來
-                String afterArrow = placeNameTemp.substring(index+2);
-                if(afterArrow.length()>20){
-                    afterArrow=afterArrow.substring(0,20)+"...";
+                String afterArrow = placeNameTemp.substring(index + 2);
+                if (afterArrow.length() > 20) {
+                    afterArrow = afterArrow.substring(0, 20) + "...";
                 }
 
                 time = cursor.getString(1);
@@ -207,6 +263,7 @@ public class HistoryFragment extends Fragment {
         updateButtonState();
         RecycleViewReset();
     }
+
     private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -272,7 +329,7 @@ public class HistoryFragment extends Fragment {
         //RecycleView沒有東西時的按鈕狀態
         if (hasItems) {
 
-            btnEdit.setEnabled(false);
+            btnEdit.setEnabled(true);
             btnSelect.setEnabled(false);
             btnClearAll.setEnabled(false);
             btnClearAll.setVisibility(View.INVISIBLE);
@@ -311,7 +368,7 @@ public class HistoryFragment extends Fragment {
             }
         } else {
             //在編輯模式下的按鈕狀態
-            btnEdit.setText("確認");
+            btnEdit.setText("返回");
             btnSelect.setText("刪除");
             btnClearAll.setVisibility(View.VISIBLE);
             btnClearAll.setEnabled(true);
@@ -334,7 +391,7 @@ public class HistoryFragment extends Fragment {
 
     private void saveInShareviewModel() {
         sharedViewModel.clearAll();
-        String time="";
+        String time = "";
         for (HashMap<String, String> item : arrayList) {
             if ("true".equals(item.get("isSelected"))) {
                 time = item.get("time");
@@ -345,7 +402,7 @@ public class HistoryFragment extends Fragment {
         Cursor cursor = db.rawQuery("SELECT * FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
         db.beginTransaction();
         try {
-            while (cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 String locationId = cursor.getString(0);
                 Cursor locationCursor = db.rawQuery("SELECT * FROM " + AppDatabaseHelper.LocationTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
                 if (locationCursor.moveToFirst()) {
@@ -371,6 +428,7 @@ public class HistoryFragment extends Fragment {
         }
         openCreaLocationFragment();
     }
+
     @SuppressLint("MissingPermission")
     private void getLastKnownLocation() {
         fusedLocationClient.getLastLocation()
@@ -379,7 +437,7 @@ public class HistoryFragment extends Fragment {
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            sharedViewModel.setnowLocation(location.getLatitude(),location.getLongitude());
+                            sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
                             // Logic to handle location object
                             Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
                         } else {
@@ -438,7 +496,7 @@ public class HistoryFragment extends Fragment {
         });
     }
 
-    private void deleteFromDB(){
+    private void deleteFromDB() {
         ArrayList<HashMap<String, String>> selectedItems = new ArrayList<>();
         for (HashMap<String, String> item : arrayList) {
             if ("true".equals(item.get("isSelected"))) {
@@ -465,6 +523,7 @@ public class HistoryFragment extends Fragment {
         arrayList.removeAll(selectedItems);
         listAdapterHistory.notifyDataSetChanged();
     }
+
     //打開導航頁面
     private void openCreaLocationFragment() {
         HomeFragment createLocationFragment = new HomeFragment();
@@ -476,6 +535,7 @@ public class HistoryFragment extends Fragment {
         NavigationView navigationView = getActivity().findViewById(R.id.navigation_view);
         navigationView.setCheckedItem(R.id.action_home);
     }
+
     // 把疊加在底層的View刪掉
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {
