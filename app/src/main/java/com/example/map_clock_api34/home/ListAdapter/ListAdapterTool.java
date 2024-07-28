@@ -222,16 +222,6 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             super(itemView);
             horecycleName = itemView.findViewById(R.id.horecycle_Name);
             horecycleimageView = itemView.findViewById(R.id.horecycle_imageView);
-//在幹嘛
-/*
-            noteView=itemView.findViewById(R.id.textView3);
-            noteView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int position = getAdapterPosition();
-                    handleImageClick(v, position);
-                }
-            });*/
 
             horecycleimageView.setOnClickListener(new View.OnClickListener() {
                 @Override
