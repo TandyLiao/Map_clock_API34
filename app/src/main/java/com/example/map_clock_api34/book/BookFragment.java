@@ -244,7 +244,7 @@ public class BookFragment extends Fragment {
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
     }
-
+    //1刪除
     private void setupRecyclerViews() {
         recyclerViewBook = rootView.findViewById(R.id.recycleView_book);
         recyclerViewBook.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -291,6 +291,7 @@ public class BookFragment extends Fragment {
         itemTouchHelper.attachToRecyclerView(recyclerViewBook);
 
     }
+    //刪除提醒
     private void showDeleteConfirmationDialog(int position) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("刪除確認")
@@ -309,6 +310,7 @@ public class BookFragment extends Fragment {
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
+    //刪除項目
     private void removeItem(int position) {
         HashMap<String, String> item = arrayList.get(position);
         String time = item.get("time");
