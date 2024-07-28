@@ -44,6 +44,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class BookFragment extends Fragment {
 
@@ -267,7 +271,7 @@ public class BookFragment extends Fragment {
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                removeItem(position);
+                showDeleteConfirmationDialog(position);
             }
 
             @Override
@@ -286,6 +290,24 @@ public class BookFragment extends Fragment {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerViewBook);
 
+    }
+    private void showDeleteConfirmationDialog(int position) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("刪除確認")
+                .setMessage("你確定要刪除這個項目嗎？")
+                .setPositiveButton("刪除", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        removeItem(position);
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        listAdapterBook.notifyItemChanged(position);
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
     private void removeItem(int position) {
         HashMap<String, String> item = arrayList.get(position);
