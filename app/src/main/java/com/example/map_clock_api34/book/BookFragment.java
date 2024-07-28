@@ -40,6 +40,11 @@ import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import androidx.recyclerview.widget.ItemTouchHelper;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+
 public class BookFragment extends Fragment {
 
     private Toolbar toolbar;
@@ -225,6 +230,7 @@ public class BookFragment extends Fragment {
 
         }
     }
+
     private void setupNavigationDrawer() {
         drawerLayout = requireActivity().findViewById(R.id.drawerLayout);
         toolbar = requireActivity().findViewById(R.id.toolbar);
@@ -234,6 +240,7 @@ public class BookFragment extends Fragment {
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
     }
+
     private void setupRecyclerViews() {
         recyclerViewBook = rootView.findViewById(R.id.recycleView_book);
         recyclerViewBook.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -250,7 +257,58 @@ public class BookFragment extends Fragment {
         });
 
         recyclerViewBook.setAdapter(listAdapterBook);
+        // 添加左滑刪除功能
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
 
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                removeItem(position);
+            }
+
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                // 自定義滑動背景顏色
+                View itemView = viewHolder.itemView;
+                Paint paint = new Paint();
+                paint.setColor(ContextCompat.getColor(getContext(), R.color.red)); // 設置背景顏色
+                RectF background = new RectF(itemView.getRight() + dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
+                c.drawRect(background, paint);
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerViewBook);
+
+    }
+    private void removeItem(int position) {
+        HashMap<String, String> item = arrayList.get(position);
+        String time = item.get("time");
+
+        // 從數據庫中刪除選中的項目
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+
+        // 從 arrayList 中刪除項目
+        arrayList.remove(position);
+        listAdapterBook.notifyItemRemoved(position);
+
+        updateButtonState(); // 更新按鈕狀態
     }
 
     private void updateButtonState() {
