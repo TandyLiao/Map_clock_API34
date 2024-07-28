@@ -52,7 +52,6 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
     private WeatherAdviceHelper weatherAdviceHelper;
     private SharedViewModel sharedViewModel;
     private BookDatabaseHelper dbBookHelper;
-    private SettingsHandler settingsHandler;
 
     String uniqueID;
 
@@ -62,7 +61,6 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         this.weatherAdviceHelper = new WeatherAdviceHelper(sharedViewModel, weatherService, context);
         this.sharedViewModel = sharedViewModel;
         this.dbBookHelper = new BookDatabaseHelper(context);
-        this.settingsHandler = new SettingsHandler(context);
         initData();
     }
 
@@ -178,7 +176,8 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
 
         } else if (position == 5) {
-            settingsHandler.showSettingsPopupWindow();        }
+           // settingsHandler.showSettingsPopupWindow();
+        }
     }
 
     @Override

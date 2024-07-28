@@ -4,7 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.content.Context;
 import android.content.SharedPreferences;
-
+import android.media.RingtoneManager;
+import android.net.Uri;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -214,11 +215,11 @@ public class StartMapping extends Fragment {
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
             if (isRingtoneEnabled) {
-                // 設置鈴聲
-                // builder.setSound(ringtoneUri);
+                Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                builder.setSound(ringtoneUri);
             }
             if (isVibrationEnabled) {
-                // 設置震動
+                builder.setVibrate(new long[]{1000, 1000});
                 // builder.setVibrate(new long[]{1000, 1000});
             }
 

@@ -33,10 +33,9 @@ import java.util.HashMap;
 
 public class CreatLocation_setting extends Fragment {
     View rootView;
-
     SharedViewModel sharedViewModel;
     RecyclerView recyclerViewRoute;
-    ListdapterSetting listAdaptersetting;
+    ListdapterSetting listAdapterSetting; // 只保留一个变量
 
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
@@ -48,7 +47,7 @@ public class CreatLocation_setting extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        //初始化ActionBar
+        // 初始化 ActionBar
         setupActionBar();
         setupRecyclerViews();
         return rootView;
@@ -62,7 +61,7 @@ public class CreatLocation_setting extends Fragment {
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewtitle.setBackground(drawable);
 
-        // 建立LinearLayout在CardView等等放圖案和文字
+        // 建立 LinearLayout 在 CardView 放图案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -70,7 +69,7 @@ public class CreatLocation_setting extends Fragment {
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        // ImageView放置圖案
+        // ImageView 放置图案
         ImageView mark = new ImageView(requireContext());
         mark.setImageResource(R.drawable.vibrate);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -80,17 +79,14 @@ public class CreatLocation_setting extends Fragment {
         params.setMarginStart(10); // 设置左边距
         mark.setLayoutParams(params);
 
-
-
-
-        // 創建TextView
+        // 创建 TextView
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("地點設定");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
 
-        // 將ImageView和TextView添加到LinearLayout
+        // 将 ImageView 和 TextView 添加到 LinearLayout
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
@@ -104,8 +100,7 @@ public class CreatLocation_setting extends Fragment {
         );
         returnButton.setLayoutParams(returnButtonParams);
 
-
-        // 建立ActionBar的父LinearLayout
+        // 建立 ActionBar 的父 LinearLayout
         LinearLayout actionBarLayout = new LinearLayout(requireContext());
         actionBarLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -114,7 +109,7 @@ public class CreatLocation_setting extends Fragment {
         actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
         actionBarLayout.setWeightSum(1.0f);
 
-        // 子LinearLayout用于返回按钮
+        // 子 LinearLayout 用于返回按钮
         LinearLayout leftLayout = new LinearLayout(requireContext());
         leftLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -125,7 +120,7 @@ public class CreatLocation_setting extends Fragment {
         leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         leftLayout.addView(returnButton);
 
-        // 子LinearLayout用于cardViewtitle
+        // 子 LinearLayout 用于 cardViewtitle
         LinearLayout rightLayout = new LinearLayout(requireContext());
         rightLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -136,14 +131,14 @@ public class CreatLocation_setting extends Fragment {
         rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         rightLayout.addView(cardViewtitle);
 
-        // 将子LinearLayout添加到父LinearLayout
+        // 将子 LinearLayout 添加到父 LinearLayout
         actionBarLayout.addView(leftLayout);
         actionBarLayout.addView(rightLayout);
 
         androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
+        toolbar.setNavigationIcon(null); // 隐藏汉堡菜单
 
-        // 获取ActionBar
+        // 获取 ActionBar
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
@@ -167,10 +162,12 @@ public class CreatLocation_setting extends Fragment {
             }
         });
     }
+
+    @Override
     public void onPause() {
         super.onPause();
 
-        // 获取ActionBar
+        // 获取 ActionBar
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(false);
@@ -178,7 +175,6 @@ public class CreatLocation_setting extends Fragment {
             actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
             actionBar.show();
         }
-
     }
 
     @Override
@@ -187,40 +183,38 @@ public class CreatLocation_setting extends Fragment {
         RecycleViewReset();
         setupActionBar();
     }
+
     private void RecycleViewReset() {
-        //清除原本的表
+        // 清除原本的表
         arrayList.clear();
         String shortLocationName;
         if (sharedViewModel.getLocationCount() != -1) {
             for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
                 shortLocationName = sharedViewModel.getDestinationName(j);
-                //如果地名大於20字，後面都用...代替
+                // 如果地名大于 20 字，后面都用 ... 代替
                 if (shortLocationName.length() > 20) {
                     hashMap.put("data", shortLocationName.substring(0, 20) + "...");
                 } else {
                     hashMap.put("data", shortLocationName);
                 }
-                //重新加回路線表
+                // 重新加回路线表
                 arrayList.add(hashMap);
             }
         }
-        //套用更新
-        listAdaptersetting.notifyDataSetChanged();
-
+        // 套用更新
+        if (listAdapterSetting != null) {
+            listAdapterSetting.notifyDataSetChanged();
+        }
     }
 
-
-
-    //初始化設定表和功能表
+    // 初始化设置表和功能表
     private void setupRecyclerViews() {
-        // 初始化路線的表
+        // 初始化路线的表
         recyclerViewRoute = rootView.findViewById(R.id.recycleViewset);
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdaptersetting = new ListdapterSetting(arrayList, sharedViewModel, false); // 禁用拖動功能，啟用單選功能
-        recyclerViewRoute.setAdapter(listAdaptersetting);
+        listAdapterSetting = new ListdapterSetting(requireContext(), arrayList, sharedViewModel, false); // 禁用拖动功能，启用单选功能
+        recyclerViewRoute.setAdapter(listAdapterSetting);
     }
-
-
 }
