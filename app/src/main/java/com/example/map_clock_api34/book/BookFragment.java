@@ -385,7 +385,7 @@ public class BookFragment extends Fragment {
                 //hashMap.put("placeName3", afterArrow);
                 hashMap.put("placeName2", placeNameTemp);
                 hashMap.put("time", time);
-                arrayList.add(hashMap);
+                arrayList.add(0,hashMap);
             }
             cursor.close();
         }
