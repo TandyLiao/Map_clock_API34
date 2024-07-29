@@ -46,6 +46,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.widget.Toast;
+
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -69,6 +71,7 @@ public class BookFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
+
         dbHelper = new BookDatabaseHelper(requireContext());
 
         setupActionBar();
@@ -83,8 +86,8 @@ public class BookFragment extends Fragment {
 
         // Set click listeners for ImageViews
         createbook_imageView.setOnClickListener(v -> {
-
             sharedViewModel.clearAll();
+            Log.d("BookFragment", "createbook_imageView clicked");
             FakeCreateLocation createFbook = new FakeCreateLocation();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, createFbook);
@@ -382,7 +385,7 @@ public class BookFragment extends Fragment {
                 //hashMap.put("placeName3", afterArrow);
                 hashMap.put("placeName2", placeNameTemp);
                 hashMap.put("time", time);
-                arrayList.add(hashMap);
+                arrayList.add(0,hashMap);
             }
             cursor.close();
         }
