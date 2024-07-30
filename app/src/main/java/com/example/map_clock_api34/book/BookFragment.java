@@ -321,7 +321,7 @@ public class BookFragment extends Fragment {
         // 從數據庫中刪除選中的項目
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
-        try {
+        /*try {
             db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
             // 找對應的 location_id 來刪除地點
@@ -331,6 +331,21 @@ public class BookFragment extends Fragment {
 
                 // 刪除 LocationTable2 中的相關項目
                 db.execSQL("DELETE FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                cursor.close();
+            }*/
+        try {
+            // 獲取相關的 location_id
+            Cursor cursor = db.rawQuery("SELECT " + BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID + " FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+            if (cursor != null && cursor.moveToFirst()) {
+                String locationId = cursor.getString(cursor.getColumnIndexOrThrow(BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID));
+
+                // 刪除 BookTable 中的項目
+                db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                // 刪除 LocationTable2 中的相關項目
+                db.execSQL("DELETE FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+            }
+            if (cursor != null) {
                 cursor.close();
             }
 
