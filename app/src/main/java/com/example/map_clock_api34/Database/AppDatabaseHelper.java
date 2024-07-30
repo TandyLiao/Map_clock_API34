@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }

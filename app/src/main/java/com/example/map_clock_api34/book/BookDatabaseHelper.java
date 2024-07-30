@@ -8,7 +8,7 @@ import android.content.ContentValues;
 public class BookDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_book";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     public BookDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

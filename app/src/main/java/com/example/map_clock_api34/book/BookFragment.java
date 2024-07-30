@@ -323,6 +323,17 @@ public class BookFragment extends Fragment {
         db.beginTransaction();
         try {
             db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+            // 找對應的 location_id 來刪除地點
+            Cursor cursor = db.rawQuery("SELECT " + BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID + " FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+            if (cursor != null && cursor.moveToFirst()) {
+                String locationId = cursor.getString(cursor.getColumnIndex(BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID));
+
+                // 刪除 LocationTable2 中的相關項目
+                db.execSQL("DELETE FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                cursor.close();
+            }
+
             db.setTransactionSuccessful();
         } catch (Exception e) {
             e.printStackTrace();
