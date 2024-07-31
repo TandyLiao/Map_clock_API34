@@ -61,6 +61,7 @@
                     android:layout_gravity="center"
                     android:background="@drawable/addbookmark"
                     android:clickable="true"
+                    android:focusable="true"
                     android:padding="20dp" />
 
                 <TextView
@@ -76,50 +77,6 @@
 
         </com.google.android.material.card.MaterialCardView>
         <!-- Book Add Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/bookadd_card"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardBackgroundColor="@color/lightyellow"
-            app:cardCornerRadius="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.3"
-            app:strokeColor="@color/darkyellow"
-            app:strokeWidth="2dp">
-
-            <LinearLayout
-                android:id="@+id/book_LinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="10dp">
-
-                <ImageView
-                    android:id="@+id/bookcreate_imageView"
-                    android:layout_width="81dp"
-                    android:layout_height="80dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/addbookmark"
-                    android:clickable="true"
-                    android:padding="20dp" />
-
-                <TextView
-                    android:id="@+id/bookcreate_Name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:padding="8dp"
-                    android:text="建立書籤"
-                    android:textColor="@color/green"
-                    android:textSize="15sp" />
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
         <!-- Book Set Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/bookset_card"
