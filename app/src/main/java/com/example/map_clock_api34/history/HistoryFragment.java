@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -35,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.Database.AppDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
@@ -80,7 +82,7 @@ public class HistoryFragment extends Fragment {
         dbHelper = new AppDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-
+        //dbHelper.clearAllTables();
         setupActionBar();
         setupButtons();
         setupRecyclerViews();
@@ -510,7 +512,21 @@ public class HistoryFragment extends Fragment {
         try {
             for (HashMap<String, String> item : selectedItems) {
                 String time = item.get("time");
-                db.execSQL("DELETE FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
+                String locationId = DatabaseUtils.stringForQuery(db,
+                        "SELECT " + HistoryTable.COLUMN_LOCATION_ID +
+                                " FROM " + HistoryTable.TABLE_NAME +
+                                " WHERE " + HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                String locationUUID = DatabaseUtils.stringForQuery(db,
+                        "SELECT " + LocationTable.COLUMN_ALARM_NAME +
+                                " FROM " + LocationTable.TABLE_NAME +
+                                " WHERE " + LocationTable.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
+                //
+                db.execSQL("DELETE FROM " + HistoryTable.TABLE_NAME +
+                        " WHERE " + HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                db.execSQL("DELETE FROM " + LocationTable.TABLE_NAME +
+                        " WHERE " + LocationTable.COLUMN_ALARM_NAME + " = ?", new String[]{locationUUID});
             }
             db.setTransactionSuccessful();
         } catch (Exception e) {
