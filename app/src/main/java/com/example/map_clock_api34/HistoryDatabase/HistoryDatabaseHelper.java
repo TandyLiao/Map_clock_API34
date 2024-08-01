@@ -1,14 +1,14 @@
-package com.example.map_clock_api34.Database;
+package com.example.map_clock_api34.HistoryDatabase;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class AppDatabaseHelper extends SQLiteOpenHelper {
+public class HistoryDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "map_clock_database";
     private static final int DATABASE_VERSION = 12;
-    public AppDatabaseHelper(Context context) {
+    public HistoryDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

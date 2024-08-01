@@ -268,6 +268,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             double longitude = sharedViewModel.getLongitude(i);
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
+            String Note = sharedViewModel.getNote(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -277,6 +278,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_ALARM_NAME, uniqueID);
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_AREA_NAME, AreaName);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_NOTE_INFO, Note);
 
                 db.insert(BookDatabaseHelper.LocationTable2.TABLE_NAME, null, values);
             }
