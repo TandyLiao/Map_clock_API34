@@ -1,14 +1,20 @@
 package com.example.map_clock_api34.book;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,10 +38,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.book.RecycleViewActionBook.SwipeToDeleteCallback;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
 import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
+import com.example.map_clock_api34.home.HomeFragment;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,11 +63,15 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
+
 public class BookFragment extends Fragment {
 
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private Toolbar toolbar;
     private ImageView createbook_imageView;
     private ImageView setbook_imageView;
+    private Button user_sure;
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawerLayout;
     SharedViewModel sharedViewModel;
@@ -68,6 +84,8 @@ public class BookFragment extends Fragment {
 
     private BookDatabaseHelper dbHelper;
 
+    private FusedLocationProviderClient fusedLocationClient;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
@@ -77,13 +95,30 @@ public class BookFragment extends Fragment {
         setupActionBar();
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        setButton();
+
+        if (getActivity() != null) {
+            drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+            toolbar = requireActivity().findViewById(R.id.toolbar);
+        }
+
+        dbHelper = new BookDatabaseHelper(requireContext());
+        setupRecyclerViews();
+
+        addFromDB();
+        //dbHelper.clearAllTables();
+        return rootView;
+    }
+
+    private void setButton(){
 
         createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
         setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
-
+        user_sure = rootView.findViewById(R.id.book_usesure);
         // 禁用 setbook_imageView，直到選擇了一個項目
         setbook_imageView.setEnabled(false);
-
         // Set click listeners for ImageViews
         createbook_imageView.setOnClickListener(v -> {
             sharedViewModel.clearAll();
@@ -147,19 +182,18 @@ public class BookFragment extends Fragment {
             }
         });
 
-        if (getActivity() != null) {
-            drawerLayout = getActivity().findViewById(R.id.drawerLayout);
-            toolbar = requireActivity().findViewById(R.id.toolbar);
-        }
+        user_sure.setOnClickListener(v -> {
 
-        dbHelper = new BookDatabaseHelper(requireContext());
-        setupRecyclerViews();
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                // 套用按鈕在這實現功能
+                saveInShareviewModel();
+            } else {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
+            }
 
-        addFromDB();
-        //dbHelper.clearAllTables();
-        return rootView;
+        });
     }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -265,32 +299,15 @@ public class BookFragment extends Fragment {
 
         recyclerViewBook.setAdapter(listAdapterBook);
         // 添加左滑刪除功能
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        // 創建並設置 ItemTouchHelper
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(getContext(), new SwipeToDeleteCallback.OnSwipedListener() {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
+            public void onSwiped(int position) {
                 showDeleteConfirmationDialog(position);
             }
+        });
 
-            @Override
-            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-                // 自定義滑動背景顏色
-                View itemView = viewHolder.itemView;
-                Paint paint = new Paint();
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.red)); // 設置背景顏色
-                RectF background = new RectF(itemView.getRight() + dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
-                c.drawRect(background, paint);
-            }
-        };
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerViewBook);
 
     }
@@ -322,7 +339,24 @@ public class BookFragment extends Fragment {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                String locationId = DatabaseUtils.stringForQuery(db,
+                        "SELECT " + BookTable.COLUMN_LOCATION_ID +
+                                " FROM " + BookTable.TABLE_NAME +
+                                " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                String locationUUID = DatabaseUtils.stringForQuery(db,
+                        "SELECT " + LocationTable2.COLUMN_ALARM_NAME +
+                                " FROM " + LocationTable2.TABLE_NAME +
+                                " WHERE " + LocationTable2.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
+                // 刪除 BookTable 中的項目
+                db.execSQL("DELETE FROM " + BookTable.TABLE_NAME +
+                                " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                // 刪除 LocationTable2 中的相關項目
+                db.execSQL("DELETE FROM " + LocationTable2.TABLE_NAME +
+                        " WHERE " + LocationTable2.COLUMN_ALARM_NAME + " = ?", new String[]{locationUUID});
+
             db.setTransactionSuccessful();
         } catch (Exception e) {
             e.printStackTrace();
@@ -334,12 +368,6 @@ public class BookFragment extends Fragment {
         // 從 arrayList 中刪除項目
         arrayList.remove(position);
         listAdapterBook.notifyItemRemoved(position);
-
-        updateButtonState(); // 更新按鈕狀態
-    }
-
-    private void updateButtonState() {
-        // 根據選擇狀態更新按鈕狀態
     }
 
     @Override
@@ -351,7 +379,6 @@ public class BookFragment extends Fragment {
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // Restore title display
         }
-        //saveInShareviewModel();
     }
 
     private void addFromDB() {
@@ -364,25 +391,9 @@ public class BookFragment extends Fragment {
             while (cursor.moveToNext()) {
 
                 String placeNameTemp = cursor.getString(3);
-                /*//找到"->"的位置
-                int index = placeNameTemp.indexOf("->");
-                //把"->"前的資料抓出來
-                String beforeArrow = placeNameTemp.substring(0,index);
-                if(beforeArrow.length()>20){
-                    beforeArrow=beforeArrow.substring(0,20)+"...";
-                }
-                //把"->"後的資料抓出來
-                String afterArrow = placeNameTemp.substring(index+2);
-                if(afterArrow.length()>20){
-                    afterArrow=afterArrow.substring(0,20)+"...";
-                }*/
-
                 time = cursor.getString(1);
 
                 HashMap<String, String> hashMap = new HashMap<>();
-                //hashMap.put("placeName", beforeArrow);
-                //hashMap.put("placeName2", "\u2193");
-                //hashMap.put("placeName3", afterArrow);
                 hashMap.put("placeName2", placeNameTemp);
                 hashMap.put("time", time);
                 arrayList.add(0,hashMap);
@@ -393,6 +404,7 @@ public class BookFragment extends Fragment {
     }
 
     private void saveInShareviewModel() {
+        sharedViewModel.clearAll();
         String time = "";
         for (HashMap<String, String> item : arrayList) {
             if ("true".equals(item.get("isSelected"))) {
@@ -412,6 +424,11 @@ public class BookFragment extends Fragment {
                     Double longitude = locationCursor.getDouble(1);
                     String city = locationCursor.getString(5);
                     String area = locationCursor.getString(6);
+
+                    sharedViewModel.setDestination(placeName, latitude, longitude);
+                    sharedViewModel.setCapital(city);
+                    sharedViewModel.setArea(area);
+                    getLastKnownLocation();
                 }
                 locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks
             }
@@ -421,6 +438,32 @@ public class BookFragment extends Fragment {
         } finally {
             db.endTransaction();
             cursor.close(); // Ensure the cursor is closed to avoid memory leaks
+
+            HomeFragment createLocationFragment = new HomeFragment();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, createLocationFragment); // 確保R.id.fl_container是你的Fragment容器ID
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+            NavigationView navigationView = getActivity().findViewById(R.id.navigation_view);
+            navigationView.setCheckedItem(R.id.action_home);
         }
+    }
+    @SuppressLint("MissingPermission")
+    private void getLastKnownLocation() {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
+                            // Logic to handle location object
+                            Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
+                        } else {
+                            Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 }

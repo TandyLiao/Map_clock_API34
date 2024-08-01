@@ -182,8 +182,10 @@ public class LocationService extends Service {
         if (last_distance < 0.05 && time < 3) {
             sendNotification("快到了!(背景執行的)");
         }
+        if (last_distance < 0.01 && time < 3) {
+            destinationIndex++;
+        }
 
-        destinationIndex++;
         if (destinationIndex < latitude.length && destinationIndex < longitude.length && destinationIndex < destinationName.length) {
             startLocation = nowLocation;
             Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
