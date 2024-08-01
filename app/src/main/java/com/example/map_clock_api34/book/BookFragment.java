@@ -200,6 +200,7 @@ public class BookFragment extends Fragment {
         setupActionBar();
         setupNavigationDrawer();
         RecycleViewReset();
+        changeNotification();
     }
     private void RecycleViewReset() {
         arrayList.clear();
@@ -319,6 +320,7 @@ public class BookFragment extends Fragment {
                 .setPositiveButton("刪除", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         removeItem(position);
+                        changeNotification();
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -369,7 +371,15 @@ public class BookFragment extends Fragment {
         arrayList.remove(position);
         listAdapterBook.notifyItemRemoved(position);
     }
-
+    private void changeNotification(){
+        if(arrayList.isEmpty()){
+            TextView notification = rootView.findViewById(R.id.textView7);
+            notification.setText("目前還沒有東西喔");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView7);
+            notification.setText("");
+        }
+    }
     @Override
     public void onPause() {
         super.onPause();

@@ -416,5 +416,13 @@ public class CreateLocation extends Fragment {
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
         }
+
+        if(sharedViewModel.getLocationCount()!=-1){
+            TextView notification = rootView.findViewById(R.id.textView6);
+            notification.setText("");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView6);
+            notification.setText("請按新增增加地點");
+        }
     }
 }

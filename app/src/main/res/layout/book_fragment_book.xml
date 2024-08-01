@@ -8,6 +8,7 @@
     tools:context=".MainActivity">
 
     <!-- RecyclerView -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleView_book"
         android:layout_width="0dp"
@@ -19,6 +20,18 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Controls Container -->
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="目前還沒有東西喔"
+        android:textColor="@color/lightgreen"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toBottomOf="@+id/recycleView_book"
+        app:layout_constraintTop_toTopOf="@+id/recycleView_book"
+        tools:layout_editor_absoluteX="176dp" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controls_container"
         android:layout_width="0dp"

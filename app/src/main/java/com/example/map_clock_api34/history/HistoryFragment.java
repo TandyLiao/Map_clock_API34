@@ -319,6 +319,14 @@ public class HistoryFragment extends Fragment {
 
     private void updateButtonState() {
 
+        if(arrayList.isEmpty()){
+            TextView notification = rootView.findViewById(R.id.textView5);
+            notification.setText("目前還沒有記錄喔");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView5);
+            notification.setText("");
+        }
+
         boolean hasItems = arrayList.isEmpty();
         boolean hasSelectedItems = false;
         for (HashMap<String, String> item : arrayList) {
