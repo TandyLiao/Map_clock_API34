@@ -1,6 +1,7 @@
 package com.example.map_clock_api34.book;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.book.RecycleViewActionBook.SwipeToDeleteCallback;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
@@ -50,6 +52,8 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class BookFragment extends Fragment {
 
@@ -265,32 +269,15 @@ public class BookFragment extends Fragment {
 
         recyclerViewBook.setAdapter(listAdapterBook);
         // 添加左滑刪除功能
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        // 創建並設置 ItemTouchHelper
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(getContext(), new SwipeToDeleteCallback.OnSwipedListener() {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
+            public void onSwiped(int position) {
                 showDeleteConfirmationDialog(position);
             }
+        });
 
-            @Override
-            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-                // 自定義滑動背景顏色
-                View itemView = viewHolder.itemView;
-                Paint paint = new Paint();
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.red)); // 設置背景顏色
-                RectF background = new RectF(itemView.getRight() + dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
-                c.drawRect(background, paint);
-            }
-        };
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerViewBook);
 
     }
@@ -321,33 +308,24 @@ public class BookFragment extends Fragment {
         // 從數據庫中刪除選中的項目
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
-        /*try {
-            db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
-
-            // 找對應的 location_id 來刪除地點
-            Cursor cursor = db.rawQuery("SELECT " + BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID + " FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
-            if (cursor != null && cursor.moveToFirst()) {
-                String locationId = cursor.getString(cursor.getColumnIndex(BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID));
-
-                // 刪除 LocationTable2 中的相關項目
-                db.execSQL("DELETE FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
-                cursor.close();
-            }*/
         try {
-            // 獲取相關的 location_id
-            Cursor cursor = db.rawQuery("SELECT " + BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID + " FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
-            if (cursor != null && cursor.moveToFirst()) {
-                String locationId = cursor.getString(cursor.getColumnIndexOrThrow(BookDatabaseHelper.BookTable.COLUMN_LOCATION_ID));
 
+                String locationId = DatabaseUtils.stringForQuery(db,
+                        "SELECT " + BookTable.COLUMN_LOCATION_ID +
+                                " FROM " + BookTable.TABLE_NAME +
+                                " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+
+                String locationUUID = DatabaseUtils.stringForQuery(db,
+                        "SELECT " + LocationTable2.COLUMN_ALARM_NAME +
+                                " FROM " + LocationTable2.TABLE_NAME +
+                                " WHERE " + LocationTable2.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
                 // 刪除 BookTable 中的項目
-                db.execSQL("DELETE FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+                db.execSQL("DELETE FROM " + BookTable.TABLE_NAME +
+                                " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
                 // 刪除 LocationTable2 中的相關項目
-                db.execSQL("DELETE FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
-            }
-            if (cursor != null) {
-                cursor.close();
-            }
+                db.execSQL("DELETE FROM " + LocationTable2.TABLE_NAME +
+                        " WHERE " + LocationTable2.COLUMN_ALARM_NAME + " = ?", new String[]{locationUUID});
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
@@ -377,7 +355,6 @@ public class BookFragment extends Fragment {
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // Restore title display
         }
-        //saveInShareviewModel();
     }
 
     private void addFromDB() {
@@ -390,25 +367,9 @@ public class BookFragment extends Fragment {
             while (cursor.moveToNext()) {
 
                 String placeNameTemp = cursor.getString(3);
-                /*//找到"->"的位置
-                int index = placeNameTemp.indexOf("->");
-                //把"->"前的資料抓出來
-                String beforeArrow = placeNameTemp.substring(0,index);
-                if(beforeArrow.length()>20){
-                    beforeArrow=beforeArrow.substring(0,20)+"...";
-                }
-                //把"->"後的資料抓出來
-                String afterArrow = placeNameTemp.substring(index+2);
-                if(afterArrow.length()>20){
-                    afterArrow=afterArrow.substring(0,20)+"...";
-                }*/
-
                 time = cursor.getString(1);
 
                 HashMap<String, String> hashMap = new HashMap<>();
-                //hashMap.put("placeName", beforeArrow);
-                //hashMap.put("placeName2", "\u2193");
-                //hashMap.put("placeName3", afterArrow);
                 hashMap.put("placeName2", placeNameTemp);
                 hashMap.put("time", time);
                 arrayList.add(0,hashMap);
