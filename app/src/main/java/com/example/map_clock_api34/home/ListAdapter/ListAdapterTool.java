@@ -94,7 +94,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 return;
             }
             Note notesFragment = new Note();
-            fragmentTransaction.replace(R.id.home_fragment_container, notesFragment);
+            fragmentTransaction.replace(R.id.fl_container, notesFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }

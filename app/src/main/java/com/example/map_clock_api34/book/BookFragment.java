@@ -141,6 +141,7 @@ public class BookFragment extends Fragment {
                 sharedViewModel.clearAll();
                 String time = sharedViewModel.time;
 
+                int count =0;
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
                 Cursor cursor = db.rawQuery("SELECT * FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
@@ -156,11 +157,13 @@ public class BookFragment extends Fragment {
                             Double longitude = locationCursor.getDouble(1);
                             String city = locationCursor.getString(5);
                             String area = locationCursor.getString(6);
+                            String Note = locationCursor.getString(7);
 
                             sharedViewModel.uuid = locationCursor.getString(4);
                             sharedViewModel.setDestination(placeName, latitude, longitude);
                             sharedViewModel.setCapital(city);
                             sharedViewModel.setArea(area);
+                            sharedViewModel.setNote(Note, count++);
                         }
 
                         locationCursor.close();

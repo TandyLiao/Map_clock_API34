@@ -30,7 +30,7 @@ public class NoteEnterContent extends Fragment {
     private TextView title;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.activity_note_enter_content, container, false);
+        rootView = inflater.inflate(R.layout.note_note_enter_content, container, false);
 
         detailTextView = rootView.findViewById(R.id.textView3);//benson
         title = rootView.findViewById(R.id.textView4);

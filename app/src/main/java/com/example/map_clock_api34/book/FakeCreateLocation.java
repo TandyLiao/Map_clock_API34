@@ -47,6 +47,7 @@ import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
+import com.example.map_clock_api34.note.Note;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -78,13 +79,14 @@ public class FakeCreateLocation extends Fragment {
     ListAdapterRoute listAdapterRoute;
     //獨立出來是因為要設置不可點擊狀態
     Button btnReset;
+    ImageView noteView;
     SharedViewModel sharedViewModel;
     EditText input;
 
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fake_fragment_creatlocation, container, false);
+        rootView = inflater.inflate(R.layout.book_fake_fragment_creatlocation, container, false);
 
         dbBookHelper = new BookDatabaseHelper(requireContext());
 
@@ -94,8 +96,6 @@ public class FakeCreateLocation extends Fragment {
 
         //初始化ActionBar
         setupActionBar();
-        //初始化漢堡選單
-        setupNavigationDrawer();
         //初始化按鈕
         setupButtons();
         //初始化路線表和功能表
@@ -155,6 +155,18 @@ public class FakeCreateLocation extends Fragment {
             }
         });
 
+        noteView = rootView.findViewById(R.id.bookcreate_imageView);
+        noteView.setOnClickListener(v -> {
+            if (arrayList.isEmpty()) {
+                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Note notesFragment = new Note();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, notesFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
 
     }
 
@@ -212,6 +224,7 @@ public class FakeCreateLocation extends Fragment {
             double longitude = sharedViewModel.getLongitude(i);
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
+            String Note = sharedViewModel.getNote(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -221,6 +234,7 @@ public class FakeCreateLocation extends Fragment {
                 values.put(LocationTable2.COLUMN_ALARM_NAME, uniqueID);
                 values.put(LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable2.COLUMN_AREA_NAME, AreaName);
+                values.put(LocationTable2.COLUMN_NOTE_INFO, Note);
 
                 db.insert(LocationTable2.TABLE_NAME, null, values);
             }
@@ -236,10 +250,6 @@ public class FakeCreateLocation extends Fragment {
         transaction.replace(R.id.fl_container, mapFragment);
         transaction.addToBackStack(null);
         transaction.commit();
-    }
-
-    //初始化漢堡選單
-    private void setupNavigationDrawer() {
     }
 
     //ActionBar初始設定
@@ -475,6 +485,7 @@ public class FakeCreateLocation extends Fragment {
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
         }
+        changeNotification();
     }
     private void hideKeyboard() {
         View view = getActivity().getCurrentFocus();
@@ -483,6 +494,15 @@ public class FakeCreateLocation extends Fragment {
             if (imm != null) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
+        }
+    }
+    private void changeNotification(){
+        if(arrayList.isEmpty()){
+            TextView notification = rootView.findViewById(R.id.textView);
+            notification.setText("請按新增增加地點");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView);
+            notification.setText("");
         }
     }
 }
