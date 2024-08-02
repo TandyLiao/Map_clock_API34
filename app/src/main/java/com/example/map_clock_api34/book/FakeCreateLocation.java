@@ -143,7 +143,8 @@ public class FakeCreateLocation extends Fragment {
                     Toast.makeText(getActivity(), "你沒有輸入書籤名稱!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //Booknames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                //設立名字字數限制
+
                 saveInLocationDB();
                 saveInBookDB();
                 sharedViewModel.clearAll();
@@ -186,7 +187,7 @@ public class FakeCreateLocation extends Fragment {
             int arranged_id_local=0;
 
             while (cursor.moveToNext()) {
-                if (input.getText().toString() != null) {
+                if (input.getText().toString() != null ) {
                     ContentValues values = new ContentValues();
                     values.put(BookTable.COLUMN_START_TIME, formattedDate);
                     values.put(BookTable.COLUMN_ALARM_NAME, input.getText().toString());
