@@ -84,9 +84,6 @@ public class Note extends Fragment {
         params.setMarginStart(10); // 设置左边距
         mark.setLayoutParams(params);
 
-
-
-
         // 創建TextView
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("記事");
@@ -163,11 +160,7 @@ public class Note extends Fragment {
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.home_fragment_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
     }
@@ -220,7 +213,7 @@ public class Note extends Fragment {
     private void openWritingFragment() {
         NoteEnterContent noteEnterContent = new NoteEnterContent();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.home_fragment_container, noteEnterContent);
+        transaction.replace(R.id.fl_container, noteEnterContent);
         transaction.addToBackStack(null);
         transaction.commit();
     }

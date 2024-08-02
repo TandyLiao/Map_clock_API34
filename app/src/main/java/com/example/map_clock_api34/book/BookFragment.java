@@ -141,6 +141,7 @@ public class BookFragment extends Fragment {
                 sharedViewModel.clearAll();
                 String time = sharedViewModel.time;
 
+                int count =0;
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
                 Cursor cursor = db.rawQuery("SELECT * FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
@@ -156,11 +157,13 @@ public class BookFragment extends Fragment {
                             Double longitude = locationCursor.getDouble(1);
                             String city = locationCursor.getString(5);
                             String area = locationCursor.getString(6);
+                            String Note = locationCursor.getString(7);
 
                             sharedViewModel.uuid = locationCursor.getString(4);
                             sharedViewModel.setDestination(placeName, latitude, longitude);
                             sharedViewModel.setCapital(city);
                             sharedViewModel.setArea(area);
+                            sharedViewModel.setNote(Note, count++);
                         }
 
                         locationCursor.close();
@@ -200,6 +203,7 @@ public class BookFragment extends Fragment {
         setupActionBar();
         setupNavigationDrawer();
         RecycleViewReset();
+        changeNotification();
     }
     private void RecycleViewReset() {
         arrayList.clear();
@@ -319,6 +323,7 @@ public class BookFragment extends Fragment {
                 .setPositiveButton("刪除", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         removeItem(position);
+                        changeNotification();
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -369,7 +374,15 @@ public class BookFragment extends Fragment {
         arrayList.remove(position);
         listAdapterBook.notifyItemRemoved(position);
     }
-
+    private void changeNotification(){
+        if(arrayList.isEmpty()){
+            TextView notification = rootView.findViewById(R.id.textView7);
+            notification.setText("目前還沒有東西喔");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView7);
+            notification.setText("");
+        }
+    }
     @Override
     public void onPause() {
         super.onPause();
@@ -411,6 +424,7 @@ public class BookFragment extends Fragment {
                 time = item.get("time");
             }
         }
+        int count =0;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
         db.beginTransaction();
@@ -424,10 +438,13 @@ public class BookFragment extends Fragment {
                     Double longitude = locationCursor.getDouble(1);
                     String city = locationCursor.getString(5);
                     String area = locationCursor.getString(6);
+                    String note = locationCursor.getString(7);
 
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
+                    sharedViewModel.setNote(note, count++);
+
                     getLastKnownLocation();
                 }
                 locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks

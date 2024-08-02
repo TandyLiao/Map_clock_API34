@@ -36,6 +36,18 @@
             app:layout_constraintBottom_toTopOf="@+id/BookName"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="目前還沒有東西喔"
+            android:textColor="@color/lightgreen"
+            android:textSize="32sp"
+            app:layout_constraintBottom_toBottomOf="@+id/recycleViewRouteBook"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/recycleViewRouteBook" />
+
         <Button
             android:id="@+id/btn_addItem"
             android:layout_width="100dp"

@@ -35,9 +35,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
-import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
-import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.HistoryTable;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherService;
@@ -53,7 +53,7 @@ import java.util.UUID;
 
 public class CreateLocation extends Fragment {
 
-    private AppDatabaseHelper dbHistoryHelper;
+    private HistoryDatabaseHelper dbHistoryHelper;
 
     String names;
     String Historynames;
@@ -83,7 +83,7 @@ public class CreateLocation extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
 
-        dbHistoryHelper = new AppDatabaseHelper(requireContext());
+        dbHistoryHelper = new HistoryDatabaseHelper(requireContext());
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -187,6 +187,7 @@ public class CreateLocation extends Fragment {
             double longitude = sharedViewModel.getLongitude(i);
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
+            String Note = sharedViewModel.getNote(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -196,6 +197,7 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_ALARM_NAME, uniqueID);
                 values.put(LocationTable.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable.COLUMN_AREA_NAME, AreaName);
+                values.put(LocationTable.COLUMN_NOTE_INFO, Note);
 
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
@@ -415,6 +417,14 @@ public class CreateLocation extends Fragment {
             btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
+        }
+
+        if(sharedViewModel.getLocationCount()!=-1){
+            TextView notification = rootView.findViewById(R.id.textView6);
+            notification.setText("");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView6);
+            notification.setText("請按新增增加地點");
         }
     }
 }

@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -26,7 +25,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -46,6 +45,7 @@ import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
+import com.example.map_clock_api34.note.Note;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,18 +66,18 @@ public class EditCreateLocation extends Fragment {
     View rootView;
     View overlayView;
     RecyclerView recyclerViewRoute;
-    RecyclerView recyclerViewTool;
     RecyclerViewActionHome recyclerViewActionHome;
     ListAdapterRoute listAdapterRoute;
     //獨立出來是因為要設置不可點擊狀態
     Button btnReset;
     SharedViewModel sharedViewModel;
     EditText input;
+    ImageView noteView;
 
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fake_fragment_creatlocation, container, false);
+        rootView = inflater.inflate(R.layout.book_fake_fragment_creatlocation, container, false);
 
         dbBookHelper = new BookDatabaseHelper(requireContext());
 
@@ -153,10 +153,56 @@ public class EditCreateLocation extends Fragment {
                 //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
             } else {
-                deleteDB();
-                getActivity().getSupportFragmentManager().popBackStack();
+                warning();
             }
         });
+
+        noteView = rootView.findViewById(R.id.bookcreate_imageView);
+        noteView.setOnClickListener(v -> {
+            if (arrayList.isEmpty()) {
+                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Note notesFragment = new Note();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, notesFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+    }
+    private void warning(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+
+        //套用XML的布局
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View customView = inflater.inflate(R.layout.dialog_delete_waring, null);
+        builder.setView(customView);
+        // 创建并显示对话框
+        AlertDialog dialog = builder.create();
+        // 設置點擊對話框外部不會關閉對話框
+        dialog.setCanceledOnTouchOutside(false);
+
+        // 找到並設置按鈕事件
+        Button positiveButton = customView.findViewById(R.id.Popupsure);
+        Button negativeButton = customView.findViewById(R.id.PopupCancel);
+
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteDB();
+                getActivity().getSupportFragmentManager().popBackStack();
+                dialog.cancel();
+            }
+        });
+
+        negativeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
     }
     private void deleteDB() {
         SQLiteDatabase bookDB = dbBookHelper.getWritableDatabase();
@@ -232,6 +278,7 @@ public class EditCreateLocation extends Fragment {
             double longitude = sharedViewModel.getLongitude(i);
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
+            String Note = sharedViewModel.getNote(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -241,6 +288,7 @@ public class EditCreateLocation extends Fragment {
                 values.put(LocationTable2.COLUMN_ALARM_NAME, uniqueID);
                 values.put(LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable2.COLUMN_AREA_NAME, AreaName);
+                values.put(LocationTable2.COLUMN_NOTE_INFO, Note);
 
                 db.insert(LocationTable2.TABLE_NAME, null, values);
             }
@@ -491,6 +539,7 @@ public class EditCreateLocation extends Fragment {
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
         }
+        changeNotification();
     }
     private void hideKeyboard() {
         View view = getActivity().getCurrentFocus();
@@ -499,6 +548,15 @@ public class EditCreateLocation extends Fragment {
             if (imm != null) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
+        }
+    }
+    private void changeNotification(){
+        if(arrayList.isEmpty()){
+            TextView notification = rootView.findViewById(R.id.textView);
+            notification.setText("請按新增增加地點");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView);
+            notification.setText("");
         }
     }
 }
