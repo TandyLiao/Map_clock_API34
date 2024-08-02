@@ -25,8 +25,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Call;
@@ -56,6 +58,7 @@ public class BusStationFinderHelper {
 
     private BusStationFinderCallback callback;
 
+    //建構子
     public BusStationFinderHelper(Context context, SharedViewModel sharedViewModel, BusStationFinderCallback callback) {
         this.context = context;
         this.sharedViewModel = sharedViewModel;
@@ -66,6 +69,7 @@ public class BusStationFinderHelper {
         this.callback = callback;
     }
 
+    //外面可呼叫過濾站牌的方法
     public void findNearbyStations(View view) {
         authHelper.getAccessToken(new AuthHelper.AuthCallback() {
             @Override
@@ -90,6 +94,7 @@ public class BusStationFinderHelper {
         });
     }
 
+    //第一次過濾找附近和目的地站牌
     private void findNearbyBusStops(View view, String accessToken) throws UnsupportedEncodingException {
 
         double currentLat = sharedViewModel.getNowLantitude();
@@ -156,6 +161,7 @@ public class BusStationFinderHelper {
                     List<BusStation> secondNearByStop = new ArrayList<>();
                     List<BusStation> secondDesStop = new ArrayList<>();
 
+                    //後執行，先執行的程式在下面
                     Runnable onCompletion = () -> {
                         nearbyStationSuggestions.setLength(0);
                         destinationStationSuggestions.setLength(0);
@@ -169,13 +175,13 @@ public class BusStationFinderHelper {
                         for (BusStation station : secondDesStop) {
                             destinationStationSuggestions.append(station.getStopName()).append("\n");
                         }
+                        findRoutes(view, accessToken, cityName, secondNearByStop, secondDesStop);
 
                         mainHandler.post(() -> {
-                            showPopup(view);
                             callback.onBusStationsFound(secondNearByStop, secondDesStop);
                         });
                     };
-
+                    //先執行
                     filterNearbyStops(currentLat, currentLon, firstCurrentList, secondNearByStop, () ->
                             filterNearbyStops(destLat, destLon, firstDesList, secondDesStop, onCompletion));
 
@@ -188,7 +194,35 @@ public class BusStationFinderHelper {
             }
         });
     }
+    //第一次過濾站牌內分成附近和目的地站牌的方法
+    private List<BusStation> parseStops(String jsonResponse, double Lat, double Lon) throws Exception {
+        JSONArray jsonArray = new JSONArray(jsonResponse);
+        List<BusStation> stationList = new ArrayList<>();
+        Set<String> seenStops = new HashSet<>();
 
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject stopObj = jsonArray.getJSONObject(i);
+            String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
+            double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
+            double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
+
+            String key = stopName + "," + stopLat + "," + stopLon;
+
+            if (isNearby(stopLat, stopLon, Lat, Lon) && !seenStops.contains(key)) {
+                stationList.add(new BusStation(stopName, stopLat, stopLon));
+                seenStops.add(key);
+            }
+        }
+
+        return stationList;
+    }
+
+    private boolean isNearby(double stopLat, double stopLon, double targetLat, double targetLon) {
+        double latDiff = 0.0022;
+        double lonDiff = 0.0022;
+        return Math.abs(stopLat - targetLat) <= latDiff && Math.abs(stopLon - targetLon) <= lonDiff;
+    }
+    //第二次過濾站牌
     private void filterNearbyStops(double originLat, double originLon, List<BusStation> firstList, List<BusStation> resultList, Runnable callback) {
         List<String> destinations = new ArrayList<>();
         for (BusStation station : firstList) {
@@ -229,6 +263,7 @@ public class BusStationFinderHelper {
         });
     }
 
+    //過濾500公尺內步行能到的站牌
     private List<BusStation> parseDistances(String jsonResponse, List<BusStation> nearByStop) throws Exception {
         List<BusStation> stopDistances = new ArrayList<>();
 
@@ -261,34 +296,114 @@ public class BusStationFinderHelper {
         return stopDistances;
     }
 
-    private List<BusStation> parseStops(String jsonResponse, double Lat, double Lon) throws Exception {
-        JSONArray jsonArray = new JSONArray(jsonResponse);
-        List<BusStation> stationList = new ArrayList<>();
-        Set<String> seenStops = new HashSet<>();
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject stopObj = jsonArray.getJSONObject(i);
-            String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
-            double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
-            double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
-
-            String key = stopName + "," + stopLat + "," + stopLon;
-
-            if (isNearby(stopLat, stopLon, Lat, Lon) && !seenStops.contains(key)) {
-                stationList.add(new BusStation(stopName, stopLat, stopLon));
-                seenStops.add(key);
+    private void findRoutes(View view, String accessToken, String cityName, List<BusStation> nearbyStops, List<BusStation> destinationStops) {
+        // 一次性获取所有这些站点的路线
+        StringBuilder stopFilter = new StringBuilder();
+        for (BusStation station : nearbyStops) {
+            if (stopFilter.length() > 0) {
+                stopFilter.append(" or ");
             }
+            stopFilter.append("(Stops/any(s: s/StopPosition/PositionLat eq ").append(station.getStopLat())
+                    .append(" and s/StopPosition/PositionLon eq ").append(station.getStopLon()).append("))");
+        }
+        for (BusStation station : destinationStops) {
+            if (stopFilter.length() > 0) {
+                stopFilter.append(" or ");
+            }
+            stopFilter.append("(Stops/any(s: s/StopPosition/PositionLat eq ").append(station.getStopLat())
+                    .append(" and s/StopPosition/PositionLon eq ").append(station.getStopLon()).append("))");
         }
 
-        return stationList;
+        String routeUrl = STOP_OF_ROUTE_URL + cityName + "?$filter=" + stopFilter.toString() + "&$format=JSON";
+        Log.d("BusStationFinderHelper", "Route URL: " + routeUrl);
+
+        Request routeRequest = new Request.Builder()
+                .url(routeUrl)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+
+        client.newCall(routeRequest).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
+                    Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
+                    return;
+                }
+
+                try {
+                    String routeResponse = response.body().string();
+                    Log.d("BusStationFinderHelper", "Route Response: " + routeResponse);
+                    JSONArray jsonArray = new JSONArray(routeResponse);
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject routeObj = jsonArray.getJSONObject(i);
+                        String routeName = routeObj.getJSONObject("RouteName").getString("Zh_tw");
+                        JSONArray stopsArray = routeObj.getJSONArray("Stops");
+                        Map<String, BusStation.LatLng> routeStops = new HashMap<>();
+
+                        for (int j = 0; j < stopsArray.length(); j++) {
+                            JSONObject stopObj = stopsArray.getJSONObject(j);
+                            String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
+                            double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
+                            double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
+                            routeStops.put(stopName, new BusStation.LatLng(stopLat, stopLon));
+                        }
+
+                        for (BusStation station : nearbyStops) {
+                            if (isNearbyStop(station, routeStops)) {
+                                Map<String, BusStation.LatLng> destinationStopsMap = new HashMap<>();
+                                for (BusStation destinationStation : destinationStops) {
+                                    if (isNearbyStop(destinationStation, routeStops)) {
+                                        destinationStopsMap.put(destinationStation.getStopName(), new BusStation.LatLng(destinationStation.getStopLat(), destinationStation.getStopLon()));
+                                    }
+                                }
+                                station.addRoute(routeName, destinationStopsMap);
+                            }
+                        }
+                    }
+                    mainHandler.post(() -> {
+                        // 确认所有 BusStation 的信息
+                        for (BusStation station : nearbyStops) {
+                            Log.d("BusStationFinderHelper", "BusStation: " + station.toString());
+                        }
+                        Toast.makeText(context, "路線已更新", Toast.LENGTH_LONG).show();
+                    });
+                } catch (Exception e) {
+                    Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
+                }
+            }
+        });
     }
 
-    private boolean isNearby(double stopLat, double stopLon, double targetLat, double targetLon) {
-        double latDiff = 0.0022;
-        double lonDiff = 0.0022;
-        return Math.abs(stopLat - targetLat) <= latDiff && Math.abs(stopLon - targetLon) <= lonDiff;
+    private boolean isNearbyStop(BusStation station, Map<String, BusStation.LatLng> routeStops) {
+        double epsilon = 0.00001; // 允许的误差范围
+        for (Map.Entry<String, BusStation.LatLng> entry : routeStops.entrySet()) {
+            BusStation.LatLng latLng = entry.getValue();
+            if (Math.abs(station.getStopLat() - latLng.getLat()) < epsilon && Math.abs(station.getStopLon() - latLng.getLon()) < epsilon) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    private Set<String> extractStopNames(List<BusStation> busStations) {
+        Set<String> stopNames = new HashSet<>();
+        for (BusStation station : busStations) {
+            stopNames.add(station.getStopName());
+        }
+        return stopNames;
+    }
+
+
+
+
+    //負責回傳結果
     public interface BusStationFinderCallback {
         void onBusStationsFound(List<BusStation> nearbyStops, List<BusStation> destinationStops);
     }
@@ -309,7 +424,7 @@ public class BusStationFinderHelper {
         ((ViewGroup) ((FragmentActivity) context).findViewById(android.R.id.content)).addView(overlayView);
 
         mainHandler.post(() -> {
-            stationInfoTextView.setText(nearbyStationSuggestions.toString() + "\n" + destinationStationSuggestions.toString() + "\n" );
+            stationInfoTextView.setText(nearbyStationSuggestions.toString() + "\n" + destinationStationSuggestions.toString() + "\n" + routeSuggestions.toString() + "\n" );
             Button btnCancel = popupView.findViewById(R.id.PopupYes);
             btnCancel.setOnClickListener(v -> {
                 popupWindow.dismiss();
@@ -331,11 +446,13 @@ public class BusStationFinderHelper {
         private final double stopLat;
         private final double stopLon;
         private String distance;
+        private Map<String, Map<String, LatLng>> routes;
 
         public BusStation(String stopName, double stopLat, double stopLon) {
             this.stopName = stopName;
             this.stopLat = stopLat;
             this.stopLon = stopLon;
+            this.routes = new HashMap<>();
         }
 
         public BusStation(String stopName, double stopLat, double stopLon, String distance) {
@@ -343,6 +460,7 @@ public class BusStationFinderHelper {
             this.stopLat = stopLat;
             this.stopLon = stopLon;
             this.distance = distance;
+            this.routes = new HashMap<>();
         }
 
         public String getStopName() {
@@ -361,6 +479,14 @@ public class BusStationFinderHelper {
             return distance;
         }
 
+        public Map<String, Map<String, LatLng>> getRoutes() {
+            return routes;
+        }
+
+        public void addRoute(String routeName, Map<String, LatLng> destinationStops) {
+            this.routes.put(routeName, destinationStops);
+        }
+
         @Override
         public String toString() {
             return "BusStation{" +
@@ -368,7 +494,35 @@ public class BusStationFinderHelper {
                     ", stopLat=" + stopLat +
                     ", stopLon=" + stopLon +
                     ", distance='" + distance + '\'' +
+                    ", routes=" + routes +
                     '}';
         }
+
+        public static class LatLng {
+            private final double lat;
+            private final double lon;
+
+            public LatLng(double lat, double lon) {
+                this.lat = lat;
+                this.lon = lon;
+            }
+
+            public double getLat() {
+                return lat;
+            }
+
+            public double getLon() {
+                return lon;
+            }
+
+            @Override
+            public String toString() {
+                return "LatLng{" +
+                        "lat=" + lat +
+                        ", lon=" + lon +
+                        '}';
+            }
+        }
     }
+
 }
