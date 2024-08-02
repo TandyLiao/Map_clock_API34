@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.text.InputType;
 
 import android.view.LayoutInflater;
@@ -38,11 +37,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
-
-
-import android.widget.PopupWindow;
-
-
 
 
 public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHolder> {
@@ -107,7 +101,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
 
             //套用XML的布局
             LayoutInflater inflater = LayoutInflater.from(context);
-            View customView = inflater.inflate(R.layout.popupwindow_setbook, null);
+            View customView = inflater.inflate(R.layout.dialog_setbook, null);
 
             //找到XML的輸入框
             EditText input = customView.findViewById(R.id.input);

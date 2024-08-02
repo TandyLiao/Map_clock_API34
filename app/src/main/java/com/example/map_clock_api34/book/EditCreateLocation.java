@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -152,8 +153,7 @@ public class EditCreateLocation extends Fragment {
                 //回上頁
                 getActivity().getSupportFragmentManager().popBackStack();
             } else {
-                deleteDB();
-                getActivity().getSupportFragmentManager().popBackStack();
+                warning();
             }
         });
 
@@ -169,6 +169,40 @@ public class EditCreateLocation extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
+    }
+    private void warning(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+
+        //套用XML的布局
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View customView = inflater.inflate(R.layout.dialog_delete_waring, null);
+        builder.setView(customView);
+        // 创建并显示对话框
+        AlertDialog dialog = builder.create();
+        // 設置點擊對話框外部不會關閉對話框
+        dialog.setCanceledOnTouchOutside(false);
+
+        // 找到並設置按鈕事件
+        Button positiveButton = customView.findViewById(R.id.Popupsure);
+        Button negativeButton = customView.findViewById(R.id.PopupCancel);
+
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteDB();
+                getActivity().getSupportFragmentManager().popBackStack();
+                dialog.cancel();
+            }
+        });
+
+        negativeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
     }
     private void deleteDB() {
         SQLiteDatabase bookDB = dbBookHelper.getWritableDatabase();
