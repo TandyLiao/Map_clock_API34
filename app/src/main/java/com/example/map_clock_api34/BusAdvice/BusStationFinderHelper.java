@@ -4,19 +4,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
-import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
 import org.json.JSONArray;
@@ -42,12 +32,9 @@ public class BusStationFinderHelper {
     private static final String BASE_URL = "https://tdx.transportdata.tw/api/basic/v2/Bus/Stop/City/";
     private static final String STOP_OF_ROUTE_URL = "https://tdx.transportdata.tw/api/basic/v2/Bus/StopOfRoute/City/";
 
-    private Context context;
-    private View overlayView;
+    String cityName;
 
-    private StringBuilder nearbyStationSuggestions;
-    private StringBuilder destinationStationSuggestions;
-    private StringBuilder routeSuggestions;
+    private Context context;
 
     private SharedViewModel sharedViewModel;
 
@@ -55,10 +42,13 @@ public class BusStationFinderHelper {
     private AuthHelper authHelper;
     private Handler mainHandler;
     private GoogleDistanceHelper googleDistanceHelper;
+
+    CityInEnglishHelper cityTranslate;
+
     List<BusStation> secondNearByStop = new ArrayList<>();
     List<BusStation> secondDesStop = new ArrayList<>();
 
-    // Handler for updating arrival times
+    // 自動更新的 Handler
     private Handler updateHandler;
     private Runnable updateRunnable;
     private static final int UPDATE_INTERVAL = 60000; // 1 minute
@@ -74,8 +64,10 @@ public class BusStationFinderHelper {
         this.authHelper = new AuthHelper(context);
         this.mainHandler = new Handler(Looper.getMainLooper());
         this.googleDistanceHelper = new GoogleDistanceHelper(context);
+        this.cityTranslate = new CityInEnglishHelper();
         this.callback = callback;
 
+        //資動更新的Handler
         this.updateHandler = new Handler(Looper.getMainLooper());
         this.updateRunnable = new Runnable() {
             @Override
@@ -91,9 +83,7 @@ public class BusStationFinderHelper {
         authHelper.getAccessToken(new AuthHelper.AuthCallback() {
             @Override
             public void onSuccess(String accessToken) {
-                nearbyStationSuggestions = new StringBuilder();
-                destinationStationSuggestions = new StringBuilder();
-                routeSuggestions = new StringBuilder("可到达目的地的公车路线:\n");
+
                 try {
                     findNearbyBusStops(view, accessToken);
                 } catch (UnsupportedEncodingException e) {
@@ -114,29 +104,42 @@ public class BusStationFinderHelper {
     //第一次過濾找附近和目的地站牌
     private void findNearbyBusStops(View view, String accessToken) throws UnsupportedEncodingException {
 
+        //此方法是先劃出使用者附近和目的地附近的範圍(運用經緯度)
+        //範圍傳給TDX找出範圍內的公車站牌
+        //因為傳回的結果是一個Json檔，所以還要在手動分出使用者附近和目的地附近的站牌
+
+        //抓使用者的經緯度
         double currentLat = sharedViewModel.getNowLantitude();
         double currentLon = sharedViewModel.getNowLontitude();
+        //抓目的地的經緯度
         double destLat = sharedViewModel.getLatitude(0);
         double destLon = sharedViewModel.getLongitude(0);
 
+        //offSet值，用來畫出範圍
         double latDiff = 0.0025;
         double lonDiff = 0.0025;
 
+        //使用者附近的範圍
         double minLat = currentLat - latDiff;
         double maxLat = currentLat + latDiff;
         double minLon = currentLon - lonDiff;
         double maxLon = currentLon + lonDiff;
+        //目的地附近的範圍
         double destMinLat = destLat - latDiff;
         double destMaxLat = destLat + latDiff;
         double destMinLon = destLon - lonDiff;
         double destMaxLon = destLon + lonDiff;
 
-        String cityName = "NewTaipei";
+        //目的地的城市名，e.g.台北市
+        cityName = cityTranslate.getCityInEnglish(sharedViewModel.getCapital(0));
 
+        //創建要傳給TDX的URL
         String userStopsUrl = BASE_URL + cityName + "?$filter=( " +
+                //使用者附近的經緯度
                 "StopPosition/PositionLat ge " + minLat + " and StopPosition/PositionLat le " + maxLat + " and " +
                 "StopPosition/PositionLon ge " + minLon + " and StopPosition/PositionLon le " + maxLon + "" +
                 ") or ( " +
+                //目的地附近的經緯度
                 "StopPosition/PositionLat ge " + destMinLat + " and StopPosition/PositionLat le " + destMaxLat + " and " +
                 "StopPosition/PositionLon ge " + destMinLon + " and StopPosition/PositionLon le " + destMaxLon + "" +
                 ")&$format=JSON";
@@ -153,7 +156,7 @@ public class BusStationFinderHelper {
             public void onFailure(Call call, IOException e) {
                 Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
                 }
             }
 
@@ -163,43 +166,32 @@ public class BusStationFinderHelper {
                     Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
                     Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "无法获取公车站牌资讯", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(context, "無法獲取公車站牌，請稍後在試一次", Toast.LENGTH_SHORT).show());
                     }
                     return;
                 }
 
                 try {
+                    //TDX回傳的Json
                     String userStopsResponse = response.body().string();
                     Log.d("BusStationFinderHelper", "User Stops Response: " + userStopsResponse);
 
+                    //第一次過濾的使用者附近和目的地附近的站牌，運用parseStops的方法
                     List<BusStation> firstCurrentList = parseStops(userStopsResponse, currentLat, currentLon);
                     List<BusStation> firstDesList = parseStops(userStopsResponse, destLat, destLon);
 
                     //後執行，先執行的程式在下面
                     Runnable onCompletion = () -> {
-                        nearbyStationSuggestions.setLength(0);
-                        destinationStationSuggestions.setLength(0);
-
-                        nearbyStationSuggestions.append("附近站牌:\n");
-                        for (BusStation station : secondNearByStop) {
-                            nearbyStationSuggestions.append(station.getStopName()).append("\n");
-                        }
-
-                        destinationStationSuggestions.append("目的地站牌:\n");
-                        for (BusStation station : secondDesStop) {
-                            destinationStationSuggestions.append(station.getStopName()).append("\n");
-                        }
                         findRoutes(view, accessToken, cityName, secondNearByStop, secondDesStop);
-
                     };
-                    //先執行
+                    //先執行，二次過濾出步行500公尺內可到的站牌
                     filterNearbyStops(currentLat, currentLon, firstCurrentList, secondNearByStop, () ->
                             filterNearbyStops(destLat, destLon, firstDesList, secondDesStop, onCompletion));
 
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "无法解析公车站牌资讯", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(context, "無法解析公車站牌資訊，請稍後在試", Toast.LENGTH_SHORT).show());
                     }
                 }
             }
@@ -207,12 +199,15 @@ public class BusStationFinderHelper {
     }
     //第一次過濾站牌內分成附近和目的地站牌的方法
     private List<BusStation> parseStops(String jsonResponse, double Lat, double Lon) throws Exception {
+
         JSONArray jsonArray = new JSONArray(jsonResponse);
         List<BusStation> stationList = new ArrayList<>();
+        //用來防止一樣的站牌重複加入
         Set<String> seenStops = new HashSet<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject stopObj = jsonArray.getJSONObject(i);
+            //從Json裡汲取我要的資訊
             String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
             double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
             double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
@@ -227,7 +222,7 @@ public class BusStationFinderHelper {
 
         return stationList;
     }
-
+    //手動分出使用者附近和目的地附近站牌的方法
     private boolean isNearby(double stopLat, double stopLon, double targetLat, double targetLon) {
         double latDiff = 0.0025;
         double lonDiff = 0.0025;
@@ -235,6 +230,8 @@ public class BusStationFinderHelper {
     }
     //第二次過濾站牌
     private void filterNearbyStops(double originLat, double originLon, List<BusStation> firstList, List<BusStation> resultList, Runnable callback) {
+        //因為多次請求會被Google檔下，所以把全部站牌一次丟給她
+        //這是把請求站牌濃縮的程式
         List<String> destinations = new ArrayList<>();
         for (BusStation station : firstList) {
             destinations.add(station.getStopLat() + "," + station.getStopLon());
@@ -259,7 +256,7 @@ public class BusStationFinderHelper {
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Error parsing distances: " + e.getMessage());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "解析距离资讯时出错", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(context, "解析距離時出錯", Toast.LENGTH_SHORT).show());
                     }
                 }
             }
@@ -268,7 +265,7 @@ public class BusStationFinderHelper {
             public void onFailure(String errorMessage) {
                 Log.e("BusStationFinderHelper", "Distance matrix error: " + errorMessage);
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "无法获取距离资讯", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(context, "無法獲取距離，請稍後在試", Toast.LENGTH_SHORT).show());
                 }
             }
         });
@@ -282,13 +279,13 @@ public class BusStationFinderHelper {
         JSONArray rows = jsonObject.getJSONArray("rows");
 
         if (rows.length() == 0) {
-            throw new Exception("No rows in distance matrix response");
+            throw new Exception("回傳值為空");
         }
 
         JSONArray elements = rows.getJSONObject(0).getJSONArray("elements");
 
         if (elements.length() != nearByStop.size()) {
-            throw new Exception("Mismatch between number of stops and elements in distance matrix response");
+            throw new Exception("回傳值和站牌數量不匹配");
         }
 
         for (int i = 0; i < elements.length(); i++) {
@@ -308,7 +305,9 @@ public class BusStationFinderHelper {
     }
 
     private void findRoutes(View view, String accessToken, String cityName, List<BusStation> nearbyStops, List<BusStation> destinationStops) {
-        // 一次性获取所有这些站点的路线
+
+        //一次性獲取全部可能路線
+
         StringBuilder stopFilter = new StringBuilder();
         for (BusStation station : nearbyStops) {
             if (stopFilter.length() > 0) {
@@ -353,6 +352,7 @@ public class BusStationFinderHelper {
                     JSONArray jsonArray = new JSONArray(routeResponse);
 
                     for (int i = 0; i < jsonArray.length(); i++) {
+
                         JSONObject routeObj = jsonArray.getJSONObject(i);
                         String routeName = routeObj.getJSONObject("RouteName").getString("Zh_tw");
                         JSONArray stopsArray = routeObj.getJSONArray("Stops");
@@ -369,6 +369,7 @@ public class BusStationFinderHelper {
                         for (BusStation station : nearbyStops) {
                             if (isNearbyStop(station, routeStops)) {
                                 Map<BusStation.LatLng, String> destinationStopsMap = new HashMap<>();
+
                                 for (BusStation destinationStation : destinationStops) {
                                     if (isNearbyStop(destinationStation, routeStops)) {
                                         destinationStopsMap.put(new BusStation.LatLng(destinationStation.getStopLat(), destinationStation.getStopLon()), destinationStation.getStopName());
@@ -379,12 +380,13 @@ public class BusStationFinderHelper {
                         }
                     }
                     mainHandler.post(() -> {
-                        // 确认所有 BusStation 的信息
+                        // 確認路線添加的Log
                         for (BusStation station : nearbyStops) {
                             Log.d("BusStationFinderHelper", "BusStation: " + station.toString());
                         }
                         Toast.makeText(context, "路線已更新", Toast.LENGTH_LONG).show();
                     });
+                    //找公車抵達時間
                     findArrivalTimes(accessToken, cityName, nearbyStops);
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
@@ -394,7 +396,7 @@ public class BusStationFinderHelper {
     }
 
     private boolean isNearbyStop(BusStation station, Map<BusStation.LatLng, String> routeStops) {
-        double epsilon = 0.00001; // 允许的误差范围
+        double epsilon = 0.00001; // 允許的誤差範圍
         for (Map.Entry<BusStation.LatLng, String> entry : routeStops.entrySet()) {
             BusStation.LatLng latLng = entry.getKey();
             if (Math.abs(station.getStopLat() - latLng.getLat()) < epsilon && Math.abs(station.getStopLon() - latLng.getLon()) < epsilon) {
@@ -429,7 +431,7 @@ public class BusStationFinderHelper {
             public void onFailure(Call call, IOException e) {
                 Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
                 }
             }
 
@@ -439,7 +441,7 @@ public class BusStationFinderHelper {
                     Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
                     Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "无法获取到站时间", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(context, "無法獲取到站時間，請稍後在試", Toast.LENGTH_SHORT).show());
                     }
                     return;
                 }
@@ -454,13 +456,13 @@ public class BusStationFinderHelper {
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "无法解析到站时间", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(context, "無法解析到站時間", Toast.LENGTH_SHORT).show());
                     }
                 }
             }
         });
 
-        // Start the periodic update
+        // 啟動自動更新到站時時間
         updateHandler.postDelayed(updateRunnable, UPDATE_INTERVAL);
     }
 
@@ -468,14 +470,14 @@ public class BusStationFinderHelper {
         authHelper.getAccessToken(new AuthHelper.AuthCallback() {
             @Override
             public void onSuccess(String accessToken) {
-                findArrivalTimes(accessToken, "NewTaipei", secondNearByStop); // Assuming the city is NewTaipei
+                findArrivalTimes(accessToken, cityName, secondNearByStop);
             }
 
             @Override
             public void onFailure(String errorMessage) {
                 Log.e("BusStationFinderHelper", "Auth error: " + errorMessage);
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "无法获取授权", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(context, "無法獲取授權", Toast.LENGTH_SHORT).show());
                 }
             }
         });
