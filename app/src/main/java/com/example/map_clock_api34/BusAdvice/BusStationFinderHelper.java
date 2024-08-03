@@ -58,6 +58,12 @@ public class BusStationFinderHelper {
     List<BusStation> secondNearByStop = new ArrayList<>();
     List<BusStation> secondDesStop = new ArrayList<>();
 
+    // Handler for updating arrival times
+    private Handler updateHandler;
+    private Runnable updateRunnable;
+    private static final int UPDATE_INTERVAL = 60000; // 1 minute
+
+
     private BusStationFinderCallback callback;
 
     //建構子
@@ -69,6 +75,8 @@ public class BusStationFinderHelper {
         this.mainHandler = new Handler(Looper.getMainLooper());
         this.googleDistanceHelper = new GoogleDistanceHelper(context);
         this.callback = callback;
+
+
     }
 
     //外面可呼叫過濾站牌的方法
@@ -368,9 +376,9 @@ public class BusStationFinderHelper {
                         for (BusStation station : nearbyStops) {
                             Log.d("BusStationFinderHelper", "BusStation: " + station.toString());
                         }
-                        callback.onBusStationsFound(secondNearByStop, secondDesStop);
                         Toast.makeText(context, "路線已更新", Toast.LENGTH_LONG).show();
                     });
+                    findArrivalTimes(accessToken, cityName, nearbyStops);
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                 }
@@ -394,37 +402,90 @@ public class BusStationFinderHelper {
         void onBusStationsFound(List<BusStation> nearbyStops, List<BusStation> destinationStops);
     }
 
-    private void showPopup(View view) {
-        View popupView = LayoutInflater.from(context).inflate(R.layout.popupwindow_station, null, false);
-        PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setWidth(700);
-        popupWindow.setFocusable(false);
-        popupWindow.setOutsideTouchable(false);
+    private void findArrivalTimes(String accessToken, String cityName, List<BusStation> nearbyStops) {
+        List<String> stopNames = new ArrayList<>();
+        for (BusStation station : nearbyStops) {
+            stopNames.add(station.getStopName());
+        }
 
-        TextView stationInfoTextView = popupView.findViewById(R.id.txtStationNote);
+        String stopNameFilter = String.join(" or ", stopNames.stream().map(name -> "StopName/Zh_tw eq '" + name + "'").toArray(String[]::new));
+        String arrivalTimeUrl = "https://tdx.transportdata.tw/api/basic/v2/Bus/EstimatedTimeOfArrival/City/" + cityName + "?$filter=" + stopNameFilter + "&$format=JSON";
+        Log.d("BusStationFinderHelper", "Arrival Time URL: " + arrivalTimeUrl);
 
-        overlayView = new View(context);
-        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
-        overlayView.setClickable(true);
-        ((ViewGroup) ((FragmentActivity) context).findViewById(android.R.id.content)).addView(overlayView);
+        Request arrivalTimeRequest = new Request.Builder()
+                .url(arrivalTimeUrl)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
 
-        mainHandler.post(() -> {
-            stationInfoTextView.setText(nearbyStationSuggestions.toString() + "\n" + destinationStationSuggestions.toString() + "\n" + routeSuggestions.toString() + "\n" );
-            Button btnCancel = popupView.findViewById(R.id.PopupYes);
-            btnCancel.setOnClickListener(v -> {
-                popupWindow.dismiss();
-                removeOverlayView();
-            });
-            popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+        client.newCall(arrivalTimeRequest).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
+                if (context != null) {
+                    mainHandler.post(() -> Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
+                    Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
+                    if (context != null) {
+                        mainHandler.post(() -> Toast.makeText(context, "无法获取到站时间", Toast.LENGTH_SHORT).show());
+                    }
+                    return;
+                }
+
+                try {
+                    String arrivalTimeResponse = response.body().string();
+                    Log.d("BusStationFinderHelper", "Arrival Time Response: " + arrivalTimeResponse);
+
+                    // 解析到站时间
+                    parseArrivalTimes(arrivalTimeResponse);
+
+                } catch (Exception e) {
+                    Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
+                    if (context != null) {
+                        mainHandler.post(() -> Toast.makeText(context, "无法解析到站时间", Toast.LENGTH_SHORT).show());
+                    }
+                }
+            }
         });
     }
 
-    private void removeOverlayView() {
-        if (overlayView != null && overlayView.getParent() != null) {
-            ((ViewGroup) overlayView.getParent()).removeView(overlayView);
-            overlayView = null;
+
+    private void parseArrivalTimes(String jsonResponse) throws Exception {
+        JSONArray jsonArray = new JSONArray(jsonResponse);
+        Map<String, String> arrivalTimes = new HashMap<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject arrivalObj = jsonArray.getJSONObject(i);
+            String routeName = arrivalObj.getJSONObject("RouteName").getString("Zh_tw");
+            String stopName = arrivalObj.getJSONObject("StopName").getString("Zh_tw");
+            int estimateTime = arrivalObj.optInt("EstimateTime", -1);
+
+            String key = routeName + "-" + stopName;
+            String value = estimateTime == -1 ? "未發車" : (estimateTime / 60) + " 分鐘";
+
+            arrivalTimes.put(key, value);
         }
+
+        // 将抵达时间存储到相应的站点
+        for (BusStation station : secondNearByStop) {
+            Map<String, String> stationArrivalTimes = new HashMap<>();
+            for (String routeName : station.getRoutes().keySet()) {
+                String key = routeName + "-" + station.getStopName();
+                if (arrivalTimes.containsKey(key)) {
+                    stationArrivalTimes.put(routeName, arrivalTimes.get(key));
+                }
+            }
+            station.setArrivalTimes(stationArrivalTimes);
+        }
+
+        mainHandler.post(() -> {
+            callback.onBusStationsFound(secondNearByStop, secondDesStop);
+        });
     }
 
     public static class BusStation {
@@ -433,12 +494,14 @@ public class BusStationFinderHelper {
         private final double stopLon;
         private String distance;
         private Map<String, Map<LatLng, String>> routes;
+        private Map<String, String> arrivalTimes; // 新增字段以存储到站时间
 
         public BusStation(String stopName, double stopLat, double stopLon) {
             this.stopName = stopName;
             this.stopLat = stopLat;
             this.stopLon = stopLon;
             this.routes = new HashMap<>();
+            this.arrivalTimes = new HashMap<>();
         }
 
         public BusStation(String stopName, double stopLat, double stopLon, String distance) {
@@ -447,6 +510,7 @@ public class BusStationFinderHelper {
             this.stopLon = stopLon;
             this.distance = distance;
             this.routes = new HashMap<>();
+            this.arrivalTimes = new HashMap<>();
         }
 
         public String getStopName() {
@@ -478,6 +542,14 @@ public class BusStationFinderHelper {
             }
         }
 
+        public Map<String, String> getArrivalTimes() {
+            return arrivalTimes;
+        }
+
+        public void setArrivalTimes(Map<String, String> arrivalTimes) {
+            this.arrivalTimes = arrivalTimes;
+        }
+
         @Override
         public String toString() {
             return "BusStation{" +
@@ -486,6 +558,7 @@ public class BusStationFinderHelper {
                     ", stopLon=" + stopLon +
                     ", distance='" + distance + '\'' +
                     ", routes=" + routes +
+                    ", arrivalTimes=" + arrivalTimes +
                     '}';
         }
 
@@ -515,5 +588,4 @@ public class BusStationFinderHelper {
             }
         }
     }
-
 }

@@ -165,12 +165,19 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
     private void showRoutesDialog(BusStationFinderHelper.BusStation station) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("可搭路線");
+        builder.setTitle("請選擇可搭路線");
 
         final Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
         final List<String> routeNames = new ArrayList<>(routes.keySet());
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, routeNames);
+        // 获取每条路线的到站时间信息
+        List<String> routeDetails = new ArrayList<>();
+        for (String routeName : routeNames) {
+            String arrivalTime = station.getArrivalTimes().get(routeName);
+            routeDetails.add(routeName + " - 到站時間: " + arrivalTime);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, routeDetails);
         builder.setAdapter(adapter, (dialog, which) -> {
             String selectedRoute = routeNames.get(which);
             highlightRouteDestinations(routes.get(selectedRoute));
