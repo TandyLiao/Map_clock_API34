@@ -32,6 +32,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -200,8 +201,16 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         builder.show();
     }
 
+    private void resetDestinationMarkers() {
+        for (Marker marker : destinationMarkers) {
+            marker.remove();
+        }
+        destinationMarkers.clear();
+    }
     private void highlightRouteDestinations(Map<BusStationFinderHelper.BusStation.LatLng, String> destinations) {
         resetDestinationMarkers();
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+
         for (Map.Entry<BusStationFinderHelper.BusStation.LatLng, String> entry : destinations.entrySet()) {
             Log.d("highlightRouteDestinations", "Destination stop: " + entry.getValue() + " at " + entry.getKey().getLat() + ", " + entry.getKey().getLon());
             LatLng position = new LatLng(entry.getKey().getLat(), entry.getKey().getLon());
@@ -211,16 +220,16 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                     .alpha(1.0f));
             destinationMarkers.add(marker);
+            boundsBuilder.include(position);
         }
-    }
 
-    private void resetDestinationMarkers() {
-        for (Marker marker : destinationMarkers) {
-            marker.remove();
+        for (Marker marker : nearbyMarkers) {
+            boundsBuilder.include(marker.getPosition());
         }
-        destinationMarkers.clear();
-    }
 
+        LatLngBounds bounds = boundsBuilder.build();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 300));
+    }
     @Override
     public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops, List<BusStationFinderHelper.BusStation> destinationStops) {
         secondNearByStop = nearbyStops;
