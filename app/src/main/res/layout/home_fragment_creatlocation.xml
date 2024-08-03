@@ -22,6 +22,17 @@
             tools:layout_editor_absoluteY="63dp" />
 
 
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="請按新增增加地點"
+            android:textColor="@color/lightgreen"
+            android:textSize="32sp"
+            app:layout_constraintBottom_toBottomOf="@+id/recycleViewRouteBook"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/recycleViewRouteBook" />
 
         <Button
             android:id="@+id/btn_addItem"

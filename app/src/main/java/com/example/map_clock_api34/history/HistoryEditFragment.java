@@ -12,13 +12,13 @@ import androidx.fragment.app.Fragment;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import androidx.lifecycle.ViewModelProvider;
 
 
 public class HistoryEditFragment extends Fragment {
 
-    private AppDatabaseHelper dbHelper;
+    private HistoryDatabaseHelper dbHelper;
     private SharedViewModel sharedViewModel;
 
     @Nullable
@@ -28,7 +28,7 @@ public class HistoryEditFragment extends Fragment {
         View view = inflater.inflate(R.layout.history_fragment_history_edit, container, false);
 
         // Initialize AppDatabaseHelper and SharedViewModel
-        dbHelper = new AppDatabaseHelper(requireContext()); // Pass only context here
+        dbHelper = new HistoryDatabaseHelper(requireContext()); // Pass only context here
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         Button clearButton = view.findViewById(R.id.SelectButton);

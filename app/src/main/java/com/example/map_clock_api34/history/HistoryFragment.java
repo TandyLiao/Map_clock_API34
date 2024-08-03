@@ -33,16 +33,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.Database.AppDatabaseHelper;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
-import com.example.map_clock_api34.Database.AppDatabaseHelper.LocationTable;
-import com.example.map_clock_api34.Database.AppDatabaseHelper.HistoryTable;
-import com.example.map_clock_api34.home.CreateLocation;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.HistoryTable;
 import com.example.map_clock_api34.home.HomeFragment;
-import com.example.map_clock_api34.home.StartMapping;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -69,7 +66,7 @@ public class HistoryFragment extends Fragment {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     SharedViewModel sharedViewModel;
 
-    private AppDatabaseHelper dbHelper;
+    private HistoryDatabaseHelper dbHelper;
     private FusedLocationProviderClient fusedLocationClient;
 
     private boolean isFirstEditClick = true;
@@ -79,7 +76,7 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
 
-        dbHelper = new AppDatabaseHelper(requireContext());
+        dbHelper = new HistoryDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         //dbHelper.clearAllTables();
@@ -319,6 +316,14 @@ public class HistoryFragment extends Fragment {
 
     private void updateButtonState() {
 
+        if(arrayList.isEmpty()){
+            TextView notification = rootView.findViewById(R.id.textView5);
+            notification.setText("目前還沒有記錄喔");
+        }else{
+            TextView notification = rootView.findViewById(R.id.textView5);
+            notification.setText("");
+        }
+
         boolean hasItems = arrayList.isEmpty();
         boolean hasSelectedItems = false;
         for (HashMap<String, String> item : arrayList) {
@@ -399,24 +404,26 @@ public class HistoryFragment extends Fragment {
                 time = item.get("time");
             }
         }
-
+        int count = 0;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + AppDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + HistoryDatabaseHelper.HistoryTable.TABLE_NAME + " WHERE " + HistoryDatabaseHelper.HistoryTable.COLUMN_START_TIME + " = ?", new String[]{time});
         db.beginTransaction();
         try {
             while (cursor.moveToNext()) {
                 String locationId = cursor.getString(0);
-                Cursor locationCursor = db.rawQuery("SELECT * FROM " + AppDatabaseHelper.LocationTable.TABLE_NAME + " WHERE " + AppDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                Cursor locationCursor = db.rawQuery("SELECT * FROM " + HistoryDatabaseHelper.LocationTable.TABLE_NAME + " WHERE " + HistoryDatabaseHelper.LocationTable.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
                 if (locationCursor.moveToFirst()) {
                     String placeName = locationCursor.getString(3);
                     Double latitude = locationCursor.getDouble(2);
                     Double longitude = locationCursor.getDouble(1);
                     String city = locationCursor.getString(5);
                     String area = locationCursor.getString(6);
+                    String note = locationCursor.getString(7);
 
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
+                    sharedViewModel.setNote(note, count++);
                     getLastKnownLocation();
                 }
                 locationCursor.close();

@@ -1,11 +1,13 @@
 package com.example.map_clock_api34.note;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,7 +32,7 @@ public class NoteEnterContent extends Fragment {
     private TextView title;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.activity_note_enter_content, container, false);
+        rootView = inflater.inflate(R.layout.note_note_enter_content, container, false);
 
         detailTextView = rootView.findViewById(R.id.textView3);//benson
         title = rootView.findViewById(R.id.textView4);
@@ -48,6 +50,7 @@ public class NoteEnterContent extends Fragment {
             public void onClick(View v) {
                 sharedViewModel.setNote(detailTextView.getText().toString(), sharedViewModel.getPosition());
                 getActivity().getSupportFragmentManager().popBackStack();
+                hideKeyboard();
             }
         });
 
@@ -160,7 +163,15 @@ public class NoteEnterContent extends Fragment {
 
 
     }
-
+    private void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+        }
+    }
     @Override
     public void onResume() {
         super.onResume();
