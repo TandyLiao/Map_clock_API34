@@ -141,7 +141,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(station.getStopName() + " (" + station.getStopLat() + ", " + station.getStopLon() + ")")
+                    .title(station.getStopName())
                     .icon(BitmapDescriptorFactory.defaultMarker(color))
                     .alpha(transparent ? 0.3f : 1.0f)); // 透明度设为0.3表示透明
             if (transparent) {
@@ -157,18 +157,25 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
         for (BusStationFinderHelper.BusStation station : secondNearByStop) {
             if (station.getStopName().equals(stopName.split(" \\(")[0]) && Math.abs(station.getStopLat() - lat) < 0.00001 && Math.abs(station.getStopLon() - lon) < 0.00001) {
-                showRoutesDialog(station);
+                showRoutesDialog(stopName, station);
                 break;
             }
         }
     }
 
-    private void showRoutesDialog(BusStationFinderHelper.BusStation station) {
+    private void showRoutesDialog(String stopName, BusStationFinderHelper.BusStation station) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("請選擇可搭路線");
+        builder.setTitle(stopName + "站 - 請選擇可搭路線");
 
         final Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
         final List<String> routeNames = new ArrayList<>(routes.keySet());
+
+        // 確認數據完整性
+        if (routeNames.isEmpty()) {
+            Log.e("BusStationFinderHelper", "No routes available for stop: " + station.getStopName());
+            Toast.makeText(getContext(), "沒有可用的路線，請稍候再試", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // 获取每条路线的到站时间信息
         List<String> routeDetails = new ArrayList<>();
@@ -176,6 +183,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             String arrivalTime = station.getArrivalTimes().get(routeName);
             routeDetails.add(routeName + " - 到站時間: " + arrivalTime);
         }
+
+        Log.d("BusStationFinderHelper", "Routes for stop " + station.getStopName() + ": " + routeDetails);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, routeDetails);
         builder.setAdapter(adapter, (dialog, which) -> {
@@ -187,6 +196,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
         builder.show();
     }
+
 
     private void highlightRouteDestinations(Map<BusStationFinderHelper.BusStation.LatLng, String> destinations) {
         resetDestinationMarkers();
@@ -221,4 +231,5 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onResume() {
         super.onResume();
     }
+
 }

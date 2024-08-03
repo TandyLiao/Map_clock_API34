@@ -76,7 +76,14 @@ public class BusStationFinderHelper {
         this.googleDistanceHelper = new GoogleDistanceHelper(context);
         this.callback = callback;
 
-
+        this.updateHandler = new Handler(Looper.getMainLooper());
+        this.updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                refreshArrivalTimes();
+                updateHandler.postDelayed(this, UPDATE_INTERVAL);
+            }
+        };
     }
 
     //外面可呼叫過濾站牌的方法
@@ -452,7 +459,28 @@ public class BusStationFinderHelper {
                 }
             }
         });
+
+        // Start the periodic update
+        updateHandler.postDelayed(updateRunnable, UPDATE_INTERVAL);
     }
+
+    private void refreshArrivalTimes() {
+        authHelper.getAccessToken(new AuthHelper.AuthCallback() {
+            @Override
+            public void onSuccess(String accessToken) {
+                findArrivalTimes(accessToken, "NewTaipei", secondNearByStop); // Assuming the city is NewTaipei
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Log.e("BusStationFinderHelper", "Auth error: " + errorMessage);
+                if (context != null) {
+                    mainHandler.post(() -> Toast.makeText(context, "无法获取授权", Toast.LENGTH_SHORT).show());
+                }
+            }
+        });
+    }
+
 
 
     private void parseArrivalTimes(String jsonResponse) throws Exception {
@@ -487,6 +515,7 @@ public class BusStationFinderHelper {
             callback.onBusStationsFound(secondNearByStop, secondDesStop);
         });
     }
+
 
     public static class BusStation {
         private final String stopName;
