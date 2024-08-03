@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,6 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     private BusStationFinderHelper stationFinder;
 
     private List<BusStationFinderHelper.BusStation> secondNearByStop;
-    private List<BusStationFinderHelper.BusStation> secondDesStop;
     private Set<Marker> destinationMarkers = new HashSet<>();
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -68,16 +68,13 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
             // 移动地图视图到最后已知的位置
             if (lastLocation != null) {
-                // 移动地图视图到最后已知的位置
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
             } else {
-                // 处理 lastLocation 为 null 的情况
                 Toast.makeText(getContext(), "无法取得当前位置信息，请查看您的GPS设备", Toast.LENGTH_LONG).show();
             }
 
             // 初始化时显示所有站牌
             displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false);
-            displayBusStopsOnMap(secondDesStop, BitmapDescriptorFactory.HUE_RED, true);
 
             // 设置标记点击事件
             mMap.setOnMarkerClickListener(marker -> {
@@ -130,7 +127,6 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 返回上一个 Fragment
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
@@ -145,7 +141,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(station.getStopName())
+                    .title(station.getStopName() + " (" + station.getStopLat() + ", " + station.getStopLon() + ")")
                     .icon(BitmapDescriptorFactory.defaultMarker(color))
                     .alpha(transparent ? 0.3f : 1.0f)); // 透明度设为0.3表示透明
             if (transparent) {
@@ -160,7 +156,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         }
 
         for (BusStationFinderHelper.BusStation station : secondNearByStop) {
-            if (station.getStopName().equals(stopName) && Math.abs(station.getStopLat() - lat) < 0.00001 && Math.abs(station.getStopLon() - lon) < 0.00001) {
+            if (station.getStopName().equals(stopName.split(" \\(")[0]) && Math.abs(station.getStopLat() - lat) < 0.00001 && Math.abs(station.getStopLon() - lon) < 0.00001) {
                 showRoutesDialog(station);
                 break;
             }
@@ -188,32 +184,29 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     private void highlightRouteDestinations(Map<String, BusStationFinderHelper.BusStation.LatLng> destinations) {
         resetDestinationMarkers();
         for (Map.Entry<String, BusStationFinderHelper.BusStation.LatLng> entry : destinations.entrySet()) {
-            highlightDestinationStop(entry.getKey());
+            Log.d("highlightRouteDestinations", "Destination stop: " + entry.getKey() + " at " + entry.getValue().getLat() + ", " + entry.getValue().getLon());
+            LatLng position = new LatLng(entry.getValue().getLat(), entry.getValue().getLon());
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(position)
+                    .title(entry.getKey() + " (" + entry.getValue().getLat() + ", " + entry.getValue().getLon() + ")")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    .alpha(1.0f));
+            destinationMarkers.add(marker);
         }
     }
 
     private void resetDestinationMarkers() {
         for (Marker marker : destinationMarkers) {
-            marker.setAlpha(0.3f); // 重置透明度
+            marker.remove();
         }
-    }
-
-    private void highlightDestinationStop(String stopName) {
-        for (Marker marker : destinationMarkers) {
-            if (marker.getTitle().equals(stopName)) {
-                marker.setAlpha(1.0f); // 将透明度设为1.0表示不透明
-            }
-        }
+        destinationMarkers.clear();
     }
 
     @Override
     public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops, List<BusStationFinderHelper.BusStation> destinationStops) {
         secondNearByStop = nearbyStops;
-        secondDesStop = destinationStops;
-
         if (mMap != null) {
             displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false);
-            displayBusStopsOnMap(secondDesStop, BitmapDescriptorFactory.HUE_RED, true);
         }
     }
 

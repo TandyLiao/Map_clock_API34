@@ -55,6 +55,8 @@ public class BusStationFinderHelper {
     private AuthHelper authHelper;
     private Handler mainHandler;
     private GoogleDistanceHelper googleDistanceHelper;
+    List<BusStation> secondNearByStop = new ArrayList<>();
+    List<BusStation> secondDesStop = new ArrayList<>();
 
     private BusStationFinderCallback callback;
 
@@ -102,8 +104,8 @@ public class BusStationFinderHelper {
         double destLat = sharedViewModel.getLatitude(0);
         double destLon = sharedViewModel.getLongitude(0);
 
-        double latDiff = 0.0022;
-        double lonDiff = 0.0022;
+        double latDiff = 0.0025;
+        double lonDiff = 0.0025;
 
         double minLat = currentLat - latDiff;
         double maxLat = currentLat + latDiff;
@@ -158,9 +160,6 @@ public class BusStationFinderHelper {
                     List<BusStation> firstCurrentList = parseStops(userStopsResponse, currentLat, currentLon);
                     List<BusStation> firstDesList = parseStops(userStopsResponse, destLat, destLon);
 
-                    List<BusStation> secondNearByStop = new ArrayList<>();
-                    List<BusStation> secondDesStop = new ArrayList<>();
-
                     //後執行，先執行的程式在下面
                     Runnable onCompletion = () -> {
                         nearbyStationSuggestions.setLength(0);
@@ -177,9 +176,6 @@ public class BusStationFinderHelper {
                         }
                         findRoutes(view, accessToken, cityName, secondNearByStop, secondDesStop);
 
-                        mainHandler.post(() -> {
-                            callback.onBusStationsFound(secondNearByStop, secondDesStop);
-                        });
                     };
                     //先執行
                     filterNearbyStops(currentLat, currentLon, firstCurrentList, secondNearByStop, () ->
@@ -218,8 +214,8 @@ public class BusStationFinderHelper {
     }
 
     private boolean isNearby(double stopLat, double stopLon, double targetLat, double targetLon) {
-        double latDiff = 0.0022;
-        double lonDiff = 0.0022;
+        double latDiff = 0.0025;
+        double lonDiff = 0.0025;
         return Math.abs(stopLat - targetLat) <= latDiff && Math.abs(stopLon - targetLon) <= lonDiff;
     }
     //第二次過濾站牌
@@ -372,6 +368,7 @@ public class BusStationFinderHelper {
                         for (BusStation station : nearbyStops) {
                             Log.d("BusStationFinderHelper", "BusStation: " + station.toString());
                         }
+                        callback.onBusStationsFound(secondNearByStop, secondDesStop);
                         Toast.makeText(context, "路線已更新", Toast.LENGTH_LONG).show();
                     });
                 } catch (Exception e) {
@@ -391,17 +388,6 @@ public class BusStationFinderHelper {
         }
         return false;
     }
-
-    private Set<String> extractStopNames(List<BusStation> busStations) {
-        Set<String> stopNames = new HashSet<>();
-        for (BusStation station : busStations) {
-            stopNames.add(station.getStopName());
-        }
-        return stopNames;
-    }
-
-
-
 
     //負責回傳結果
     public interface BusStationFinderCallback {
