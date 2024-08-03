@@ -341,22 +341,22 @@ public class BusStationFinderHelper {
                         JSONObject routeObj = jsonArray.getJSONObject(i);
                         String routeName = routeObj.getJSONObject("RouteName").getString("Zh_tw");
                         JSONArray stopsArray = routeObj.getJSONArray("Stops");
-                        Map<String, BusStation.LatLng> routeStops = new HashMap<>();
+                        Map<BusStation.LatLng, String> routeStops = new HashMap<>();
 
                         for (int j = 0; j < stopsArray.length(); j++) {
                             JSONObject stopObj = stopsArray.getJSONObject(j);
                             String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
                             double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
                             double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
-                            routeStops.put(stopName, new BusStation.LatLng(stopLat, stopLon));
+                            routeStops.put(new BusStation.LatLng(stopLat, stopLon), stopName);
                         }
 
                         for (BusStation station : nearbyStops) {
                             if (isNearbyStop(station, routeStops)) {
-                                Map<String, BusStation.LatLng> destinationStopsMap = new HashMap<>();
+                                Map<BusStation.LatLng, String> destinationStopsMap = new HashMap<>();
                                 for (BusStation destinationStation : destinationStops) {
                                     if (isNearbyStop(destinationStation, routeStops)) {
-                                        destinationStopsMap.put(destinationStation.getStopName(), new BusStation.LatLng(destinationStation.getStopLat(), destinationStation.getStopLon()));
+                                        destinationStopsMap.put(new BusStation.LatLng(destinationStation.getStopLat(), destinationStation.getStopLon()), destinationStation.getStopName());
                                     }
                                 }
                                 station.addRoute(routeName, destinationStopsMap);
@@ -378,10 +378,10 @@ public class BusStationFinderHelper {
         });
     }
 
-    private boolean isNearbyStop(BusStation station, Map<String, BusStation.LatLng> routeStops) {
+    private boolean isNearbyStop(BusStation station, Map<BusStation.LatLng, String> routeStops) {
         double epsilon = 0.00001; // 允许的误差范围
-        for (Map.Entry<String, BusStation.LatLng> entry : routeStops.entrySet()) {
-            BusStation.LatLng latLng = entry.getValue();
+        for (Map.Entry<BusStation.LatLng, String> entry : routeStops.entrySet()) {
+            BusStation.LatLng latLng = entry.getKey();
             if (Math.abs(station.getStopLat() - latLng.getLat()) < epsilon && Math.abs(station.getStopLon() - latLng.getLon()) < epsilon) {
                 return true;
             }
@@ -432,7 +432,7 @@ public class BusStationFinderHelper {
         private final double stopLat;
         private final double stopLon;
         private String distance;
-        private Map<String, Map<String, LatLng>> routes;
+        private Map<String, Map<LatLng, String>> routes;
 
         public BusStation(String stopName, double stopLat, double stopLon) {
             this.stopName = stopName;
@@ -465,12 +465,17 @@ public class BusStationFinderHelper {
             return distance;
         }
 
-        public Map<String, Map<String, LatLng>> getRoutes() {
+        public Map<String, Map<LatLng, String>> getRoutes() {
             return routes;
         }
 
-        public void addRoute(String routeName, Map<String, LatLng> destinationStops) {
-            this.routes.put(routeName, destinationStops);
+        public void addRoute(String routeName, Map<LatLng, String> destinationStops) {
+            if (this.routes.containsKey(routeName)) {
+                Map<LatLng, String> existingStops = this.routes.get(routeName);
+                existingStops.putAll(destinationStops);
+            } else {
+                this.routes.put(routeName, destinationStops);
+            }
         }
 
         @Override

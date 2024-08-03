@@ -165,9 +165,9 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
     private void showRoutesDialog(BusStationFinderHelper.BusStation station) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("选择路线");
+        builder.setTitle("可搭路線");
 
-        final Map<String, Map<String, BusStationFinderHelper.BusStation.LatLng>> routes = station.getRoutes();
+        final Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
         final List<String> routeNames = new ArrayList<>(routes.keySet());
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, routeNames);
@@ -181,14 +181,14 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         builder.show();
     }
 
-    private void highlightRouteDestinations(Map<String, BusStationFinderHelper.BusStation.LatLng> destinations) {
+    private void highlightRouteDestinations(Map<BusStationFinderHelper.BusStation.LatLng, String> destinations) {
         resetDestinationMarkers();
-        for (Map.Entry<String, BusStationFinderHelper.BusStation.LatLng> entry : destinations.entrySet()) {
-            Log.d("highlightRouteDestinations", "Destination stop: " + entry.getKey() + " at " + entry.getValue().getLat() + ", " + entry.getValue().getLon());
-            LatLng position = new LatLng(entry.getValue().getLat(), entry.getValue().getLon());
+        for (Map.Entry<BusStationFinderHelper.BusStation.LatLng, String> entry : destinations.entrySet()) {
+            Log.d("highlightRouteDestinations", "Destination stop: " + entry.getValue() + " at " + entry.getKey().getLat() + ", " + entry.getKey().getLon());
+            LatLng position = new LatLng(entry.getKey().getLat(), entry.getKey().getLon());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(entry.getKey() + " (" + entry.getValue().getLat() + ", " + entry.getValue().getLon() + ")")
+                    .title(entry.getValue() + " (" + entry.getKey().getLat() + ", " + entry.getKey().getLon() + ")")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                     .alpha(1.0f));
             destinationMarkers.add(marker);
