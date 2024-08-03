@@ -408,7 +408,7 @@ public class BusStationFinderHelper {
 
     //負責回傳結果
     public interface BusStationFinderCallback {
-        void onBusStationsFound(List<BusStation> nearbyStops, List<BusStation> destinationStops);
+        void onBusStationsFound(List<BusStation> nearbyStops);
     }
 
     private void findArrivalTimes(String accessToken, String cityName, List<BusStation> nearbyStops) {
@@ -504,7 +504,7 @@ public class BusStationFinderHelper {
             arrivalTimes.put(key, value);
         }
 
-        // 将抵达时间存储到相应的站点
+        // 儲存到站時間
         for (BusStation station : secondNearByStop) {
             Map<String, String> stationArrivalTimes = new HashMap<>();
             for (String routeName : station.getRoutes().keySet()) {
@@ -517,7 +517,7 @@ public class BusStationFinderHelper {
         }
 
         mainHandler.post(() -> {
-            callback.onBusStationsFound(secondNearByStop, secondDesStop);
+            callback.onBusStationsFound(secondNearByStop);
         });
     }
 

@@ -231,9 +231,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 300));
     }
     @Override
-    public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops, List<BusStationFinderHelper.BusStation> destinationStops) {
+    public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops) {
         secondNearByStop = nearbyStops;
-        secondDesStop = destinationStops;
         if (mMap != null) {
             displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false, nearbyMarkers);
         }
