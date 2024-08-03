@@ -53,6 +53,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     private BusStationFinderHelper stationFinder;
 
     private List<BusStationFinderHelper.BusStation> secondNearByStop;
+    private List<BusStationFinderHelper.BusStation> secondDesStop;
+    private Set<Marker> nearbyMarkers = new HashSet<>();
     private Set<Marker> destinationMarkers = new HashSet<>();
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -73,15 +75,18 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                 Toast.makeText(getContext(), "无法取得当前位置信息，请查看您的GPS设备", Toast.LENGTH_LONG).show();
             }
 
-            // 初始化时显示所有站牌
-            displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false);
-
             // 设置标记点击事件
             mMap.setOnMarkerClickListener(marker -> {
-                String stopName = marker.getTitle();
-                LatLng position = marker.getPosition();
-                // 查找能搭乘的公车路线
-                findBusRoutesForStop(stopName, position.latitude, position.longitude);
+                if (nearbyMarkers.contains(marker)) {
+                    String stopName = marker.getTitle();
+                    LatLng position = marker.getPosition();
+                    // 查找能搭乘的公车路线
+                    findBusRoutesForStop(stopName, position.latitude, position.longitude);
+                }else{
+                    // 如果是目的地站牌，則不執行 findBusRoutesForStop
+                    marker.showInfoWindow();
+                }
+
                 return true;
             });
         }
@@ -132,7 +137,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         });
     }
 
-    private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color, boolean transparent) {
+    private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color, boolean transparent, Set<Marker> markerSet) {
         if (busStops == null || busStops.isEmpty()) {
             return;
         }
@@ -144,9 +149,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                     .title(station.getStopName())
                     .icon(BitmapDescriptorFactory.defaultMarker(color))
                     .alpha(transparent ? 0.3f : 1.0f)); // 透明度设为0.3表示透明
-            if (transparent) {
-                destinationMarkers.add(marker);
-            }
+            markerSet.add(marker);
         }
     }
 
@@ -197,7 +200,6 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         builder.show();
     }
 
-
     private void highlightRouteDestinations(Map<BusStationFinderHelper.BusStation.LatLng, String> destinations) {
         resetDestinationMarkers();
         for (Map.Entry<BusStationFinderHelper.BusStation.LatLng, String> entry : destinations.entrySet()) {
@@ -205,7 +207,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             LatLng position = new LatLng(entry.getKey().getLat(), entry.getKey().getLon());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(entry.getValue() + " (" + entry.getKey().getLat() + ", " + entry.getKey().getLon() + ")")
+                    .title(entry.getValue())  // 直接顯示目的地站牌名稱
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                     .alpha(1.0f));
             destinationMarkers.add(marker);
@@ -222,8 +224,9 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     @Override
     public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops, List<BusStationFinderHelper.BusStation> destinationStops) {
         secondNearByStop = nearbyStops;
+        secondDesStop = destinationStops;
         if (mMap != null) {
-            displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false);
+            displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false, nearbyMarkers);
         }
     }
 
@@ -232,4 +235,10 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         super.onResume();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        // 停止更新
+        stationFinder.stopUpdating();
+    }
 }

@@ -481,6 +481,9 @@ public class BusStationFinderHelper {
         });
     }
 
+    public void stopUpdating() {
+        updateHandler.removeCallbacks(updateRunnable);
+    }
 
 
     private void parseArrivalTimes(String jsonResponse) throws Exception {
