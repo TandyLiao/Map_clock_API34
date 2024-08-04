@@ -342,12 +342,14 @@ public class CreateLocation extends Fragment {
         //讓PopupWindow顯示出來的關鍵句
         popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
         //疊加View在底下，讓她不會按到底層就跳掉
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
+
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
         BTNPopup.setOnClickListener(v -> {
             popupWindow.dismiss();

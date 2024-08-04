@@ -53,6 +53,22 @@ public class SharedViewModel extends ViewModel {
         this.nowLantitude=lantitude;
         this.nowLontitude=longtitude;
     }
+
+    public void setFirstDestination(String name, String busArea, String busCity, double latitude, double longitude){
+        if(locationCount>=7){ return; }
+
+        for (int i = locationCount+1; i > 0; i--) {
+            swap(i, i - 1);
+        }
+
+        this.destinationName[0] = name;
+        this.latitude[0] = latitude;
+        this.longitude[0] = longitude;
+        this.destinationArea[0] = busArea;
+        this.destinationCapital[0] = busCity;
+        locationCount++;
+    }
+
     public int getPosition(){ return position; }
     //benson
     public String getNote(int position){    return note[position];  }
@@ -96,6 +112,10 @@ public class SharedViewModel extends ViewModel {
         stemp = destinationArea[start];
         destinationArea[start] = destinationArea[end];
         destinationArea[end] = stemp;
+
+        stemp = note[start];
+        note[start] = note[end];
+        note[end] = stemp;
     }
 
     public void delet(int position) {
@@ -116,7 +136,6 @@ public class SharedViewModel extends ViewModel {
         note = new String[7];
         nowLantitude = 0;
         nowLontitude = 0;
-
     }
 
     public int getLocationCount() {
