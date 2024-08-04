@@ -111,8 +111,8 @@ public class SelectPlace extends Fragment {
                     markerOptions.title(latLng.latitude+" : "+latLng.longitude);
 
                     String nuKnownName="座標： "+ Math.round(latLng.latitude * 1000)/1000.0+"  "+ Math.round(latLng.longitude * 1000)/1000.0;
-                    cityName = getCityNameCustom(latLng.latitude, latLng.longitude);
-                    areaName= getAreaNameCustom(latLng.latitude, latLng.longitude);
+                    cityName = getCityNameCustom(getContext(), latLng.latitude, latLng.longitude);
+                    areaName= getAreaNameCustom(getContext(), latLng.latitude, latLng.longitude);
 
                     isUnknown = true;
 
@@ -224,8 +224,8 @@ public class SelectPlace extends Fragment {
 
             LatLng destiantion_LatLng;
             destiantion_LatLng= new LatLng(place.getLatLng().latitude,place.getLatLng().longitude);
-            cityName = getCityNameCustom(destiantion_LatLng.latitude, destiantion_LatLng.longitude);
-            areaName= getAreaNameCustom(destiantion_LatLng.latitude, destiantion_LatLng.longitude);
+            cityName = getCityNameCustom(getContext(), destiantion_LatLng.latitude, destiantion_LatLng.longitude);
+            areaName= getAreaNameCustom(getContext(), destiantion_LatLng.latitude, destiantion_LatLng.longitude);
             isUnknown = false;
 
             //在地圖上標示Marker和彈跳地點資訊
@@ -421,7 +421,7 @@ public class SelectPlace extends Fragment {
         }
     }
 
-    private String getCityNameCustom(double latitude, double longitude) {
+    public String getCityNameCustom(Context context, double latitude, double longitude) {
         // 金門縣的經緯度範圍
         if (latitude >= 24.4 && latitude <= 24.6 && longitude >= 118.2 && longitude <= 118.5) {
             return "金門縣";
@@ -432,7 +432,7 @@ public class SelectPlace extends Fragment {
         }
 
         // 使用內置的 Geocoder 獲取其他地區名稱
-        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses != null && !addresses.isEmpty()) {
@@ -452,10 +452,10 @@ public class SelectPlace extends Fragment {
         // 返回默認值
         return "未知地區";
     }
-    private String getAreaNameCustom(double latitude, double longitude) {
+    public String getAreaNameCustom(Context context,double latitude, double longitude) {
 
         // 使用內置的 Geocoder 獲取其他地區名稱
-        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses != null && !addresses.isEmpty()) {

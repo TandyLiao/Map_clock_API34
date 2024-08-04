@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.home.SelectPlace;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -59,6 +60,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     TextView notification;
 
     private GoogleMap mMap;
+
+    SelectPlace selectPlace;
 
     private BusStationFinderHelper stationFinder;
 
@@ -111,6 +114,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         rootView = inflater.inflate(R.layout.home_bus_maps_fragment, container, false);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        selectPlace = new SelectPlace();
 
         notification = rootView.findViewById(R.id.textinfo);
 
@@ -294,10 +299,21 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
 
-            sharedViewModel.setBusInformation(stopName, String.valueOf(stopLatLng.latitude), String.valueOf(stopLatLng.longitude));
+            if(sharedViewModel.getLocationCount()<7){
+                String busArea = selectPlace.getAreaNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
+                String busCity = selectPlace.getCityNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
+
+                sharedViewModel.setFirstDestination(stopName, busArea, busCity, stopLatLng.latitude, stopLatLng.longitude);
+                Toast.makeText(getActivity(),sharedViewModel.getDestinationName(1)+sharedViewModel.getArea(1)+sharedViewModel.getCapital(1),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(),"已加入路線",Toast.LENGTH_SHORT).show();
+            }
+            else{
+                Toast.makeText(getActivity(),"路線已滿，請刪除後再試",Toast.LENGTH_SHORT).show();
+            }
             //移除疊加在底下防止點擊其他區域的View
             removeOverlayView();
             popupWindow.dismiss();
+
         });
     }
 

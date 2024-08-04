@@ -29,10 +29,6 @@ public class SharedViewModel extends ViewModel {
     //7個地點有3個提醒時間可供選擇;
     private Boolean[][] notification = new Boolean[7][3];
 
-    private String busName;
-    private String busLatitude;
-    private String busLontitude;
-
     public String time, routeName, uuid;
 
     public void setDestination(String name, double latitude, double longitude) {
@@ -58,14 +54,20 @@ public class SharedViewModel extends ViewModel {
         this.nowLontitude=longtitude;
     }
 
-    public void setBusInformation(String busName, String busLatitude, String busLontitude){
-        this.busName = busName;
-        this.busLatitude = busLatitude;
-        this.busLontitude = busLontitude;
+    public void setFirstDestination(String name, String busArea, String busCity, double latitude, double longitude){
+        if(locationCount>=7){ return; }
+
+        for (int i = locationCount+1; i > 0; i--) {
+            swap(i, i - 1);
+        }
+
+        this.destinationName[0] = name;
+        this.latitude[0] = latitude;
+        this.longitude[0] = longitude;
+        this.destinationArea[0] = busArea;
+        this.destinationCapital[0] = busCity;
+        locationCount++;
     }
-    public String getBusName(){ return busName; }
-    public String getBusLatitude(){ return busLatitude; }
-    public String getBusLontitude(){ return busLontitude; }
 
     public int getPosition(){ return position; }
     //benson
@@ -110,6 +112,10 @@ public class SharedViewModel extends ViewModel {
         stemp = destinationArea[start];
         destinationArea[start] = destinationArea[end];
         destinationArea[end] = stemp;
+
+        stemp = note[start];
+        note[start] = note[end];
+        note[end] = stemp;
     }
 
     public void delet(int position) {
@@ -130,10 +136,6 @@ public class SharedViewModel extends ViewModel {
         note = new String[7];
         nowLantitude = 0;
         nowLontitude = 0;
-
-        busName = new String();
-        busLatitude = new String();
-        busLontitude = new String();
     }
 
     public int getLocationCount() {
