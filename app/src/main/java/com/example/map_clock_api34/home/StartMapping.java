@@ -115,7 +115,7 @@ public class StartMapping extends Fragment {
         return rootView;
     }
     private void loadSettings() {
-        SharedPreferences preferences = getActivity().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+        SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
         boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
         boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
         int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
@@ -202,10 +202,10 @@ public class StartMapping extends Fragment {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-            SharedPreferences preferences = getActivity().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
-            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false);
-            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false);
-            int notificationTime = preferences.getInt("notification_time", 1);
+
+            SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
+            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
+            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -237,7 +237,7 @@ public class StartMapping extends Fragment {
         public void onLocationChanged(@NonNull Location nowLocation) {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) //這個if設定組加的
             {
-                SharedPreferences preferences = getActivity().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
+                SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
                int notificationTime = preferences.getInt("notification_time", 5);
 
                 totalTime = totalTime + 10;
@@ -380,16 +380,6 @@ public class StartMapping extends Fragment {
 
     public void resetNotificationSent() {
         notificationSent = false;
-    }
-    public static void updateSettings(Context context, boolean isRingtoneEnabled, boolean isVibrationEnabled, int notificationTime) {
-        // 更新設置的邏輯，比如保存到 SharedPreferences
-        SharedPreferences preferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("ringtone_enabled", isRingtoneEnabled);
-        editor.putBoolean("vibration_enabled", isVibrationEnabled);
-        editor.putInt("notification_time", notificationTime);
-        editor.apply();
-        // 可以在這裡添加更多邏輯來應用這些設置
     }
 
 

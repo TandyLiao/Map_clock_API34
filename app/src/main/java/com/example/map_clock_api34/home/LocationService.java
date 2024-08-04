@@ -8,25 +8,26 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
-
 import java.util.Arrays;
 
 public class LocationService extends Service {
@@ -35,6 +36,7 @@ public class LocationService extends Service {
     private static final String WORK_TAG = "location_update_work";
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private boolean notificationSent = false; // 新增的变量(by設定組)
 
     private double[] latitude;
     private double[] longitude;
@@ -47,8 +49,10 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("LocationService", "Service is being created");
+        resetNotificationSent();//設定組新增
 
+        Log.d("LocationService", "Service is being created");
+        loadSettings();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
@@ -80,6 +84,15 @@ public class LocationService extends Service {
                 .build();
 
         startForeground(1, notification);
+    }
+    private void loadSettings() {
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+        boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
+        boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
+        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
+        Log.d("Settings_BY_ForeGround", "Ringtone Enabled: " + isRingtoneEnabled);
+        Log.d("Settings_BY_ForeGround", "Vibration Enabled: " + isVibrationEnabled);
+        Log.d("Settings_BY_ForeGround", "Notification Time: " + notificationTime);
     }
 
     @Override
@@ -153,7 +166,8 @@ public class LocationService extends Service {
 
     private void handleLocationUpdate(Location nowLocation) {
         Log.d("LocationService", "Handling location update");
-
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
         if (nowLocation == null) {
             Log.e("LocationService", "Current location is null");
             return;
@@ -179,8 +193,10 @@ public class LocationService extends Service {
             totalTime -= 60;
         }
 
-        if (last_distance < 0.05 && time < 3) {
-            sendNotification("快到了!(背景執行的)");
+        if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
+            sendNotification("快到了!");
+            resetNotificationSent(); // 新增重製通知(6/2新增)
+
         }
         if (last_distance < 0.01 && time < 3) {
             destinationIndex++;
@@ -196,43 +212,52 @@ public class LocationService extends Service {
     }
 
     private void sendNotification(String message) {
-        Log.d("LocationService", "Sending notification: " + message);
+        Context context = getApplicationContext();
 
-        Intent intent = new Intent(this, StartMapping.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            Toast.makeText(context, "未啟用通知權限", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("地圖鬧鐘")
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
+        try {
+            Intent intent = new Intent(context, StartMapping.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+            SharedPreferences preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
+            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle("地圖鬧鐘")
+                    .setContentText(message)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true);
+
+            if (isRingtoneEnabled) {
+                Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                builder.setSound(ringtoneUri);
+            }
+
+            if (isVibrationEnabled) {
+                builder.setVibrate(new long[]{1000, 1000});
+            }
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+            notificationManager.notify(0, builder.build());
+
+        } catch (SecurityException e) {
+            Toast.makeText(context, "無法發送通知，請求被拒絕", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void startLocationUpdateWorker() {
-        Data.Builder dataBuilder = new Data.Builder();
-        dataBuilder.putDoubleArray("latitude", latitude);
-        dataBuilder.putDoubleArray("longitude", longitude);
-        dataBuilder.putStringArray("destinationName", destinationName);
-
-        OneTimeWorkRequest locationUpdateWork = new OneTimeWorkRequest.Builder(LocationWorker.class)
-                .setInputData(dataBuilder.build())
-                .addTag(WORK_TAG)
-                .build();
-
-        WorkManager.getInstance(this).enqueueUniqueWork(
-                WORK_TAG,
-                ExistingWorkPolicy.REPLACE,
-                locationUpdateWork
-        );
 
         Log.d("LocationService", "Location update worker started");
     }
-
+    public void resetNotificationSent() {
+        notificationSent = false;
+    }
 }
