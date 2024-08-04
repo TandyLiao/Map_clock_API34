@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -183,10 +184,20 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             }
         }
     }
+    private AlertDialog dialog;
 
     private void showRoutesDialog(String stopName, BusStationFinderHelper.BusStation station) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(stopName + "站 - 請選擇可搭路線");
+
+        // 套用XML的布局
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View customView = inflater.inflate(R.layout.dialog_bus_fragment, null);
+
+        TextView showTitle = customView.findViewById(R.id.txtNote);
+        showTitle.setText(stopName + "站 - 請選擇可搭路線");
+
+        // 获取routes_container，动态添加路線選項
+        LinearLayout routesContainer = customView.findViewById(R.id.routes_container);
 
         final Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
         final List<String> routeNames = new ArrayList<>(routes.keySet());
@@ -207,15 +218,32 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
         Log.d("BusStationFinderHelper", "Routes for stop " + station.getStopName() + ": " + routeDetails);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, routeDetails);
-        builder.setAdapter(adapter, (dialog, which) -> {
-            String selectedRoute = routeNames.get(which);
-            highlightRouteDestinations(routes.get(selectedRoute));
-        });
+        // 动态添加 TextView 到 routesContainer
+        for (String detail : routeDetails) {
+            View itemView = inflater.inflate(R.layout.dialog_bus_item, routesContainer, false);
+            TextView routeTextView = itemView.findViewById(R.id.routeTextView);
+            routeTextView.setText(detail);
+            routeTextView.setOnClickListener(v -> {
+                int which = routeDetails.indexOf(detail);
+                String selectedRoute = routeNames.get(which);
+                highlightRouteDestinations(routes.get(selectedRoute));
+                dialog.dismiss(); // 在選擇路線後關閉對話框
+            });
 
-        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+            routesContainer.addView(itemView);
+        }
+        builder.setView(customView);
 
-        builder.show();
+        // 创建并显示对话框
+        dialog = builder.create();
+        // 設置點擊對話框外部不會關閉對話框
+        dialog.setCanceledOnTouchOutside(false);
+
+        // 设置取消按钮的点击事件
+        Button cancelBTN = customView.findViewById(R.id.PopupCancel);
+        cancelBTN.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void resetDestinationMarkers() {

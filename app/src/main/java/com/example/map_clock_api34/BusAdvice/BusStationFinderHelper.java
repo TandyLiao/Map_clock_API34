@@ -58,7 +58,7 @@ public class BusStationFinderHelper {
     private int requestCount = 0;
     private Handler rateLimitHandler = new Handler(Looper.getMainLooper());
 
-    private static final long REQUEST_DELAY = 1000L; // 請求之間的延遲時間（2秒）
+    private static final long REQUEST_DELAY = 2000L; // 請求之間的延遲時間（2秒）
 
     private BusStationFinderCallback callback;
     private ToastCallback toastCallback;
