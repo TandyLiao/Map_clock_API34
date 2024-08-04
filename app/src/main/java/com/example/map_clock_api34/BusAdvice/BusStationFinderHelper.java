@@ -232,13 +232,15 @@ public class BusStationFinderHelper {
 
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
-                        // 將響應傳遞給回調函數
-                        callback.onResponse(call, response);
+                        if (response.code() == 429) { // Too Many Requests
+                            long retryAfter = response.headers().getDate("Retry-After").getTime() - System.currentTimeMillis();
+                            rateLimitHandler.postDelayed(() -> executeRequestWithRateLimit(request, callback), retryAfter);
+                        } else {
+                            callback.onResponse(call, response);
+                        }
                     }
                 });
             } else {
-                // 如果請求計數超過速率限制，延遲 TIME_WINDOW（1000毫秒）後重試請求
-                Log.e("BusStationFinderHelper", "Rate limit exceeded, delaying request");
                 rateLimitHandler.postDelayed(() -> executeRequestWithRateLimit(request, callback), TIME_WINDOW);
             }
 
