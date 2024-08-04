@@ -4,15 +4,20 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -36,6 +42,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +57,9 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
     Location lastLocation;
+    View overlayView;
+    View rootView;
+
     private GoogleMap mMap;
 
     private BusStationFinderHelper stationFinder;
@@ -84,8 +95,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                     // 查找能搭乘的公车路线
                     findBusRoutesForStop(stopName, position.latitude, position.longitude);
                 }else{
-                    // 如果是目的地站牌，則不執行 findBusRoutesForStop
-                    marker.showInfoWindow();
+                    ShowPopupWindow(marker.getTitle());
+                    Log.d("Hello",marker.getPosition().toString());
                 }
 
                 return true;
@@ -99,12 +110,12 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.home_bus_maps_fragment, container, false);
+        rootView = inflater.inflate(R.layout.home_bus_maps_fragment, container, false);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         stationFinder = new BusStationFinderHelper(getActivity(), sharedViewModel, this);
-        stationFinder.findNearbyStations(v);
+        stationFinder.findNearbyStations(rootView);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -120,7 +131,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             actionBar.hide();
         }
 
-        return v;
+        return rootView;
     }
 
     @Override
@@ -248,5 +259,51 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         super.onPause();
         // 停止更新
         stationFinder.stopUpdating();
+    }
+
+    //按重置紐後PopupWindow跳出來的設定
+    private void ShowPopupWindow(String stopName) {
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
+        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setWidth(700);
+        popupWindow.setFocusable(false);
+        popupWindow.setOutsideTouchable(false);
+
+        //讓PopupWindow顯示出來的關鍵句
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        //疊加View在底下，讓她不會按到底層就跳掉
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setClickable(true);
+        ((ViewGroup) rootView).addView(overlayView);
+
+        TextView showNotification = (TextView) view.findViewById(R.id.txtNote);
+        showNotification.setTextSize(15);
+        showNotification.setText(stopName +" - 要加入行程中嗎?");
+
+        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        BTNPopup.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            //移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
+        });
+        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        btnsure.setOnClickListener(v -> {
+
+            //移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
+            popupWindow.dismiss();
+        });
+    }
+
+    //把疊加在底層的View刪掉
+    private void removeOverlayView() {
+        if (overlayView != null && overlayView.getParent() != null) {
+            ((ViewGroup) overlayView.getParent()).removeView(overlayView);
+            overlayView = null;
+        }
     }
 }
