@@ -3,7 +3,6 @@ package com.example.map_clock_api34.BusAdvice;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -42,8 +41,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -59,6 +56,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     Location lastLocation;
     View overlayView;
     View rootView;
+    TextView notification;
 
     private GoogleMap mMap;
 
@@ -95,7 +93,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                     // 查找能搭乘的公车路线
                     findBusRoutesForStop(stopName, position.latitude, position.longitude);
                 }else{
-                    ShowPopupWindow(marker.getTitle());
+                    ShowPopupWindow(marker.getTitle(), marker.getPosition());
                     Log.d("Hello",marker.getPosition().toString());
                 }
 
@@ -114,7 +112,10 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+        notification = rootView.findViewById(R.id.textinfo);
+
         stationFinder = new BusStationFinderHelper(getActivity(), sharedViewModel, this);
+        stationFinder.setToastCallback(this::onToastShown);
         stationFinder.findNearbyStations(rootView);
 
         SupportMapFragment mapFragment =
@@ -262,7 +263,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     }
 
     //按重置紐後PopupWindow跳出來的設定
-    private void ShowPopupWindow(String stopName) {
+    private void ShowPopupWindow(String stopName, LatLng stopLatLng) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setWidth(700);
@@ -293,12 +294,21 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
 
+            sharedViewModel.setBusInformation(stopName, String.valueOf(stopLatLng.latitude), String.valueOf(stopLatLng.longitude));
             //移除疊加在底下防止點擊其他區域的View
             removeOverlayView();
             popupWindow.dismiss();
         });
     }
 
+    public void onToastShown(String message) {
+        // 更新 TextView 的文本
+        if (notification != null && message.equals("路線已更新")) {
+            notification.setText("請選擇下列地標");
+        }else{
+            notification.setText("錯誤，請關閉在開");
+        }
+    }
     //把疊加在底層的View刪掉
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {

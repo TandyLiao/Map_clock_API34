@@ -58,7 +58,22 @@ public class BusStationFinderHelper {
     private int requestCount = 0;
     private Handler rateLimitHandler = new Handler(Looper.getMainLooper());
 
+    private static final long REQUEST_DELAY = 2000L; // 請求之間的延遲時間（2秒）
+
     private BusStationFinderCallback callback;
+    private ToastCallback toastCallback;
+
+    //負責回傳結果
+    public interface BusStationFinderCallback {
+        void onBusStationsFound(List<BusStation> nearbyStops);
+
+    }
+    public interface ToastCallback {
+        void onToastShown(String message);
+    }
+    public void setToastCallback(ToastCallback toastCallback) {
+        this.toastCallback = toastCallback;
+    }
 
     //建構子
     public BusStationFinderHelper(Context context, SharedViewModel sharedViewModel, BusStationFinderCallback callback) {
@@ -107,11 +122,9 @@ public class BusStationFinderHelper {
 
     //第一次過濾找附近和目的地站牌
     private void findNearbyBusStops(View view, String accessToken) throws UnsupportedEncodingException {
-
         // 抓使用者的經緯度
         double currentLat = sharedViewModel.getNowLantitude();
         double currentLon = sharedViewModel.getNowLontitude();
-        // 抓目的地的經緯度
         double destLat = sharedViewModel.getLatitude(0);
         double destLon = sharedViewModel.getLongitude(0);
 
@@ -172,22 +185,21 @@ public class BusStationFinderHelper {
                 }
 
                 try {
-                    // TDX回傳的Json
                     String userStopsResponse = response.body().string();
                     Log.d("BusStationFinderHelper", "User Stops Response: " + userStopsResponse);
 
-                    // 第一次過濾的使用者附近和目的地附近的站牌，運用parseStops的方法
                     List<BusStation> firstCurrentList = parseStops(userStopsResponse, currentLat, currentLon);
                     List<BusStation> firstDesList = parseStops(userStopsResponse, destLat, destLon);
 
-                    // 後執行，先執行的程式在下面
+                    secondNearByStop = new ArrayList<>();
+                    secondDesStop = new ArrayList<>();
+
                     Runnable onCompletion = () -> {
-                        findRoutes(view, accessToken, cityName, secondNearByStop, secondDesStop);
+                        mainHandler.postDelayed(() -> findRoutes(view, accessToken, cityName, secondNearByStop, secondDesStop), REQUEST_DELAY);
                     };
-                    // 先執行，二次過濾出步行500公尺內可到的站牌
+
                     filterNearbyStops(currentLat, currentLon, firstCurrentList, secondNearByStop, () ->
                             filterNearbyStops(destLat, destLon, firstDesList, secondDesStop, onCompletion));
-
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                     if (context != null) {
@@ -197,6 +209,7 @@ public class BusStationFinderHelper {
             }
         });
     }
+
 
     private void executeRequestWithRateLimit(Request request, Callback callback) {
         // 使用 Handler 來管理計時和請求排程
@@ -343,7 +356,6 @@ public class BusStationFinderHelper {
     }
 
     private void findRoutes(View view, String accessToken, String cityName, List<BusStation> nearbyStops, List<BusStation> destinationStops) {
-        // 創建要傳給TDX的URL
         StringBuilder stopFilter = new StringBuilder();
         for (BusStation station : nearbyStops) {
             if (stopFilter.length() > 0) {
@@ -388,7 +400,6 @@ public class BusStationFinderHelper {
                     JSONArray jsonArray = new JSONArray(routeResponse);
 
                     for (int i = 0; i < jsonArray.length(); i++) {
-
                         JSONObject routeObj = jsonArray.getJSONObject(i);
                         String routeName = routeObj.getJSONObject("RouteName").getString("Zh_tw");
                         JSONArray stopsArray = routeObj.getJSONArray("Stops");
@@ -415,22 +426,21 @@ public class BusStationFinderHelper {
                             }
                         }
                     }
+
                     mainHandler.post(() -> {
-                        // 確認路線添加的Log
                         for (BusStation station : nearbyStops) {
                             Log.d("BusStationFinderHelper", "BusStation: " + station.toString());
                         }
-                        Toast.makeText(context, "路線已更新", Toast.LENGTH_LONG).show();
                     });
-                    // 找公車抵達時間
-                    findArrivalTimes(accessToken, cityName, nearbyStops);
+
+                    // 延遲查找到站時間
+                    mainHandler.postDelayed(() -> findArrivalTimes(accessToken, cityName, nearbyStops), REQUEST_DELAY);
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                 }
             }
         });
     }
-
 
     private boolean isNearbyStop(BusStation station, Map<BusStation.LatLng, String> routeStops) {
         double epsilon = 0.00001; // 允許的誤差範圍
@@ -441,11 +451,6 @@ public class BusStationFinderHelper {
             }
         }
         return false;
-    }
-
-    //負責回傳結果
-    public interface BusStationFinderCallback {
-        void onBusStationsFound(List<BusStation> nearbyStops);
     }
 
     private void findArrivalTimes(String accessToken, String cityName, List<BusStation> nearbyStops) {
@@ -554,10 +559,19 @@ public class BusStationFinderHelper {
         }
 
         mainHandler.post(() -> {
+            showToast("路線已更新");
             callback.onBusStationsFound(secondNearByStop);
         });
     }
 
+    private void showToast(String message) {
+        // 顯示 Toast
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        // 調用回調更新 TextView
+        if (toastCallback != null) {
+            toastCallback.onToastShown(message);
+        }
+    }
 
     public static class BusStation {
         private final String stopName;

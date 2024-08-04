@@ -57,6 +57,16 @@ public class SharedViewModel extends ViewModel {
         this.nowLantitude=lantitude;
         this.nowLontitude=longtitude;
     }
+
+    public void setBusInformation(String busName, String busLatitude, String busLontitude){
+        this.busName = busName;
+        this.busLatitude = busLatitude;
+        this.busLontitude = busLontitude;
+    }
+    public String getBusName(){ return busName; }
+    public String getBusLatitude(){ return busLatitude; }
+    public String getBusLontitude(){ return busLontitude; }
+
     public int getPosition(){ return position; }
     //benson
     public String getNote(int position){    return note[position];  }
