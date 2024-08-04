@@ -53,6 +53,10 @@ public class BusStationFinderHelper {
     private Runnable updateRunnable;
     private static final int UPDATE_INTERVAL = 60000; // 1 minute
 
+    private static final int RATE_LIMIT = 50; // 每秒最多請求次數
+    private static final long TIME_WINDOW = 1000L; // 毫秒
+    private int requestCount = 0;
+    private Handler rateLimitHandler = new Handler(Looper.getMainLooper());
 
     private BusStationFinderCallback callback;
 
@@ -102,11 +106,6 @@ public class BusStationFinderHelper {
     }
 
     //第一次過濾找附近和目的地站牌
-    private static final int RATE_LIMIT = 50; // 每秒最多請求次數
-    private static final long TIME_WINDOW = 1000L; // 毫秒
-    private int requestCount = 0;
-    private Handler rateLimitHandler = new Handler(Looper.getMainLooper());
-
     private void findNearbyBusStops(View view, String accessToken) throws UnsupportedEncodingException {
 
         // 抓使用者的經緯度
@@ -200,31 +199,41 @@ public class BusStationFinderHelper {
     }
 
     private void executeRequestWithRateLimit(Request request, Callback callback) {
+        // 使用 Handler 來管理計時和請求排程
         rateLimitHandler.post(() -> {
+            // 檢查當前的請求計數是否小於設定的速率限制（50次/秒）
             if (requestCount < RATE_LIMIT) {
+                // 增加請求計數
                 requestCount++;
+                // 使用 OkHttpClient 執行 HTTP 請求並處理回調
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
+                        // 如果請求失敗，記錄錯誤
                         Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                         if (context != null) {
+                            // 在主線程上顯示錯誤消息
                             mainHandler.post(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
                         }
                     }
 
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
+                        // 將響應傳遞給回調函數
                         callback.onResponse(call, response);
                     }
                 });
             } else {
+                // 如果請求計數超過速率限制，延遲 TIME_WINDOW（1000毫秒）後重試請求
                 Log.e("BusStationFinderHelper", "Rate limit exceeded, delaying request");
                 rateLimitHandler.postDelayed(() -> executeRequestWithRateLimit(request, callback), TIME_WINDOW);
             }
 
+            // 每秒鐘減少請求計數
             rateLimitHandler.postDelayed(() -> requestCount--, TIME_WINDOW);
         });
     }
+
 
     //第一次過濾站牌內分成附近和目的地站牌的方法
     private List<BusStation> parseStops(String jsonResponse, double Lat, double Lon) throws Exception {
