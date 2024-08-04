@@ -306,7 +306,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         if (notification != null && message.equals("路線已更新")) {
             notification.setText("請選擇下列地標");
         }else{
-            notification.setText("錯誤，請關閉在開");
+            notification.setText("發生錯誤，請關閉再開");
         }
     }
     //把疊加在底層的View刪掉

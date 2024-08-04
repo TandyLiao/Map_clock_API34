@@ -114,7 +114,7 @@ public class BusStationFinderHelper {
             public void onFailure(String errorMessage) {
                 Log.e("BusStationFinderHelper", "Auth error: " + errorMessage);
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "无法获取授权", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> showToast("無法獲取授權"));
                 }
             }
         });
@@ -169,7 +169,7 @@ public class BusStationFinderHelper {
             public void onFailure(Call call, IOException e) {
                 Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> showToast("網路錯誤"));
                 }
             }
 
@@ -179,7 +179,7 @@ public class BusStationFinderHelper {
                     Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
                     Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "無法獲取公車站牌，請稍後在試一次", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> showToast("無法獲取公車站牌，請稍後在試一次"));
                     }
                     return;
                 }
@@ -203,7 +203,7 @@ public class BusStationFinderHelper {
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "無法解析公車站牌資訊，請稍後在試", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> showToast("無法解析公車站牌資訊，請稍後在試"));
                     }
                 }
             }
@@ -226,7 +226,7 @@ public class BusStationFinderHelper {
                         Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                         if (context != null) {
                             // 在主線程上顯示錯誤消息
-                            mainHandler.post(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
+                            mainHandler.post(() -> showToast("網路錯誤"));
                         }
                     }
 
@@ -307,7 +307,7 @@ public class BusStationFinderHelper {
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Error parsing distances: " + e.getMessage());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "解析距離時出錯", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> showToast("解析距離時出錯"));
                     }
                 }
             }
@@ -316,7 +316,7 @@ public class BusStationFinderHelper {
             public void onFailure(String errorMessage) {
                 Log.e("BusStationFinderHelper", "Distance matrix error: " + errorMessage);
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "無法獲取距離，請稍後在試", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> showToast("無法獲取距離，請稍後在試"));
                 }
             }
         });
@@ -473,7 +473,7 @@ public class BusStationFinderHelper {
             public void onFailure(Call call, IOException e) {
                 Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "網路錯誤", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> showToast("網路錯誤"));
                 }
             }
 
@@ -483,7 +483,7 @@ public class BusStationFinderHelper {
                     Log.e("BusStationFinderHelper", "Request failed: " + response.message() + ", Code: " + response.code());
                     Log.e("BusStationFinderHelper", "Response Body: " + response.body().string());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "無法獲取到站時間，請稍後在試", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> showToast("無法獲取到站時間，請稍後在試"));
                     }
                     return;
                 }
@@ -498,7 +498,7 @@ public class BusStationFinderHelper {
                 } catch (Exception e) {
                     Log.e("BusStationFinderHelper", "Parsing error: " + e.getMessage());
                     if (context != null) {
-                        mainHandler.post(() -> Toast.makeText(context, "無法解析到站時間", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> showToast("無法解析到站時間"));
                     }
                 }
             }
@@ -519,7 +519,7 @@ public class BusStationFinderHelper {
             public void onFailure(String errorMessage) {
                 Log.e("BusStationFinderHelper", "Auth error: " + errorMessage);
                 if (context != null) {
-                    mainHandler.post(() -> Toast.makeText(context, "無法獲取授權", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> showToast("無法獲取授權"));
                 }
             }
         });
@@ -528,7 +528,6 @@ public class BusStationFinderHelper {
     public void stopUpdating() {
         updateHandler.removeCallbacks(updateRunnable);
     }
-
 
     private void parseArrivalTimes(String jsonResponse) throws Exception {
         JSONArray jsonArray = new JSONArray(jsonResponse);
