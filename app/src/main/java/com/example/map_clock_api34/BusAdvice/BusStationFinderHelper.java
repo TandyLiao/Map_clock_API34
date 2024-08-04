@@ -212,20 +212,14 @@ public class BusStationFinderHelper {
 
 
     private void executeRequestWithRateLimit(Request request, Callback callback) {
-        // 使用 Handler 來管理計時和請求排程
         rateLimitHandler.post(() -> {
-            // 檢查當前的請求計數是否小於設定的速率限制（50次/秒）
             if (requestCount < RATE_LIMIT) {
-                // 增加請求計數
                 requestCount++;
-                // 使用 OkHttpClient 執行 HTTP 請求並處理回調
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-                        // 如果請求失敗，記錄錯誤
                         Log.e("BusStationFinderHelper", "Network error: " + e.getMessage());
                         if (context != null) {
-                            // 在主線程上顯示錯誤消息
                             mainHandler.post(() -> showToast("網路錯誤"));
                         }
                     }
@@ -233,7 +227,10 @@ public class BusStationFinderHelper {
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (response.code() == 429) { // Too Many Requests
-                            long retryAfter = response.headers().getDate("Retry-After").getTime() - System.currentTimeMillis();
+                            long retryAfter = 2000L; // 默認的重試時間（2秒）
+                            if (response.headers().getDate("Retry-After") != null) {
+                                retryAfter = response.headers().getDate("Retry-After").getTime() - System.currentTimeMillis();
+                            }
                             rateLimitHandler.postDelayed(() -> executeRequestWithRateLimit(request, callback), retryAfter);
                         } else {
                             callback.onResponse(call, response);
@@ -244,10 +241,10 @@ public class BusStationFinderHelper {
                 rateLimitHandler.postDelayed(() -> executeRequestWithRateLimit(request, callback), TIME_WINDOW);
             }
 
-            // 每秒鐘減少請求計數
             rateLimitHandler.postDelayed(() -> requestCount--, TIME_WINDOW);
         });
     }
+
 
 
     //第一次過濾站牌內分成附近和目的地站牌的方法

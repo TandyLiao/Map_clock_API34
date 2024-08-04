@@ -156,18 +156,22 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         });
     }
 
-    private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color, boolean transparent, Set<Marker> markerSet) {
+    private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color, Set<Marker> markerSet) {
         if (busStops == null || busStops.isEmpty()) {
             return;
         }
 
         for (BusStationFinderHelper.BusStation station : busStops) {
+            if(station.getRoutes() == null)  continue;
+
+            Log.d("Bus",station.toString());
             LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
+
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title(station.getStopName())
                     .icon(BitmapDescriptorFactory.defaultMarker(color))
-                    .alpha(transparent ? 0.3f : 1.0f)); // 透明度设为0.3表示透明
+                    .alpha(1.0f));
             markerSet.add(marker);
         }
     }
@@ -200,12 +204,19 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         LinearLayout routesContainer = customView.findViewById(R.id.routes_container);
 
         final Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
-        final List<String> routeNames = new ArrayList<>(routes.keySet());
+        final List<String> routeNames = new ArrayList<>();
+
+        // 过滤掉没有目的地的路线
+        for (Map.Entry<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> entry : routes.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                routeNames.add(entry.getKey());
+            }
+        }
 
         // 確認數據完整性
         if (routeNames.isEmpty()) {
             Log.e("BusStationFinderHelper", "No routes available for stop: " + station.getStopName());
-            Toast.makeText(getContext(), "沒有可用的路線，請稍候再試", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "沒有可用的路線", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -246,6 +257,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         dialog.show();
     }
 
+
     private void resetDestinationMarkers() {
         for (Marker marker : destinationMarkers) {
             marker.remove();
@@ -279,7 +291,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onBusStationsFound(List<BusStationFinderHelper.BusStation> nearbyStops) {
         secondNearByStop = nearbyStops;
         if (mMap != null) {
-            displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, false, nearbyMarkers);
+            displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, nearbyMarkers);
         }
     }
 
