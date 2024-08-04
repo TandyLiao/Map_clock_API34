@@ -303,9 +303,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                 String busArea = selectPlace.getAreaNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
                 String busCity = selectPlace.getCityNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
 
-                sharedViewModel.setFirstDestination(stopName, busArea, busCity, stopLatLng.latitude, stopLatLng.longitude);
-                Toast.makeText(getActivity(),sharedViewModel.getDestinationName(1)+sharedViewModel.getArea(1)+sharedViewModel.getCapital(1),Toast.LENGTH_SHORT).show();
-                //Toast.makeText(getActivity(),"已加入路線",Toast.LENGTH_SHORT).show();
+                sharedViewModel.setFirstDestination("公車站："+stopName, busArea, busCity, stopLatLng.latitude, stopLatLng.longitude);
+                Toast.makeText(getActivity(),"已加入路線",Toast.LENGTH_SHORT).show();
             }
             else{
                 Toast.makeText(getActivity(),"路線已滿，請刪除後再試",Toast.LENGTH_SHORT).show();
