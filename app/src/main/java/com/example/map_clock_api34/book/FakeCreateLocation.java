@@ -144,13 +144,16 @@ public class FakeCreateLocation extends Fragment {
                     return;
                 }
                 //設立名字字數限制
-
-                saveInLocationDB();
-                saveInBookDB();
-                sharedViewModel.clearAll();
-                hideKeyboard();
-                //回上頁
-                getActivity().getSupportFragmentManager().popBackStack();
+                if(input.getText().toString().length()>10){
+                    Toast.makeText(getActivity(), "書籤名稱的長度必須小於10個字", Toast.LENGTH_SHORT).show();
+                }else {
+                    saveInLocationDB();
+                    saveInBookDB();
+                    sharedViewModel.clearAll();
+                    hideKeyboard();
+                    //回上頁
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
