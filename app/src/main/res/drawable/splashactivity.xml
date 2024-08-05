@@ -1,0 +1,10 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/white" />
+    <!-- 設定背景顏色 -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/appicon_tem7" />
+        <!-- 設定圖標 -->
+    </item>
+</layer-list>

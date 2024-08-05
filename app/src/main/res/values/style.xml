@@ -6,7 +6,15 @@
         <item name="colorPrimary">@color/green</item>
         <item name="colorAccent">@color/lightyellow</item>
         <!-- Status bar color -->
+
         <item name="android:statusBarColor">@color/lightgreen</item>
+    </style>
+    <style name="AppTheme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary branding color -->
+        <item name="android:windowBackground">@drawable/splashactivity</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Status bar color -->
+
     </style>
 
     <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
