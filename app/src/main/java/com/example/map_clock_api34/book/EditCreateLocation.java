@@ -330,7 +330,7 @@ public class EditCreateLocation extends Fragment {
 
         //設置右上角的小圖示
         ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.route);
+        bookmark.setImageResource(R.drawable.bookmark2);
         bookmark.setPadding(10, 10, 5, 10);//設定icon邊界
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
@@ -342,7 +342,7 @@ public class EditCreateLocation extends Fragment {
 
         // 創建右上角的名字
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("路線規劃");
+        bookTitle.setText("修改書籤");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距

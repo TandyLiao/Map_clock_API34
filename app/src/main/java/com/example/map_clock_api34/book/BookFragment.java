@@ -2,10 +2,13 @@ package com.example.map_clock_api34.book;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -14,6 +17,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -53,10 +59,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
+
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.Toast;
 
@@ -112,7 +118,7 @@ public class BookFragment extends Fragment {
         return rootView;
     }
 
-    private void setButton(){
+    private void setButton() {
 
         createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
         setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
@@ -141,12 +147,12 @@ public class BookFragment extends Fragment {
                 sharedViewModel.clearAll();
                 String time = sharedViewModel.time;
 
-                int count =0;
+                int count = 0;
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
                 Cursor cursor = db.rawQuery("SELECT * FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
                 try {
-                    while (cursor.moveToNext()){
+                    while (cursor.moveToNext()) {
 
                         String locationId = cursor.getString(0);
                         Cursor locationCursor = db.rawQuery("SELECT * FROM " + LocationTable2.TABLE_NAME + " WHERE " + LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
@@ -197,6 +203,7 @@ public class BookFragment extends Fragment {
 
         });
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -205,11 +212,13 @@ public class BookFragment extends Fragment {
         RecycleViewReset();
         changeNotification();
     }
+
     private void RecycleViewReset() {
         arrayList.clear();
         addFromDB();
         listAdapterBook.notifyDataSetChanged();
     }
+
     private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -285,6 +294,7 @@ public class BookFragment extends Fragment {
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
     }
+
     //1刪除
     private void setupRecyclerViews() {
         recyclerViewBook = rootView.findViewById(R.id.recycleView_book);
@@ -307,7 +317,10 @@ public class BookFragment extends Fragment {
         SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(getContext(), new SwipeToDeleteCallback.OnSwipedListener() {
             @Override
             public void onSwiped(int position) {
-                showDeleteConfirmationDialog(position);
+                View itemView = recyclerViewBook.getLayoutManager().findViewByPosition(position);
+                if (itemView != null) {
+                    showDeleteConfirmationDialog(itemView, position);
+                }
             }
         });
 
@@ -315,26 +328,51 @@ public class BookFragment extends Fragment {
         itemTouchHelper.attachToRecyclerView(recyclerViewBook);
 
     }
+
     //刪除提醒
-    private void showDeleteConfirmationDialog(int position) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("刪除確認")
-                .setMessage("你確定要刪除這個項目嗎？")
-                .setPositiveButton("刪除", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        removeItem(position);
-                        changeNotification();
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        listAdapterBook.notifyItemChanged(position);
-                        dialog.dismiss();
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+    private void showDeleteConfirmationDialog(View view, int position) {
+        Context context = view.getContext();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
+
+        //套用XML的布局
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View customView = inflater.inflate(R.layout.dialog_deltebook, null);
+
+        builder.setView(customView);
+
+        // 创建并显示对话框
+        AlertDialog dialog = builder.create();
+        // 設置點擊對話框外部不會關閉對話框
+        dialog.setCanceledOnTouchOutside(false);
+
+        Button positiveButton = customView.findViewById(R.id.Popupsure);
+        Button negativeButton = customView.findViewById(R.id.PopupCancel);
+
+
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeItem(position);
+                changeNotification();
+            }
+        });
+
+        negativeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listAdapterBook.notifyItemChanged(position);
+                dialog.cancel();
+            }
+
+        });
+
+        dialog.show();
+
     }
+
     //刪除項目
     private void removeItem(int position) {
         HashMap<String, String> item = arrayList.get(position);
@@ -345,22 +383,22 @@ public class BookFragment extends Fragment {
         db.beginTransaction();
         try {
 
-                String locationId = DatabaseUtils.stringForQuery(db,
-                        "SELECT " + BookTable.COLUMN_LOCATION_ID +
-                                " FROM " + BookTable.TABLE_NAME +
-                                " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+            String locationId = DatabaseUtils.stringForQuery(db,
+                    "SELECT " + BookTable.COLUMN_LOCATION_ID +
+                            " FROM " + BookTable.TABLE_NAME +
+                            " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
-                String locationUUID = DatabaseUtils.stringForQuery(db,
-                        "SELECT " + LocationTable2.COLUMN_ALARM_NAME +
-                                " FROM " + LocationTable2.TABLE_NAME +
-                                " WHERE " + LocationTable2.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
-                // 刪除 BookTable 中的項目
-                db.execSQL("DELETE FROM " + BookTable.TABLE_NAME +
-                                " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+            String locationUUID = DatabaseUtils.stringForQuery(db,
+                    "SELECT " + LocationTable2.COLUMN_ALARM_NAME +
+                            " FROM " + LocationTable2.TABLE_NAME +
+                            " WHERE " + LocationTable2.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
+            // 刪除 BookTable 中的項目
+            db.execSQL("DELETE FROM " + BookTable.TABLE_NAME +
+                    " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
-                // 刪除 LocationTable2 中的相關項目
-                db.execSQL("DELETE FROM " + LocationTable2.TABLE_NAME +
-                        " WHERE " + LocationTable2.COLUMN_ALARM_NAME + " = ?", new String[]{locationUUID});
+            // 刪除 LocationTable2 中的相關項目
+            db.execSQL("DELETE FROM " + LocationTable2.TABLE_NAME +
+                    " WHERE " + LocationTable2.COLUMN_ALARM_NAME + " = ?", new String[]{locationUUID});
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
@@ -374,15 +412,17 @@ public class BookFragment extends Fragment {
         arrayList.remove(position);
         listAdapterBook.notifyItemRemoved(position);
     }
-    private void changeNotification(){
-        if(arrayList.isEmpty()){
+
+    private void changeNotification() {
+        if (arrayList.isEmpty()) {
             TextView notification = rootView.findViewById(R.id.textView7);
             notification.setText("目前還沒有東西喔");
-        }else{
+        } else {
             TextView notification = rootView.findViewById(R.id.textView7);
             notification.setText("");
         }
     }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -409,7 +449,7 @@ public class BookFragment extends Fragment {
                 HashMap<String, String> hashMap = new HashMap<>();
                 hashMap.put("placeName2", placeNameTemp);
                 hashMap.put("time", time);
-                arrayList.add(0,hashMap);
+                arrayList.add(0, hashMap);
             }
             cursor.close();
         }
@@ -424,7 +464,7 @@ public class BookFragment extends Fragment {
                 time = item.get("time");
             }
         }
-        int count =0;
+        int count = 0;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
         db.beginTransaction();
@@ -466,6 +506,7 @@ public class BookFragment extends Fragment {
             navigationView.setCheckedItem(R.id.action_home);
         }
     }
+
     @SuppressLint("MissingPermission")
     private void getLastKnownLocation() {
         fusedLocationClient.getLastLocation()

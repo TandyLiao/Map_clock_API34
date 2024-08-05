@@ -1,54 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="300dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/popupborder">
 
     <View
-        android:layout_width="100dp"
+        android:layout_width="300dp"
         android:layout_height="10dp" />
 
     <TextView
         android:id="@+id/txtNote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="請輸入書籤名稱"
+        android:text="確定刪除此書籤?"
         android:textColor="@color/darkgreen"
         android:textSize="25sp"
         android:layout_gravity="center" />
 
     <View
-        android:layout_width="5dp"
+        android:layout_width="300dp"
         android:layout_height="10dp" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_bookname"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        app:cardBackgroundColor="@color/lightyellow"
-        app:cardCornerRadius="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:strokeColor="@color/darkyellow"
-        app:strokeWidth="1dp">
-
-
-    <EditText
-        android:id="@+id/input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="在這輸入書籤名稱"
-        android:textColorHint="@color/gray"
-        android:textColor="@color/black" />
-
-    </com.google.android.material.card.MaterialCardView>
-
     <View
         android:layout_width="5dp"
         android:layout_height="20dp" />
@@ -71,7 +44,7 @@
             android:layout_gravity="center" />
 
         <View
-            android:layout_width="90dp"
+            android:layout_width="50dp"
             android:layout_height="35dp" />
 
         <Button

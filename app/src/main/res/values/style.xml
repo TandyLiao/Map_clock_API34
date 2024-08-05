@@ -10,7 +10,7 @@
     </style>
 
     <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:background">#90EE90</item> <!-- 设置背景颜色为浅绿色 -->
+        <item name="android:background">@drawable/dialog_background</item>
         <item name="android:textColorPrimary">#000000</item> <!-- 设置主要文本颜色为黑色 -->
         <item name="android:textColorSecondary">#333333</item> <!-- 设置次要文本颜色为深灰色 -->
     </style>

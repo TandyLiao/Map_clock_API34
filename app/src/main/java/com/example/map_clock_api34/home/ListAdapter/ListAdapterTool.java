@@ -3,6 +3,8 @@ package com.example.map_clock_api34.home.ListAdapter;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,6 +115,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             // 設置點擊對話框外部不會關閉對話框
             dialog.setCanceledOnTouchOutside(false);
 
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             // 找到並設置按鈕事件
             Button positiveButton = customView.findViewById(R.id.Popupsure);
             Button negativeButton = customView.findViewById(R.id.PopupCancel);
