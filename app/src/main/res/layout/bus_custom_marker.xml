@@ -20,8 +20,8 @@
 
     <ImageView
         android:id="@+id/marker_image"
-        android:layout_width="30dp"
-        android:layout_height="52dp"
+        android:layout_width="26dp"
+        android:layout_height="47dp"
         android:src="@drawable/custom_marker"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

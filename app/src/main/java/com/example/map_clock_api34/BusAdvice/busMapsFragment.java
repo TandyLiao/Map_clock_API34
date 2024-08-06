@@ -14,7 +14,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -92,9 +91,21 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                 Toast.makeText(getContext(), "無法取得目前位置訊息，請查看您的GPS設備", Toast.LENGTH_LONG).show();
             }
 
+            LatLng latlon = new LatLng(sharedViewModel.getLatitude(0), sharedViewModel.getLongitude(0));
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_destination_marker, sharedViewModel.getDestinationName(0), true);
+
+            Marker destination = mMap.addMarker(new MarkerOptions()
+                    .position(latlon)
+                    .title(sharedViewModel.getDestinationName(0))
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarker))
+                    .alpha(1.0f));
+
             // 设置标记点击事件
             mMap.setOnMarkerClickListener(marker -> {
-                if (nearbyMarkers.contains(marker)) {
+                if(marker.equals(destination)) {
+                    Toast.makeText(getActivity(), "這是你的目的地", Toast.LENGTH_SHORT).show();
+                }
+                else if (nearbyMarkers.contains(marker)) {
                     String stopName = marker.getTitle();
                     LatLng position = marker.getPosition();
                     // 查找能搭乘的公车路线
@@ -106,6 +117,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
                 return true;
             });
+
         }
     };
 
@@ -158,24 +170,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             }
         });
     }
-    private Bitmap createCustomMarker(Context context, @DrawableRes int resource, String title) {
-        View markerView = LayoutInflater.from(context).inflate(R.layout.bus_custom_marker, null);
 
-        ImageView markerImage = markerView.findViewById(R.id.marker_image);
-        markerImage.setImageResource(resource);
-
-        TextView markerText = markerView.findViewById(R.id.marker_text);
-        markerText.setText(title);
-
-        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
-
-        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        markerView.draw(canvas);
-
-        return bitmap;
-    }
     private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color, Set<Marker> markerSet) {
         if (busStops == null || busStops.isEmpty()) {
             return;
@@ -202,7 +197,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             Log.d("Bus", station.toString());
             LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
 
-            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_marker, station.getStopName());
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_marker, station.getStopName(), false);
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title(station.getStopName())
@@ -214,7 +209,25 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             notification.setText("附近沒有可用直達車");
         }
     }
+    private Bitmap createCustomMarker(Context context, @DrawableRes int resource, String title, Boolean isDestination) {
+        View markerView = LayoutInflater.from(context).inflate(R.layout.bus_custom_marker, null);
 
+        ImageView markerImage = markerView.findViewById(R.id.marker_image);
+        markerImage.setImageResource(resource);
+
+        TextView markerText = markerView.findViewById(R.id.marker_text);
+        markerText.setText(title);
+        if(isDestination)   markerText.setBackgroundResource(R.drawable.btn_unclickable);
+
+        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        markerView.draw(canvas);
+
+        return bitmap;
+    }
     private void findBusRoutesForStop(String stopName, double lat, double lon) {
         if (stopName == null || stopName.isEmpty()) {
             return;
@@ -303,10 +316,11 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         for (Map.Entry<BusStationFinderHelper.BusStation.LatLng, String> entry : destinations.entrySet()) {
             Log.d("highlightRouteDestinations", "Destination stop: " + entry.getValue() + " at " + entry.getKey().getLat() + ", " + entry.getKey().getLon());
             LatLng position = new LatLng(entry.getKey().getLat(), entry.getKey().getLon());
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_destination_near_marker, entry.getValue().toString(), false);
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title(entry.getValue())  // 直接顯示目的地站牌名稱
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarker))
                     .alpha(1.0f));
             destinationMarkers.add(marker);
             boundsBuilder.include(position);
@@ -391,7 +405,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onToastShown(String message) {
         // 更新 TextView 的文本
         if (notification != null && message.equals("路線已更新")) {
-            notification.setText("請選擇下列地標");
+            notification.setText("請選擇下列紅色地標");
         }else{
             notification.setText("發生錯誤，請關閉再開");
         }
