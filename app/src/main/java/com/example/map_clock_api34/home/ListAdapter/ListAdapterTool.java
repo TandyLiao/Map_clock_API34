@@ -71,7 +71,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         item3.put("data", "天氣");
         arrayList.add(item3);
         HashMap<String, String> item4 = new HashMap<>();
-        item4.put("data", "推薦路線");
+        item4.put("data", "直達公車路線");
         arrayList.add(item4);
         HashMap<String, String> item5 = new HashMap<>();
         item5.put("data", "地點設定");
@@ -196,7 +196,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             case "天氣":
                 holder.horecycleimageView.setImageResource(R.drawable.weather);
                 break;
-            case "推薦路線":
+            case "直達公車路線":
                 holder.horecycleimageView.setImageResource(R.drawable.route_well2);
                 break;
             case "地點設定":

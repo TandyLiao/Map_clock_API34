@@ -3,6 +3,8 @@ package com.example.map_clock_api34.BusAdvice;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -20,6 +22,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -86,7 +89,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             if (lastLocation != null) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
             } else {
-                Toast.makeText(getContext(), "无法取得当前位置信息，请查看您的GPS设备", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "無法取得目前位置訊息，請查看您的GPS設備", Toast.LENGTH_LONG).show();
             }
 
             // 设置标记点击事件
@@ -155,24 +158,60 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             }
         });
     }
+    private Bitmap createCustomMarker(Context context, @DrawableRes int resource, String title) {
+        View markerView = LayoutInflater.from(context).inflate(R.layout.bus_custom_marker, null);
 
+        ImageView markerImage = markerView.findViewById(R.id.marker_image);
+        markerImage.setImageResource(resource);
+
+        TextView markerText = markerView.findViewById(R.id.marker_text);
+        markerText.setText(title);
+
+        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        markerView.draw(canvas);
+
+        return bitmap;
+    }
     private void displayBusStopsOnMap(List<BusStationFinderHelper.BusStation> busStops, float color, Set<Marker> markerSet) {
         if (busStops == null || busStops.isEmpty()) {
             return;
         }
 
         for (BusStationFinderHelper.BusStation station : busStops) {
-            if(station.getRoutes() == null)  continue;
+            Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
 
-            Log.d("Bus",station.toString());
+            // 過濾掉沒有目的地站牌的站點
+            boolean hasDestination = false;
+            if (routes != null) {
+                for (Map<BusStationFinderHelper.BusStation.LatLng, String> destinationMap : routes.values()) {
+                    if (!destinationMap.isEmpty()) {
+                        hasDestination = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasDestination) {
+                continue; // 跳過沒有目的地站牌的站點
+            }
+
+            Log.d("Bus", station.toString());
             LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
 
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_marker, station.getStopName());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title(station.getStopName())
-                    .icon(BitmapDescriptorFactory.defaultMarker(color))
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarker))
                     .alpha(1.0f));
             markerSet.add(marker);
+        }
+        if(nearbyMarkers.isEmpty()){
+            notification.setText("附近沒有可用直達車");
         }
     }
 
@@ -211,13 +250,6 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             if (!entry.getValue().isEmpty()) {
                 routeNames.add(entry.getKey());
             }
-        }
-
-        // 確認數據完整性
-        if (routeNames.isEmpty()) {
-            Log.e("BusStationFinderHelper", "No routes available for stop: " + station.getStopName());
-            Toast.makeText(getContext(), "沒有可用的路線", Toast.LENGTH_SHORT).show();
-            return;
         }
 
         // 获取每条路线的到站时间信息
