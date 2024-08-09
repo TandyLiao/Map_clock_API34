@@ -58,20 +58,6 @@
             android:layout_marginEnd="8dp" />
 
         <Button
-            android:id="@+id/btnSettings"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:background="@drawable/btn_additem"
-            android:text="設定"
-            android:textColor="@color/green"
-            app:backgroundTint="@null"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:onClick="onSettingsClicked" />
-
-        <Button
             android:id="@+id/btnNext"
             android:layout_width="0dp"
             android:layout_height="40dp"

@@ -108,7 +108,6 @@ public class StartMapping extends Fragment {
 
         createNotificationChannel();//這行設定組新增
         checkAndRequestPermissions();//這行設定組新增
-        // 其他代码...
 
         loadSettings();
 
@@ -178,6 +177,8 @@ public class StartMapping extends Fragment {
 
         }
     };
+
+    //新增手機通知的渠道
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Destination Alert Channel";
@@ -262,8 +263,6 @@ public class StartMapping extends Fragment {
                     resetNotificationSent(); // 新增重製通知(6/2新增)
 
                 }
-
-                //設定組新增
 
             }
         }
@@ -384,21 +383,3 @@ public class StartMapping extends Fragment {
 
 
 }
-/*@Override
-    public void onStart() {
-        super.onStart();
-
-        // 启动前台服务
-        Intent serviceIntent = new Intent(getContext(), LocationService.class);
-        ContextCompat.startForegroundService(getContext(), serviceIntent);
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        // 停止前台服務
-        Intent serviceIntent = new Intent(getActivity(), LocationService.class);
-        getActivity().stopService(serviceIntent);
-    }
-*/

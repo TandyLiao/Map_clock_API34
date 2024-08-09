@@ -269,7 +269,6 @@ public class SelectPlace extends Fragment {
 
         Button btnCancel = popupView.findViewById(R.id.btnCancel);
         Button btnNext = popupView.findViewById(R.id.btnNext);
-        Button btnSettings = popupView.findViewById(R.id.btnSettings);
 
         if (!isUnknown) {
             destinationNameTextView.setText(destiantion_Name);
@@ -303,13 +302,6 @@ public class SelectPlace extends Fragment {
                 mMap.clear();
                 // Close the popup window
                 closePopupWindow();
-            }
-        });
-
-        btnSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         });
 

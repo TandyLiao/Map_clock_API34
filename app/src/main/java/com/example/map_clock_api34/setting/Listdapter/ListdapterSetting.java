@@ -33,7 +33,6 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
     private int selectedPosition = RecyclerView.NO_POSITION;
     private boolean enableDrag;
     private OnItemClickListener onItemClickListener;
-    private SharedPreferences preferences;
     private static final String TAG = "ListdapterSetting";
 
     public interface OnItemClickListener {
@@ -45,7 +44,6 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         this.arrayList = arrayList;
         this.sharedViewModel = sharedViewModel;
         this.enableDrag = enableDrag;
-        this.preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
     }
 
     public void setItemTouchHelper(ItemTouchHelper itemTouchHelper) {
@@ -138,9 +136,9 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         Button cancelButton = settingsView.findViewById(R.id.PopupCancel);
         Button confirmButton = settingsView.findViewById(R.id.PopupConfirm);
 
-        boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", true);
-        boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", true);
-        int notificationTime = preferences.getInt("notification_time", 5);
+        boolean isRingtoneEnabled = sharedViewModel.getRingtone(selectedPosition);
+        boolean isVibrationEnabled = sharedViewModel.getVibrate(selectedPosition);
+        int notificationTime = sharedViewModel.getNotification(selectedPosition);
 
         ringtoneSwitch.setChecked(isRingtoneEnabled);
         vibrationSwitch.setChecked(isVibrationEnabled);
@@ -159,11 +157,9 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
             boolean newVibrationEnabled = vibrationSwitch.isChecked();
             int newNotificationTime = getSelectedNotificationTime(notificationTimeGroup);
 
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("ringtone_enabled", newRingtoneEnabled);
-            editor.putBoolean("vibration_enabled", newVibrationEnabled);
-            editor.putInt("notification_time", newNotificationTime);
-            editor.apply();
+            sharedViewModel.setVibrate(vibrationSwitch.isChecked(), selectedPosition);
+            sharedViewModel.setRingtone(ringtoneSwitch.isChecked(), selectedPosition);
+            sharedViewModel.setNotification(newNotificationTime, selectedPosition);
 
             Toast.makeText(context, "已存取設定", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
