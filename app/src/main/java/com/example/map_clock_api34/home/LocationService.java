@@ -1,5 +1,7 @@
 package com.example.map_clock_api34.home;
 
+
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -13,10 +15,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,12 +30,16 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import java.util.Arrays;
 
+
+
 public class LocationService extends Service {
+
 
     private static final String CHANNEL_ID = "location_service_channel";
     private static final String WORK_TAG = "location_update_work";
@@ -42,6 +51,7 @@ public class LocationService extends Service {
     private double[] longitude;
     private String[] destinationName;
     private int destinationIndex = 0;
+    private Ringtone mRingtone;
 
     private double pre_distance, last_distance, speed, time, totalTime = 0;
     private Location startLocation;
@@ -85,6 +95,7 @@ public class LocationService extends Service {
 
         startForeground(1, notification);
     }
+
     private void loadSettings() {
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
         boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
@@ -221,6 +232,7 @@ public class LocationService extends Service {
 
         try {
             Intent intent = new Intent(context, StartMapping.class);
+
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
@@ -237,14 +249,12 @@ public class LocationService extends Service {
                     .setAutoCancel(true);
 
             if (isRingtoneEnabled) {
-                Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                builder.setSound(ringtoneUri);
-            }
+                playRingtone();
 
+            }
             if (isVibrationEnabled) {
-                builder.setVibrate(new long[]{1000, 1000});
+                startVibrate();
             }
-
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(0, builder.build());
 
@@ -257,7 +267,43 @@ public class LocationService extends Service {
 
         Log.d("LocationService", "Location update worker started");
     }
+
     public void resetNotificationSent() {
         notificationSent = false;
+    }
+
+    private void startVibrate() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(1000);
+        }
+    }
+
+    private void playRingtone() {
+        Uri ringtoneUri = loadRingtoneUri();
+        if (ringtoneUri != null) {
+            mRingtone = RingtoneManager.getRingtone(getApplicationContext(), ringtoneUri);
+            if (mRingtone != null) {
+                mRingtone.play();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopRingtone();
+                    }
+                }, 3000);
+            }
+        }
+    }
+
+    private void stopRingtone() {
+        if (mRingtone != null && mRingtone.isPlaying()) {
+            mRingtone.stop();
+        }
+    }
+
+    private Uri loadRingtoneUri() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String uriString = preferences.getString("ringtone_uri", null);
+        return uriString != null ? Uri.parse(uriString) : null;
     }
 }

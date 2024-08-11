@@ -139,6 +139,8 @@ public class SettingRemind extends Fragment {
 
     private void playRingtone() {
         Uri ringtoneUri = loadRingtoneUri();
+
+
         if (ringtoneUri != null) {
             mRingtone = RingtoneManager.getRingtone(requireContext(), ringtoneUri);
             if (mRingtone != null) {
@@ -160,6 +162,7 @@ public class SettingRemind extends Fragment {
         String uriString = preferences.getString("ringtone_uri", null);
         return uriString != null ? Uri.parse(uriString) : null;
     }
+
 
     private void playRingtoneWithIncreasingVolume() {
         Uri ringtoneUri = loadRingtoneUri(); // Load the saved ringtone URI

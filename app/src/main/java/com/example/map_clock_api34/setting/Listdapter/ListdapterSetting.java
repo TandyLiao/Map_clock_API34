@@ -1,5 +1,6 @@
 package com.example.map_clock_api34.setting.Listdapter;
 
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -24,6 +25,8 @@ import com.example.map_clock_api34.SharedViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.ViewHolder> {
     private Context context;
@@ -31,6 +34,8 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
     private SharedViewModel sharedViewModel;
     private ItemTouchHelper itemTouchHelper;
     private int selectedPosition = RecyclerView.NO_POSITION;
+    private Set<Integer> selectedPositions = new HashSet<>(); // 用於存儲選中的項目位置
+
     private boolean enableDrag;
     private OnItemClickListener onItemClickListener;
     private static final String TAG = "ListdapterSetting";
@@ -68,13 +73,16 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
                 public void onClick(View v) {
                     if (!enableDrag) {
                         int previousSelectedPosition = selectedPosition;
-                        if (selectedPosition == getAdapterPosition()) {
-                            selectedPosition = RecyclerView.NO_POSITION; // 取消選擇
+                        selectedPosition = getAdapterPosition();
+
+                        Log.d(TAG, "Clicked position: " + selectedPosition);
+                        int position = getAdapterPosition();
+                        if (selectedPositions.contains(position)) {
+                            selectedPositions.remove(position); // 如果已選中，則取消選中
                         } else {
-                            selectedPosition = getAdapterPosition();
+                            selectedPositions.add(position); // 如果未選中，則添加到選中集合
                         }
-                        notifyItemChanged(previousSelectedPosition);
-                        notifyItemChanged(selectedPosition);
+                        notifyItemChanged(position);
                     }
                     if (onItemClickListener != null) {
                         onItemClickListener.onItemClick(getAdapterPosition());
@@ -112,7 +120,7 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
-
+//要多個安妮雅
         if (!enableDrag) {
             if (position == selectedPosition) {
                 holder.dragHandle.setImageResource(R.drawable.anya062516);
@@ -161,9 +169,14 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
             sharedViewModel.setRingtone(ringtoneSwitch.isChecked(), selectedPosition);
             sharedViewModel.setNotification(newNotificationTime, selectedPosition);
 
+            String destinationName = arrayList.get(selectedPosition).get("data"); // 取得選定的目的地名稱
+
             Toast.makeText(context, "已存取設定", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
-            Log.d(TAG, "Settings Updated: Ringtone = " + newRingtoneEnabled + ", Vibration = " + newVibrationEnabled + ", Time = " + newNotificationTime);
+            Log.d(TAG, "Settings Updated: Ringtone = " + newRingtoneEnabled +
+                    ", Vibration = " + newVibrationEnabled +
+                    ", Time = " + newNotificationTime +
+                    ", Destination = " + destinationName);
         });
     }
 

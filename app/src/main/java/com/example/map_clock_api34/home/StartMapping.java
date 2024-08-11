@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -51,12 +54,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 public class StartMapping extends Fragment {
 
     private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
     private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
     private boolean notificationSent = false; // 新增的变量(by設定組)
+    private Ringtone mRingtone;
 
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
@@ -216,12 +221,11 @@ public class StartMapping extends Fragment {
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
             if (isRingtoneEnabled) {
-                Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                builder.setSound(ringtoneUri);
+                playRingtone();
+
             }
             if (isVibrationEnabled) {
-                builder.setVibrate(new long[]{1000, 1000});
-                // builder.setVibrate(new long[]{1000, 1000});
+                startVibrate();
             }
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
@@ -381,5 +385,36 @@ public class StartMapping extends Fragment {
         notificationSent = false;
     }
 
+    private void startVibrate() {
+        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(1000);
+        }
+    }
+    private void playRingtone() {
+        Uri ringtoneUri = loadRingtoneUri();
+        if (ringtoneUri != null) {
+            mRingtone = RingtoneManager.getRingtone(requireContext(), ringtoneUri);
+            if (mRingtone != null) {
+                mRingtone.play();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopRingtone();
+                    }
+                }, 3000);
+            }
+        }
+        }
+    private void stopRingtone() {
+        if (mRingtone != null && mRingtone.isPlaying()) {
+            mRingtone.stop();
+        }
+    }
+    private Uri loadRingtoneUri() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String uriString = preferences.getString("ringtone_uri", null);
+        return uriString != null ? Uri.parse(uriString) : null;
+    }
+    }
 
-}
