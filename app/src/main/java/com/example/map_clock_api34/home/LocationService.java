@@ -219,6 +219,7 @@ public class LocationService extends Service {
         } else {
             Log.d("LocationService", "All destinations reached, stopping service");
             stopSelf();
+
         }
     }
 

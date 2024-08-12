@@ -102,6 +102,8 @@ public class CreateLocation extends Fragment {
             toolbar = requireActivity().findViewById(R.id.toolbar);
         }
 
+        //resetFields();
+
         return rootView;
     }
 
@@ -429,4 +431,5 @@ public class CreateLocation extends Fragment {
             notification.setText("請按新增增加地點");
         }
     }
+
 }

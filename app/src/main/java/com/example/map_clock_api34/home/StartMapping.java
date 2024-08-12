@@ -132,7 +132,7 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            CreateLocation createFragment = new CreateLocation();
+            EndMapping createFragment = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.home_fragment_container, createFragment);
             transaction.addToBackStack(null);
@@ -347,7 +347,12 @@ public class StartMapping extends Fragment {
                     // 在這裡重新啟動位置更新
                     startLocationUpdates();
                 }else{
-                    getActivity().getSupportFragmentManager().popBackStack();
+                    EndMapping createFragment = new EndMapping();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.home_fragment_container, createFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                    //getActivity().getSupportFragmentManager().popBackStack();
                 }
                 popupWindow.dismiss();
             }
