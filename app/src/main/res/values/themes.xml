@@ -6,6 +6,8 @@
         <item name="android:windowDisablePreview"> true </item >
         <item name="android:textColorPrimary">@color/darkgreen</item>
         <item name="android:textColorSecondary">@color/green</item>
+
+
     </style>
 
     <style name="NoTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
@@ -13,6 +15,8 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="colorPrimary">@color/green</item>
         <item name="android:windowDisablePreview"> true </item >
+
+
     </style>
 
 </resources>
