@@ -202,3 +202,4 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         return 5; // 默認值
     }
 }
+

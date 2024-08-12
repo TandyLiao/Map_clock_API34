@@ -1,7 +1,6 @@
 package com.example.map_clock_api34.home;
 
 
-
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -35,7 +34,6 @@ import androidx.preference.PreferenceManager;
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import java.util.Arrays;
-
 
 
 public class LocationService extends Service {
@@ -141,7 +139,7 @@ public class LocationService extends Service {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Request location updates
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
             Log.d("LocationService", "Location updates requested");
 
             // Start WorkManager for periodic location updates
@@ -307,3 +305,4 @@ public class LocationService extends Service {
         return uriString != null ? Uri.parse(uriString) : null;
     }
 }
+

@@ -2,6 +2,8 @@ package com.example.map_clock_api34.home;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
@@ -240,16 +242,16 @@ public class StartMapping extends Fragment {
     public LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) //這個if設定組加的
-            {
-                SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
-               int notificationTime = preferences.getInt("notification_time", 5);
+            Activity activity = getActivity();
+            if (activity != null && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
+                int notificationTime = preferences.getInt("notification_time", 5);
 
-                totalTime = totalTime + 10;
+                totalTime += 10;
                 pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
                 last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-                if (pre_distance > 0.020) {
 
+                if (pre_distance > 0.020) {
                     speed = pre_distance / (totalTime / 60 / 60);
                     time = Math.round(last_distance / speed * 60);
                     txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
@@ -261,13 +263,12 @@ public class StartMapping extends Fragment {
                     initPopWindow();
                 }
 
-                //設定組新增
                 if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
                     sendNotification("快到了!");
-                    resetNotificationSent(); // 新增重製通知(6/2新增)
-
+                    resetNotificationSent();
                 }
-
+            } else {
+                Log.e("StartMapping", "Activity is null or permission not granted");
             }
         }
     };
