@@ -1,14 +1,17 @@
 package com.example.map_clock_api34.note;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,10 +40,14 @@ import java.util.HashMap;
 public class Note extends Fragment {
 
     View rootView;
+    View overlayView;
 
     SharedViewModel sharedViewModel;
     RecyclerView recyclerViewRoute;
     ListAdapterRoute listAdapterRoute;
+    Button btnreset;
+    Button btnsure;
+
 
     ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
@@ -49,13 +56,113 @@ public class Note extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.note_fragment_note, container, false);
+        btnreset = rootView.findViewById(R.id.btn_reset);
+        btnreset.setOnClickListener(v -> {
+            ShowPopupWindow();
+        });
+
+        btnsure = rootView.findViewById(R.id.btn_sure);
+        btnsure.setOnClickListener(v -> {
+            CreateLocation createLocation = new CreateLocation();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, createLocation);
+            transaction.commit();
+        });
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
-        //初始化ActionBar
+        updateResetButtonState();
         setupActionBar();
         setupRecyclerViews();
         return rootView;
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        btnreset = view.findViewById(R.id.btn_reset);
+        btnreset.setOnClickListener(v -> {
+            ShowPopupWindow();
+        });
+
+        btnsure = view.findViewById(R.id.btn_sure);
+        btnsure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
+        // 其他初始化代码
+    }
+
+    private void resetAllNotes() {
+        int locationCount = sharedViewModel.getLocationCount();
+        if (locationCount >= 0) {
+            for (int i = 0; i <= locationCount; i++) {
+                sharedViewModel.setNote("",i); // 重置note為空字串
+            }
+        }
+    }
+    //按重置紐後PopupWindow跳出來的設定
+    private void ShowPopupWindow() {
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
+        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setWidth(700);
+        popupWindow.setFocusable(false);
+        popupWindow.setOutsideTouchable(false);
+        //讓PopupWindow顯示出來的關鍵句
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        //疊加View在底下，讓她不會按到底層就跳掉
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setClickable(true);
+        ((ViewGroup) rootView).addView(overlayView);
+
+        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        BTNPopup.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            //移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
+        });
+        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        btnsure.setOnClickListener(v -> {
+            resetAllNotes();
+            RecycleViewReset();
+            updateResetButtonState();
+            recyclerViewRoute.setAdapter(listAdapterRoute);
+            //改變重置按鈕狀態
+            updateResetButtonState();
+            //移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
+            popupWindow.dismiss();
+        });
+    }
+    private void removeOverlayView() {
+        if (overlayView != null && overlayView.getParent() != null) {
+            ((ViewGroup) overlayView.getParent()).removeView(overlayView);
+            overlayView = null;
+        }
+    }
+
+    private void updateResetButtonState() {
+        if (sharedViewModel.hasNotes()) {
+            //設置可點擊狀態
+            btnreset.setEnabled(true);
+            //改變按鈕文字顏色
+            btnreset.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
+            //改變按鈕的Drawable
+            btnreset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem)); // 設定啟用時的背景顏色
+        } else {
+            //設置不可點擊狀態
+            btnreset.setEnabled(false);
+            //改變按鈕文字顏色
+            btnreset.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
+            //改變按鈕的Drawable
+            btnreset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
+        }
     }
 
     private void setupActionBar() {
@@ -76,7 +183,7 @@ public class Note extends Fragment {
 
         // ImageView放置圖案
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.anya062516);
+        mark.setImageResource(R.drawable.note);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
@@ -164,6 +271,7 @@ public class Note extends Fragment {
             }
         });
     }
+
     public void onPause() {
         super.onPause();
 
@@ -184,6 +292,7 @@ public class Note extends Fragment {
         RecycleViewReset();
         setupActionBar();
     }
+
     private void RecycleViewReset() {
         //清除原本的表
         arrayList.clear();

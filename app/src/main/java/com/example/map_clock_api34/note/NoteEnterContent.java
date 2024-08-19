@@ -48,9 +48,13 @@ public class NoteEnterContent extends Fragment {
         verify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sharedViewModel.setNote(detailTextView.getText().toString(), sharedViewModel.getPosition());
+                if (!detailTextView.getText().toString().isEmpty()) {
+                    // 如果不為空，更新 ViewModel
+                    sharedViewModel.setNote(detailTextView.getText().toString(), sharedViewModel.getPosition());
+                }
                 getActivity().getSupportFragmentManager().popBackStack();
                 hideKeyboard();
+
             }
         });
 

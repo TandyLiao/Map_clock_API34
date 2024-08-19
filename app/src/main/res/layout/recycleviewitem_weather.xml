@@ -62,7 +62,7 @@
                     android:layout_weight="2"
                     android:text="找城市"
                     android:textColor="@color/white"
-                    android:textSize="15dp" />
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/text_wheather"
@@ -72,7 +72,7 @@
                     android:layout_weight="2"
                     android:text="讀檔中請稍後~"
                     android:textColor="@color/white"
-                    android:textSize="15dp" />
+                    android:textSize="15sp" />
 
             </LinearLayout>
 
@@ -82,9 +82,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:gravity="right"
-                android:text="稍後"
+                android:text="溫度"
                 android:singleLine="true"
                 android:textColor="@color/white"
                 android:textSize="30sp" />

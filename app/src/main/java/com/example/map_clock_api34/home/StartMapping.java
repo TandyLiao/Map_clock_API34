@@ -134,9 +134,9 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            EndMapping createFragment = new EndMapping();
+            EndMapping enfFragment = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.home_fragment_container, createFragment);
+            transaction.replace(R.id.home_fragment_container, enfFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
@@ -350,7 +350,7 @@ public class StartMapping extends Fragment {
                 }else{
                     EndMapping createFragment = new EndMapping();
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.home_fragment_container, createFragment);
+                    transaction.replace(R.id.fl_container, createFragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
                     //getActivity().getSupportFragmentManager().popBackStack();

@@ -183,4 +183,14 @@ public class SharedViewModel extends ViewModel {
         return longitude[position];
     }
 
+    public boolean hasNotes() {
+        for (int i = 0; i <= locationCount; i++) {
+            if (note[i] != null && !note[i].isEmpty()) {
+                return true;  // 如果找到空的 note就返回 true
+            }
+        }
+        return false;  // 如果所有 note 都空返回 false
+    }
+
+
 }
