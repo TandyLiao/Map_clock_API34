@@ -194,7 +194,7 @@ public class LocationService extends Service {
             startLocation = nowLocation;
         }
 
-        totalTime += 60;
+        totalTime += 10;
         pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
         last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
 
@@ -207,7 +207,7 @@ public class LocationService extends Service {
             Log.d("LocationService", "Speed: " + speed + " km/h");
             Log.d("LocationService", "Estimated time: " + time + " minutes");
         } else {
-            totalTime -= 60;
+            totalTime -= 10;
         }
 
         if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {

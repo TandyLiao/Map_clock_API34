@@ -243,38 +243,36 @@ public class StartMapping extends Fragment {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
             Activity activity = getActivity();
-            if (activity != null) {
-                // 检查是否具有定位权限
-                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
-                    int notificationTime = preferences.getInt("notification_time", 5);
+            if (activity != null && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
+                int notificationTime = preferences.getInt("notification_time", 5);
 
-                    totalTime += 10;
-                    pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-                    last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                totalTime += 10;
+                pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
 
-                    if (pre_distance > 0.020) {
-                        speed = pre_distance / (totalTime / 60 / 60);
-                        time = Math.round(last_distance / speed * 60);
-                        txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
-                    } else {
-                        totalTime -= 10;
-                    }
-
-                    if (last_distance < 0.05 && time < 3) {
-                        initPopWindow();
-                    }
-
-                    if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
-                        sendNotification("快到了!");
-                        resetNotificationSent();
-                    }
+                if (pre_distance > 0.020) {
+                    speed = pre_distance / (totalTime / 60 / 60);
+                    time = Math.round(last_distance / speed * 60);
+                    txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
                 } else {
-                    Log.e("StartMapping", "Activity is null or permission not granted");
+                    totalTime -= 10;
                 }
+
+                if (last_distance < 0.05 && time < 3) {
+                    initPopWindow();
+                }
+
+                if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
+                    sendNotification("快到了!");
+                    resetNotificationSent();
+                }
+            } else {
+                Log.e("StartMapping", "Activity is null or permission not granted");
             }
-        };
+        }
     };
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
