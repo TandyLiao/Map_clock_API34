@@ -38,6 +38,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
+import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 
 import java.util.Locale;
@@ -163,13 +164,13 @@ public class SettingRemind extends Fragment {
         return uriString != null ? Uri.parse(uriString) : null;
     }
 
-
     private void playRingtoneWithIncreasingVolume() {
-        Uri ringtoneUri = loadRingtoneUri(); // Load the saved ringtone URI
+        Uri ringtoneUri = loadRingtoneUri(); // 加載保存的鈴聲 URI
 
-        final int duration = 3000;
-        final int intervals = 3;
-        final float volumeIncrement = 1.0f / intervals;
+        final int totalDuration = 10000; // 總時長 10 秒
+        final int intervals = 3; // 音量增量的次數
+        final int duration = totalDuration / intervals; // 每個步驟的持續時間
+        final float volumeIncrement = 1.0f / intervals; // 音量增量
 
         mMediaPlayer = MediaPlayer.create(requireContext(), ringtoneUri);
 
@@ -192,7 +193,7 @@ public class SettingRemind extends Fragment {
                         mMediaPlayer.start();
                     }
                 }
-            }, i * (duration + 1000));
+            }, i * duration);
         }
 
         // 設置在播放完成後停止並釋放 MediaPlayer
@@ -205,8 +206,9 @@ public class SettingRemind extends Fragment {
                     mMediaPlayer = null;
                 }
             }
-        }, intervals * (duration + 1000));
+        }, totalDuration);
     }
+
 
     private void selectRingtone() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -408,13 +410,16 @@ public class SettingRemind extends Fragment {
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SettingFragment settingFragment = new SettingFragment();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fl_container, settingFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                // 創建一個 Intent 來啟動 MainActivity
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+
+                // 啟動 MainActivity
+                startActivity(intent);
+
+                getActivity().finish();
             }
         });
+
 
         // 在恢复时更新按钮标签
         updateButtonLabels();

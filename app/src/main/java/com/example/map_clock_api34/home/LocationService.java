@@ -32,18 +32,20 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import com.example.map_clock_api34.Distance;
+import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 import java.util.Arrays;
 
 
-public class LocationService extends Service {
 
+public class LocationService extends Service {
 
     private static final String CHANNEL_ID = "location_service_channel";
     private static final String WORK_TAG = "location_update_work";
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private boolean notificationSent = false; // 新增的变量(by設定組)
+    private boolean notificationSent = false; // 新增的变量
+    private boolean isVibrating = false; // 震动状态标志
 
     private double[] latitude;
     private double[] longitude;
@@ -57,7 +59,7 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        resetNotificationSent();//設定組新增
+        resetNotificationSent(); // 初始化通知状态
 
         Log.d("LocationService", "Service is being created");
         loadSettings();
@@ -81,8 +83,9 @@ public class LocationService extends Service {
         };
 
         createNotificationChannel();
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.putExtra("show_start_mapping", true); // 添加额外信息
 
-        Intent notificationIntent = new Intent(this, StartMapping.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("地圖鬧鐘正在運行")
@@ -98,7 +101,7 @@ public class LocationService extends Service {
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
         boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
         boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
-        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
+        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 5
         Log.d("Settings_BY_ForeGround", "Ringtone Enabled: " + isRingtoneEnabled);
         Log.d("Settings_BY_ForeGround", "Vibration Enabled: " + isVibrationEnabled);
         Log.d("Settings_BY_ForeGround", "Notification Time: " + notificationTime);
@@ -118,6 +121,11 @@ public class LocationService extends Service {
         Log.d("LocationService", "Service is starting");
 
         if (intent != null) {
+            if ("STOP_VIBRATION".equals(intent.getAction())) {
+                stopVibrate();
+                return START_NOT_STICKY;
+            }
+
             latitude = intent.getDoubleArrayExtra("latitude");
             longitude = intent.getDoubleArrayExtra("longitude");
             destinationName = intent.getStringArrayExtra("destinationName");
@@ -176,7 +184,7 @@ public class LocationService extends Service {
     private void handleLocationUpdate(Location nowLocation) {
         Log.d("LocationService", "Handling location update");
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
-        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
+        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 5
         if (nowLocation == null) {
             Log.e("LocationService", "Current location is null");
             return;
@@ -204,8 +212,7 @@ public class LocationService extends Service {
 
         if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
             sendNotification("快到了!");
-            resetNotificationSent(); // 新增重製通知(6/2新增)
-
+            resetNotificationSent(); // 重置通知状态
         }
         if (last_distance < 0.01 && time < 3) {
             destinationIndex++;
@@ -217,7 +224,6 @@ public class LocationService extends Service {
         } else {
             Log.d("LocationService", "All destinations reached, stopping service");
             stopSelf();
-
         }
     }
 
@@ -230,14 +236,15 @@ public class LocationService extends Service {
         }
 
         try {
-            Intent intent = new Intent(context, StartMapping.class);
-
+            Intent intent = new Intent(context, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra("show_start_mapping", true);
+
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             SharedPreferences preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
-            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
+            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false);
+            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -249,11 +256,11 @@ public class LocationService extends Service {
 
             if (isRingtoneEnabled) {
                 playRingtone();
-
             }
             if (isVibrationEnabled) {
                 startVibrate();
             }
+
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(0, builder.build());
 
@@ -263,8 +270,8 @@ public class LocationService extends Service {
     }
 
     private void startLocationUpdateWorker() {
-
         Log.d("LocationService", "Location update worker started");
+        // 你可以在这里添加你的 WorkManager 代码
     }
 
     public void resetNotificationSent() {
@@ -274,7 +281,43 @@ public class LocationService extends Service {
     private void startVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
-            vibrator.vibrate(1000);
+            final long vibrationDuration = 3000; // 振动3秒
+            final long restDuration = 2000; // 休息2秒
+            final long totalDuration = 5 * 60 * 1000; // 总持续时间5分钟
+
+            final Handler handler = new Handler();
+            final long endTime = System.currentTimeMillis() + totalDuration;
+            isVibrating = true; // 设置震动状态
+
+            Runnable vibrationRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (System.currentTimeMillis() < endTime && isVibrating) {
+                        vibrator.vibrate(vibrationDuration);
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                vibrator.cancel(); // 停止震动
+                                handler.postDelayed(this, restDuration); // 休息2秒
+                            }
+                        }, vibrationDuration);
+                        handler.postDelayed(this, vibrationDuration + restDuration); // 继续下一次振动
+                    } else {
+                        vibrator.cancel(); // 确保在结束时停止震动
+                        isVibrating = false; // 震动结束
+                    }
+                }
+            };
+
+            handler.post(vibrationRunnable); // 开始震动循环
+        }
+    }
+
+    private void stopVibrate() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator != null && isVibrating) {
+            vibrator.cancel(); // 取消震动
+            isVibrating = false; // 更新震动状态
         }
     }
 
@@ -289,7 +332,7 @@ public class LocationService extends Service {
                     public void run() {
                         stopRingtone();
                     }
-                }, 3000);
+                }, 3000); // 播放3秒后停止
             }
         }
     }
@@ -306,4 +349,3 @@ public class LocationService extends Service {
         return uriString != null ? Uri.parse(uriString) : null;
     }
 }
-

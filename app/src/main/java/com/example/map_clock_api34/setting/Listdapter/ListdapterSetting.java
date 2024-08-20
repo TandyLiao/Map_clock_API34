@@ -120,7 +120,6 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
-//要多個安妮雅
         if (!enableDrag) {
             if (position == selectedPosition) {
                 holder.dragHandle.setImageResource(R.drawable.anya062516);

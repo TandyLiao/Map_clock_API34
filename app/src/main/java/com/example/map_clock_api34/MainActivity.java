@@ -12,12 +12,17 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 
 import com.example.map_clock_api34.book.BookFragment;
 import com.example.map_clock_api34.history.HistoryFragment;
 import com.example.map_clock_api34.home.HomeFragment;
-import com.example.map_clock_api34.setting.SettingFragment;
+import com.example.map_clock_api34.home.StartMapping;
+import com.example.map_clock_api34.setting.SettingRemind;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private HistoryFragment historyFragment;
 
-    private SettingFragment settingFragment;
+    private SettingRemind SettingRemind;
 
 
 
@@ -46,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         navigation_view = (NavigationView) findViewById(R.id.navigation_view);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -63,8 +67,18 @@ public class MainActivity extends AppCompatActivity {
 
 
         //初始化地圖(第一個頁面是MAP)
-        homeFragment = new HomeFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, homeFragment,"map").commit();
+        if (homeFragment == null) {
+            homeFragment = new HomeFragment();
+        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fl_container, homeFragment, "map").commit();
+
+        if (savedInstanceState == null) {
+            homeFragment = new HomeFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fl_container, homeFragment, "map")
+                    .commit();
+        }
         //選單點擊
         navigation_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -81,36 +95,32 @@ public class MainActivity extends AppCompatActivity {
 
                     homeFragment = new HomeFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container, homeFragment,"map").commit();
+                            .replace(R.id.fl_container, homeFragment, "map").commit();
                     Toast.makeText(MainActivity.this, "Dora map", Toast.LENGTH_SHORT).show();
                     return true;
 
 
-                }
-                else if (id == R.id.action_book) {
+                } else if (id == R.id.action_book) {
 
                     bookFragment = new BookFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,bookFragment, "com/example/map_clock_api34/book").commit();
+                            .replace(R.id.fl_container, bookFragment, "com/example/map_clock_api34/book").commit();
                     Toast.makeText(MainActivity.this, "com/example/map_clock_api34/book", Toast.LENGTH_SHORT).show();
                     return true;
 
 
+                } else if (id == R.id.action_history) {
 
-                }
-                else if (id == R.id.action_history) {
-
-                    historyFragment=new HistoryFragment();
+                    historyFragment = new HistoryFragment();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,historyFragment, "com/example/map_clock_api34/history").commit();
+                            .replace(R.id.fl_container, historyFragment, "com/example/map_clock_api34/history").commit();
                     Toast.makeText(MainActivity.this, "歷史紀錄", Toast.LENGTH_SHORT).show();
 
                     return true;
-                }
-                else if (id == R.id.action_setting) {
-                    settingFragment=new SettingFragment();
+                } else if (id == R.id.action_setting) {
+                    SettingRemind = new SettingRemind();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container,settingFragment, "com/example/map_clock_api34/setting").commit();
+                            .replace(R.id.fl_container, SettingRemind, "com/example/map_clock_api34/setting").commit();
                     Toast.makeText(MainActivity.this, "設定", Toast.LENGTH_SHORT).show();
 
                     return true;

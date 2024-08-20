@@ -134,9 +134,9 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            EndMapping createFragment = new EndMapping();
+            EndMapping enfFragment = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.home_fragment_container, createFragment);
+            transaction.replace(R.id.home_fragment_container, enfFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
@@ -243,34 +243,37 @@ public class StartMapping extends Fragment {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
             Activity activity = getActivity();
-            if (activity != null && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
-                int notificationTime = preferences.getInt("notification_time", 5);
+            if (activity != null) {
+                // 检查是否具有定位权限
+                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
+                    int notificationTime = preferences.getInt("notification_time", 5);
 
-                totalTime += 10;
-                pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-                last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                    totalTime += 10;
+                    pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                    last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
 
-                if (pre_distance > 0.020) {
-                    speed = pre_distance / (totalTime / 60 / 60);
-                    time = Math.round(last_distance / speed * 60);
-                    txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
+                    if (pre_distance > 0.020) {
+                        speed = pre_distance / (totalTime / 60 / 60);
+                        time = Math.round(last_distance / speed * 60);
+                        txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
+                    } else {
+                        totalTime -= 10;
+                    }
+
+                    if (last_distance < 0.05 && time < 3) {
+                        initPopWindow();
+                    }
+
+                    if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
+                        sendNotification("快到了!");
+                        resetNotificationSent();
+                    }
                 } else {
-                    totalTime -= 10;
+                    Log.e("StartMapping", "Activity is null or permission not granted");
                 }
-
-                if (last_distance < 0.05 && time < 3) {
-                    initPopWindow();
-                }
-
-                if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
-                    sendNotification("快到了!");
-                    resetNotificationSent();
-                }
-            } else {
-                Log.e("StartMapping", "Activity is null or permission not granted");
             }
-        }
+        };
     };
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -350,7 +353,7 @@ public class StartMapping extends Fragment {
                 }else{
                     EndMapping createFragment = new EndMapping();
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.home_fragment_container, createFragment);
+                    transaction.replace(R.id.fl_container, createFragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
                     //getActivity().getSupportFragmentManager().popBackStack();
@@ -390,7 +393,23 @@ public class StartMapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
+    @Override
+    public void onPause() {
+        super.onPause();
+        // 停止位置更新
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener);
+        }
+        // 可以添加更多需要暂停的操作
+        // ...
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 重新启动位置更新
+
+    }
     private void startVibrate() {
         Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
@@ -411,7 +430,7 @@ public class StartMapping extends Fragment {
                 }, 3000);
             }
         }
-        }
+    }
     private void stopRingtone() {
         if (mRingtone != null && mRingtone.isPlaying()) {
             mRingtone.stop();
@@ -422,5 +441,5 @@ public class StartMapping extends Fragment {
         String uriString = preferences.getString("ringtone_uri", null);
         return uriString != null ? Uri.parse(uriString) : null;
     }
-    }
+}
 
