@@ -33,6 +33,7 @@ public class BusStationFinderHelper {
     private static final String STOP_OF_ROUTE_URL = "https://tdx.transportdata.tw/api/basic/v2/Bus/StopOfRoute/City/";
 
     String cityName;
+    Boolean isShow = false;
 
     private Context context;
 
@@ -557,7 +558,11 @@ public class BusStationFinderHelper {
         }
 
         mainHandler.post(() -> {
-            showToast("路線已更新");
+            if(!isShow){
+                showToast("路線已更新");
+                isShow = true;
+            }
+
             callback.onBusStationsFound(secondNearByStop);
         });
     }

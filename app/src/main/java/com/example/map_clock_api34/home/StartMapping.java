@@ -2,8 +2,11 @@ package com.example.map_clock_api34.home;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +21,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -51,12 +56,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 public class StartMapping extends Fragment {
 
     private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
     private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
     private boolean notificationSent = false; // 新增的变量(by設定組)
+    private Ringtone mRingtone;
 
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
@@ -108,7 +115,6 @@ public class StartMapping extends Fragment {
 
         createNotificationChannel();//這行設定組新增
         checkAndRequestPermissions();//這行設定組新增
-        // 其他代码...
 
         loadSettings();
 
@@ -128,9 +134,9 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            CreateLocation createFragment = new CreateLocation();
+            EndMapping enfFragment = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.home_fragment_container, createFragment);
+            transaction.replace(R.id.home_fragment_container, enfFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
@@ -178,6 +184,8 @@ public class StartMapping extends Fragment {
 
         }
     };
+
+    //新增手機通知的渠道
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Destination Alert Channel";
@@ -215,12 +223,11 @@ public class StartMapping extends Fragment {
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
             if (isRingtoneEnabled) {
-                Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                builder.setSound(ringtoneUri);
+                playRingtone();
+
             }
             if (isVibrationEnabled) {
-                builder.setVibrate(new long[]{1000, 1000});
-                // builder.setVibrate(new long[]{1000, 1000});
+                startVibrate();
             }
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
@@ -235,16 +242,16 @@ public class StartMapping extends Fragment {
     public LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) //這個if設定組加的
-            {
-                SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
-               int notificationTime = preferences.getInt("notification_time", 5);
+            Activity activity = getActivity();
+            if (activity != null && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
+                int notificationTime = preferences.getInt("notification_time", 5);
 
-                totalTime = totalTime + 10;
+                totalTime += 10;
                 pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
                 last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-                if (pre_distance > 0.020) {
 
+                if (pre_distance > 0.020) {
                     speed = pre_distance / (totalTime / 60 / 60);
                     time = Math.round(last_distance / speed * 60);
                     txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
@@ -256,18 +263,16 @@ public class StartMapping extends Fragment {
                     initPopWindow();
                 }
 
-                //設定組新增
                 if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
                     sendNotification("快到了!");
-                    resetNotificationSent(); // 新增重製通知(6/2新增)
-
+                    resetNotificationSent();
                 }
-
-                //設定組新增
-
+            } else {
+                Log.e("StartMapping", "Activity is null or permission not granted");
             }
         }
     };
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -344,7 +349,12 @@ public class StartMapping extends Fragment {
                     // 在這裡重新啟動位置更新
                     startLocationUpdates();
                 }else{
-                    getActivity().getSupportFragmentManager().popBackStack();
+                    EndMapping createFragment = new EndMapping();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fl_container, createFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                    //getActivity().getSupportFragmentManager().popBackStack();
                 }
                 popupWindow.dismiss();
             }
@@ -381,24 +391,53 @@ public class StartMapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
-
-
-}
-/*@Override
-    public void onStart() {
-        super.onStart();
-
-        // 启动前台服务
-        Intent serviceIntent = new Intent(getContext(), LocationService.class);
-        ContextCompat.startForegroundService(getContext(), serviceIntent);
+    @Override
+    public void onPause() {
+        super.onPause();
+        // 停止位置更新
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener);
+        }
+        // 可以添加更多需要暂停的操作
+        // ...
     }
-
 
     @Override
-    public void onStop() {
-        super.onStop();
-        // 停止前台服務
-        Intent serviceIntent = new Intent(getActivity(), LocationService.class);
-        getActivity().stopService(serviceIntent);
+    public void onResume() {
+        super.onResume();
+        // 重新启动位置更新
+
     }
-*/
+    private void startVibrate() {
+        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(1000);
+        }
+    }
+    private void playRingtone() {
+        Uri ringtoneUri = loadRingtoneUri();
+        if (ringtoneUri != null) {
+            mRingtone = RingtoneManager.getRingtone(requireContext(), ringtoneUri);
+            if (mRingtone != null) {
+                mRingtone.play();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopRingtone();
+                    }
+                }, 3000);
+            }
+        }
+    }
+    private void stopRingtone() {
+        if (mRingtone != null && mRingtone.isPlaying()) {
+            mRingtone.stop();
+        }
+    }
+    private Uri loadRingtoneUri() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String uriString = preferences.getString("ringtone_uri", null);
+        return uriString != null ? Uri.parse(uriString) : null;
+    }
+}
+

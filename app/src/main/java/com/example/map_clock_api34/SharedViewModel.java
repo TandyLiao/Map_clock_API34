@@ -24,10 +24,13 @@ public class SharedViewModel extends ViewModel {
     private int position=0;
 
     //震動鈴聲
-    private Boolean[] vibrate = new Boolean[7];
-    private Boolean[] ringtone = new Boolean[7];
-    //7個地點有3個提醒時間可供選擇;
-    private Boolean[][] notification = new Boolean[7][3];
+    // 震動鈴聲預設為 false
+    private Boolean[] vibrate = {true, true, true, true, true, true, true};
+    private Boolean[] ringtone = {true, true, true, true, true, true, true};
+
+    // 提醒時間預設為 5
+    private int[] notification = {5, 5, 5, 5, 5, 5, 5};
+
 
     public String time, routeName, uuid;
 
@@ -41,7 +44,7 @@ public class SharedViewModel extends ViewModel {
     public void setPosition(int position){ this.position = position;}
     public void setNote(String note, int position){    this.note[position]=note;  }
     //benson
-    public void setNotification(Boolean check, int position, int whichTime){ this.notification[position][whichTime] = check; }
+    public void setNotification(int whichTime, int position){ this.notification[position] = whichTime; }
     public void setVibrate(Boolean check, int position){ this.vibrate[position] = check; }
     public void setRingtone(Boolean check, int position){ this.ringtone[position] = check; }
 
@@ -73,7 +76,7 @@ public class SharedViewModel extends ViewModel {
     //benson
     public String getNote(int position){    return note[position];  }
     //benson
-    public Boolean getNotification(int position, int whichTime){ return notification[position][whichTime]; }
+    public int getNotification(int position){ return notification[position]; }
     public Boolean getVibrate(int position){ return vibrate[position]; }
     public Boolean getRingtone(int position){ return ringtone[position]; }
 
@@ -91,7 +94,9 @@ public class SharedViewModel extends ViewModel {
 
     public void swap(int start, int end) {
         double temp;
+        int itemp;
         String stemp;
+        Boolean btemp;
 
         temp = latitude[start];
         latitude[start] = latitude[end];
@@ -116,6 +121,18 @@ public class SharedViewModel extends ViewModel {
         stemp = note[start];
         note[start] = note[end];
         note[end] = stemp;
+
+        btemp = ringtone[start];
+        ringtone[start] = ringtone[end];
+        ringtone[end] = btemp;
+
+        btemp = vibrate[start];
+        vibrate[start] = vibrate[end];
+        vibrate[end] = btemp;
+
+        itemp = notification[start];
+        notification[start] = notification[end];
+        notification[end] = itemp;
     }
 
     public void delet(int position) {
@@ -128,14 +145,22 @@ public class SharedViewModel extends ViewModel {
 
     public void clearAll(){
         locationCount = -1;
+
         destinationName = new String[7];
         destinationCapital = new String[7];
         destinationArea = new String[7];
+
         latitude = new double[7];
         longitude = new double[7];
+
         note = new String[7];
+
         nowLantitude = 0;
         nowLontitude = 0;
+
+        vibrate = new Boolean[]{true, true, true, true, true, true, true};
+        ringtone = new Boolean[]{true, true, true, true, true, true, true};
+        notification = new int[]{5, 5, 5, 5, 5, 5, 5};
     }
 
     public int getLocationCount() {
@@ -157,5 +182,15 @@ public class SharedViewModel extends ViewModel {
     public double getLongitude(int position) {
         return longitude[position];
     }
+
+    public boolean hasNotes() {
+        for (int i = 0; i <= locationCount; i++) {
+            if (note[i] != null && !note[i].isEmpty()) {
+                return true;  // 如果找到空的 note就返回 true
+            }
+        }
+        return false;  // 如果所有 note 都空返回 false
+    }
+
 
 }

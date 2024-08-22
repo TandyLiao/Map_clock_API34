@@ -110,9 +110,17 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
             if (position == selectedPosition) {
                 holder.dragHandle.setImageResource(R.drawable.route); // 選擇後的圖標
             } else {
-                holder.dragHandle.setImageResource(R.drawable.note); // 未選擇的圖標
+                String note = sharedViewModel.getNote(position);
+                if (note != null && !note.isEmpty()){
+                    holder.dragHandle.setImageResource(R.drawable.anya062516);
+                }
+
+                else {
+                    holder.dragHandle.setImageResource(R.drawable.note); // 未選擇的圖標}
+                }
             }
-        } else {
+        }
+            else {
             holder.dragHandle.setImageResource(R.drawable.equals_sign); // 拖動時的圖標
         }
 

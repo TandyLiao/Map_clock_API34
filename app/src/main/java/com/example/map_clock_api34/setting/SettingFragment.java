@@ -24,7 +24,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.map_clock_api34.R;
 
-public class SettingFragment extends Fragment {
+public class  SettingFragment extends Fragment {
 
     private androidx.appcompat.widget.Toolbar toolbar;
     private Button interface_Button, remind_Button, language_Button;

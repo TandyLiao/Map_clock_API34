@@ -269,7 +269,6 @@ public class SelectPlace extends Fragment {
 
         Button btnCancel = popupView.findViewById(R.id.btnCancel);
         Button btnNext = popupView.findViewById(R.id.btnNext);
-        Button btnSettings = popupView.findViewById(R.id.btnSettings);
 
         if (!isUnknown) {
             destinationNameTextView.setText(destiantion_Name);
@@ -306,13 +305,6 @@ public class SelectPlace extends Fragment {
             }
         });
 
-        btnSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
         // Create the popup window object
         popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
 
@@ -329,87 +321,6 @@ public class SelectPlace extends Fragment {
         ((ViewGroup) getView()).addView(overlayView);
     }
 
-    /*private void showSettingsPopupWindow() {
-        if (popupWindow != null && popupWindow.isShowing()) {
-            popupWindow.dismiss();
-        }
-
-        // Get layout inflater service
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        // Inflate the popup layout
-        View popupView = inflater.inflate(R.layout.popupwindow_settings, null);
-
-        // Get the views
-        Switch switchRingtone = popupView.findViewById(R.id.switchRingtone);
-        Switch switchVibration = popupView.findViewById(R.id.switchVibration);
-        RadioGroup radioGroupNotificationTime = popupView.findViewById(R.id.radioGroupNotificationTime);
-        RadioButton OneMinute = popupView.findViewById(R.id.radioOneMinute);
-        RadioButton radioThreeMinutes = popupView.findViewById(R.id.radioThreeMinutes);
-        RadioButton radioFiveMinutes = popupView.findViewById(R.id.radioFiveMinutes);
-        Button btnCancel = popupView.findViewById(R.id.PopupCancel);
-        Button btnConfirm = popupView.findViewById(R.id.PopupConfirm);
-
-        // Set the listeners
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closePopupWindow();
-                showPopupWindow(currentDestinationName, currentDestinationLatitude, currentDestinationLongitude);
-            }
-        });
-
-        btnConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle the settings confirmation
-                boolean isRingtoneEnabled = switchRingtone.isChecked();
-                boolean isVibrationEnabled = switchVibration.isChecked();
-                int selectedNotificationTime = 1; // Default to 1 minute
-
-
-                closePopupWindow();
-                showPopupWindow(currentDestinationName, currentDestinationLatitude, currentDestinationLongitude);
-            }
-        });
-        SharedPreferences preferences = getContext().getSharedPreferences("MySettings", Context.MODE_PRIVATE);
-        boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // Default value if not found
-        boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // Default value if not found
-        int notificationTime = preferences.getInt("notification_time",5); // Default value if not found
-
-        // Apply settings to UI components
-        switchRingtone.setChecked(isRingtoneEnabled);
-        switchVibration.setChecked(isVibrationEnabled);
-        // Apply notification time selection
-        switch (notificationTime) {
-            case 1:
-                OneMinute.setChecked(true);
-                break;
-            case 3:
-                radioThreeMinutes.setChecked(true);
-                break;
-            case 5:
-                radioFiveMinutes.setChecked(true);
-                break;
-
-        }
-        // Create the popup window object
-        popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-
-        popupWindow.setFocusable(false);
-        popupWindow.setOutsideTouchable(false);
-
-        // Show the popup window
-        popupWindow.showAtLocation(getView(), Gravity.BOTTOM, 0, 0);
-
-        // Add an overlay view to prevent interaction outside the popup
-        overlayView = new View(getContext());
-        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
-        overlayView.setClickable(true);
-        ((ViewGroup) getView()).addView(overlayView);
-    }
-
-     */
 
 
     private void closePopupWindow() {

@@ -357,6 +357,7 @@ public class BookFragment extends Fragment {
             public void onClick(View v) {
                 removeItem(position);
                 changeNotification();
+                dialog.cancel();
             }
         });
 

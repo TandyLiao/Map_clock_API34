@@ -71,14 +71,11 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         item3.put("data", "天氣");
         arrayList.add(item3);
         HashMap<String, String> item4 = new HashMap<>();
-        item4.put("data", "推薦路線");
+        item4.put("data", "直達公車路線");
         arrayList.add(item4);
         HashMap<String, String> item5 = new HashMap<>();
         item5.put("data", "地點設定");
         arrayList.add(item5);
-        HashMap<String, String> item6 = new HashMap<>();
-        item6.put("data", "哇哭哇哭");
-        arrayList.add(item6);
     }
 
     private void handleImageClick(View view, int position) {
@@ -167,6 +164,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (position == 4) {
+            if (sharedViewModel.getLocationCount() == -1) {
+                Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
             CreatLocation_setting createlocation_setting = new CreatLocation_setting();
             fragmentTransaction.replace(R.id.home_fragment_container, createlocation_setting);
             fragmentTransaction.addToBackStack(null);
@@ -196,14 +197,11 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             case "天氣":
                 holder.horecycleimageView.setImageResource(R.drawable.weather);
                 break;
-            case "推薦路線":
+            case "直達公車路線":
                 holder.horecycleimageView.setImageResource(R.drawable.route_well2);
                 break;
             case "地點設定":
                 holder.horecycleimageView.setImageResource(R.drawable.vibrate);
-                break;
-            case "哇哭哇哭":
-                holder.horecycleimageView.setImageResource(R.drawable.bell);
                 break;
         }
     }

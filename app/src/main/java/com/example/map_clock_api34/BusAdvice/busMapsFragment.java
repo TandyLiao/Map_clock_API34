@@ -3,6 +3,8 @@ package com.example.map_clock_api34.BusAdvice;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -12,7 +14,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,6 +21,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -86,12 +88,24 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             if (lastLocation != null) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
             } else {
-                Toast.makeText(getContext(), "无法取得当前位置信息，请查看您的GPS设备", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "無法取得目前位置訊息，請查看您的GPS設備", Toast.LENGTH_LONG).show();
             }
+
+            LatLng latlon = new LatLng(sharedViewModel.getLatitude(0), sharedViewModel.getLongitude(0));
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_destination_marker, sharedViewModel.getDestinationName(0), true);
+
+            Marker destination = mMap.addMarker(new MarkerOptions()
+                    .position(latlon)
+                    .title(sharedViewModel.getDestinationName(0))
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarker))
+                    .alpha(1.0f));
 
             // 设置标记点击事件
             mMap.setOnMarkerClickListener(marker -> {
-                if (nearbyMarkers.contains(marker)) {
+                if(marker.equals(destination)) {
+                    Toast.makeText(getActivity(), "這是你的目的地", Toast.LENGTH_SHORT).show();
+                }
+                else if (nearbyMarkers.contains(marker)) {
                     String stopName = marker.getTitle();
                     LatLng position = marker.getPosition();
                     // 查找能搭乘的公车路线
@@ -103,6 +117,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
                 return true;
             });
+
         }
     };
 
@@ -162,20 +177,57 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         }
 
         for (BusStationFinderHelper.BusStation station : busStops) {
-            if(station.getRoutes() == null)  continue;
+            Map<String, Map<BusStationFinderHelper.BusStation.LatLng, String>> routes = station.getRoutes();
 
-            Log.d("Bus",station.toString());
+            // 過濾掉沒有目的地站牌的站點
+            boolean hasDestination = false;
+            if (routes != null) {
+                for (Map<BusStationFinderHelper.BusStation.LatLng, String> destinationMap : routes.values()) {
+                    if (!destinationMap.isEmpty()) {
+                        hasDestination = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasDestination) {
+                continue; // 跳過沒有目的地站牌的站點
+            }
+
+            Log.d("Bus", station.toString());
             LatLng position = new LatLng(station.getStopLat(), station.getStopLon());
 
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_marker, station.getStopName(), false);
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title(station.getStopName())
-                    .icon(BitmapDescriptorFactory.defaultMarker(color))
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarker))
                     .alpha(1.0f));
             markerSet.add(marker);
         }
+        if(nearbyMarkers.isEmpty()){
+            notification.setText("附近沒有可用直達車");
+        }
     }
+    private Bitmap createCustomMarker(Context context, @DrawableRes int resource, String title, Boolean isDestination) {
+        View markerView = LayoutInflater.from(context).inflate(R.layout.bus_custom_marker, null);
 
+        ImageView markerImage = markerView.findViewById(R.id.marker_image);
+        markerImage.setImageResource(resource);
+
+        TextView markerText = markerView.findViewById(R.id.marker_text);
+        markerText.setText(title);
+        if(isDestination)   markerText.setBackgroundResource(R.drawable.btn_unclickable);
+
+        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        markerView.draw(canvas);
+
+        return bitmap;
+    }
     private void findBusRoutesForStop(String stopName, double lat, double lon) {
         if (stopName == null || stopName.isEmpty()) {
             return;
@@ -211,13 +263,6 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             if (!entry.getValue().isEmpty()) {
                 routeNames.add(entry.getKey());
             }
-        }
-
-        // 確認數據完整性
-        if (routeNames.isEmpty()) {
-            Log.e("BusStationFinderHelper", "No routes available for stop: " + station.getStopName());
-            Toast.makeText(getContext(), "沒有可用的路線", Toast.LENGTH_SHORT).show();
-            return;
         }
 
         // 获取每条路线的到站时间信息
@@ -271,10 +316,11 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         for (Map.Entry<BusStationFinderHelper.BusStation.LatLng, String> entry : destinations.entrySet()) {
             Log.d("highlightRouteDestinations", "Destination stop: " + entry.getValue() + " at " + entry.getKey().getLat() + ", " + entry.getKey().getLon());
             LatLng position = new LatLng(entry.getKey().getLat(), entry.getKey().getLon());
+            Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_destination_near_marker, entry.getValue().toString(), false);
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title(entry.getValue())  // 直接顯示目的地站牌名稱
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarker))
                     .alpha(1.0f));
             destinationMarkers.add(marker);
             boundsBuilder.include(position);
@@ -359,7 +405,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onToastShown(String message) {
         // 更新 TextView 的文本
         if (notification != null && message.equals("路線已更新")) {
-            notification.setText("請選擇下列地標");
+            notification.setText("請選擇下列紅色地標");
         }else{
             notification.setText("發生錯誤，請關閉再開");
         }
