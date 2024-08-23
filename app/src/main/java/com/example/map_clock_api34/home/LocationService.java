@@ -84,7 +84,7 @@ public class LocationService extends Service {
 
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.putExtra("show_start_mapping", true); // 添加额外信息
+        notificationIntent.putExtra("show_start_mapping", true); // 添加訊息
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -212,17 +212,19 @@ public class LocationService extends Service {
 
         if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
             sendNotification("快到了!");
-            resetNotificationSent(); // 重置通知状态
+            resetNotificationSent();
+
         }
         if (last_distance < 0.01 && time < 3) {
             destinationIndex++;
         }
 
-        if (destinationIndex < latitude.length && destinationIndex < longitude.length && destinationIndex < destinationName.length) {
+        if ( destinationIndex < destinationName.length) {
             startLocation = nowLocation;
             Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
         } else {
             Log.d("LocationService", "All destinations reached, stopping service");
+            sendNotification("到達最後一個目的地"); // 發送到達最後一個目的地的通知
             stopSelf();
         }
     }
@@ -237,10 +239,18 @@ public class LocationService extends Service {
 
         try {
             Intent intent = new Intent(context, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.putExtra("show_start_mapping", true);
-
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            if (message.equals("到達最後一個目的地")) {
+                intent.putExtra("show_end_map", true);
+            } else {
+                intent.putExtra("show_start_mapping", true);
+            }
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
 
             SharedPreferences preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
             boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false);
@@ -316,7 +326,7 @@ public class LocationService extends Service {
     private void stopVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && isVibrating) {
-            vibrator.cancel(); // 取消震动
+            vibrator.cancel();
             isVibrating = false; // 更新震动状态
         }
     }

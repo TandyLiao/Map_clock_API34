@@ -29,6 +29,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -218,12 +219,24 @@ public class CreateLocation extends Fragment {
 
     //打開導航頁面
     private void openStartMappingFragment() {
-        StartMapping StartMapping = new StartMapping();
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.home_fragment_container, StartMapping);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        StartMapping startMappingFragment = (StartMapping) fragmentManager.findFragmentByTag("StartMapping");
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        if (startMappingFragment == null) {
+            // 如果 fragment 為 null，則創建一個新的並添加
+            startMappingFragment = new StartMapping();
+            transaction.add(R.id.home_fragment_container, startMappingFragment, "StartMapping");
+        } else {
+            // 如果 fragment 已經存在，則顯示它
+            transaction.show(startMappingFragment);
+        }
+
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
 
     //初始化漢堡選單
     private void setupNavigationDrawer() {

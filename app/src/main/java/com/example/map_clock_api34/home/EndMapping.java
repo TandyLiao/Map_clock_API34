@@ -43,7 +43,7 @@ public class EndMapping extends Fragment {
             // 切换回 CreateLocation Fragment
             CreateLocation createFragment = new CreateLocation();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, createFragment);
+            transaction.replace(R.id.home_fragment_container, createFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });

@@ -69,6 +69,7 @@ public class StartMapping extends Fragment {
     private String commandstr = LocationManager.GPS_PROVIDER;
     Location lastLocation;
     private GoogleMap mMap;
+
     TextView txtTime;
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
@@ -84,10 +85,10 @@ public class StartMapping extends Fragment {
     @SuppressLint("MissingPermission")
     @Nullable
     @Override
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         rootView = inflater.inflate(R.layout.home_start_mapping, container, false);
 
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -101,25 +102,34 @@ public class StartMapping extends Fragment {
 
         setupButton();
 
-        resetNotificationSent();//設定組新增
+        // 恢复状态
+        if (savedInstanceState != null) {
+            notificationSent = savedInstanceState.getBoolean("notificationSent", false);
+            latitude = savedInstanceState.getDoubleArray("latitude");
+            longitude = savedInstanceState.getDoubleArray("longitude");
+            destinationName = savedInstanceState.getStringArray("destinationName");
+            // 恢复其他状态信息
+        }
+            // 处理初始化逻辑
+            for (j = 0; j <= sharedViewModel.getLatitude(j); j++) {
+                destinationName[j] = sharedViewModel.getDestinationName(j);
+                latitude[j] = sharedViewModel.getLatitude(j);
+                longitude[j] = sharedViewModel.getLongitude(j);
+            }
+
+
+        createNotificationChannel();
+        checkAndRequestPermissions();
 
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
 
-        for (j = 0; j <= sharedViewModel.getLatitude(j); j++) {
-            destinationName[j] = sharedViewModel.getDestinationName(j);
-            latitude[j] = sharedViewModel.getLatitude(j);
-            longitude[j] = sharedViewModel.getLongitude(j);
-        }
-
-        createNotificationChannel();//這行設定組新增
-        checkAndRequestPermissions();//這行設定組新增
-
         loadSettings();
 
         return rootView;
     }
+
     private void loadSettings() {
         SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
         boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
@@ -147,7 +157,6 @@ public class StartMapping extends Fragment {
         @SuppressLint("MissingPermission")
         public void onMapReady(GoogleMap googleMap) {
             mMap=googleMap;
-
             //一直更新目前位置
             locationManager.requestLocationUpdates(commandstr,10000,0,locationListener);
 
@@ -243,7 +252,11 @@ public class StartMapping extends Fragment {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
             Activity activity = getActivity();
-            if (activity != null && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (activity == null) {
+                Log.e("StartMapping", "Activity is null");
+                return;
+            }
+            if ( ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
                 int notificationTime = preferences.getInt("notification_time", 5);
 
@@ -391,23 +404,7 @@ public class StartMapping extends Fragment {
     public void resetNotificationSent() {
         notificationSent = false;
     }
-    @Override
-    public void onPause() {
-        super.onPause();
-        // 停止位置更新
-        if (locationManager != null) {
-            locationManager.removeUpdates(locationListener);
-        }
-        // 可以添加更多需要暂停的操作
-        // ...
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // 重新启动位置更新
-
-    }
     private void startVibrate() {
         Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
@@ -439,5 +436,52 @@ public class StartMapping extends Fragment {
         String uriString = preferences.getString("ringtone_uri", null);
         return uriString != null ? Uri.parse(uriString) : null;
     }
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // 保存已发送通知的状态
+        outState.putBoolean("notificationSent", notificationSent);
+
+        // 保存目的地的經緯度數據和名稱
+        outState.putDoubleArray("latitude", latitude);
+        outState.putDoubleArray("longitude", longitude);
+        outState.putStringArray("destinationName", destinationName);
+
+        // 保存 LatLngBounds 對象
+        if (bounds != null) {
+            outState.putParcelable("latLngBounds", bounds);
+        }
+
+        // 保存最後已知的定位位置
+        if (lastLocation != null) {
+            outState.putParcelable("lastLocation", lastLocation);
+        }
+
+        // 保存初始的定位位置
+        if (startLocation != null) {
+            outState.putParcelable("startLocation", startLocation);
+        }
+
+        // 保存目的地 LatLng 位置
+        if (destiantion_LatLng != null) {
+            outState.putParcelable("destiantion_LatLng", destiantion_LatLng);
+        }
+
+        // 保存當前顯示的目的地索引
+        outState.putInt("currentDestinationIndex", i);
+
+        // 保存顯示的文本（如时间、距离等）
+        outState.putString("txtTimeText", txtTime.getText().toString());
+
+        // 保存命令字符串的状态
+        if (commandstr != null) {
+            outState.putString("commandstr", commandstr);
+        }
+
+        // 保存地圖狀態（例如是否啟用定位點）
+        outState.putBoolean("isMyLocationEnabled", mMap.isMyLocationEnabled());
+    }
+
 }
 
