@@ -524,7 +524,12 @@ public class BusStationFinderHelper {
             }
         });
     }
-
+    public void stopSearching() {
+        // 取消所有正在进行的网络请求
+        client.dispatcher().cancelAll();
+        // 停止定期更新
+        stopUpdating();
+    }
     public void stopUpdating() {
         updateHandler.removeCallbacks(updateRunnable);
     }
