@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -50,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class CreateLocation extends Fragment {
@@ -68,6 +70,9 @@ public class CreateLocation extends Fragment {
     private DrawerLayout drawerLayout;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 100;
+    private static final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 101;
+
     View rootView;
     View overlayView;
     RecyclerView recyclerViewRoute;
@@ -113,15 +118,7 @@ public class CreateLocation extends Fragment {
         //新增地點按鈕初始化
         Button btnAddItem = rootView.findViewById(R.id.btn_addItem);
         btnAddItem.setOnClickListener(v -> {
-            //如果他沒同意定位需求則跳else叫他打開
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                if (sharedViewModel.getLocationCount() < 6) {
-                    openSelectPlaceFragment();
-                }
-            } else {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
-            }
+            checkAndRequestPermissions();
         });
         //重置按鈕初始化
         btnReset = rootView.findViewById(R.id.btn_reset);
@@ -142,6 +139,65 @@ public class CreateLocation extends Fragment {
             }
         });
     }
+
+    //檢查權限請求
+    private void checkAndRequestPermissions() {
+        List<String> permissionsNeeded = new ArrayList<>();
+
+        // 檢查定位權限
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        // 檢查通知權限（僅在Android 13及以上版本需要）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
+        // 如果有需要請求的權限，則進行請求
+        if (!permissionsNeeded.isEmpty()) {
+            requestPermissions(permissionsNeeded.toArray(new String[0]), MULTIPLE_PERMISSIONS_REQUEST_CODE);
+        } else {
+            if (sharedViewModel.getLocationCount() < 6) {openSelectPlaceFragment();}
+
+        }
+    }
+    //請求權限
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == MULTIPLE_PERMISSIONS_REQUEST_CODE) {
+            boolean locationPermissionGranted = false;
+            boolean notificationsPermissionGranted = false;
+
+            // 檢查每個權限的結果
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    locationPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                } else if (permissions[i].equals(Manifest.permission.POST_NOTIFICATIONS)) {
+                    notificationsPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                }
+            }
+
+            if (locationPermissionGranted && notificationsPermissionGranted) {
+                // 兩個權限都被授予，這裡可以開始與定位和通知相關的操作
+                if (sharedViewModel.getLocationCount() < 6) {openSelectPlaceFragment();}
+
+            } else {
+                // 其中一個或兩個權限被拒絕，這裡可以顯示相關提示或執行其他操作
+                if (!locationPermissionGranted) {
+                    Toast.makeText(getActivity(), "需要定位權限才能正常運行", Toast.LENGTH_SHORT).show();
+                }
+                if (!notificationsPermissionGranted) {
+                    Toast.makeText(getActivity(), "需要通知權限才能正常運行", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
 
     private void saveInHistoryDB() {
         try {
@@ -212,7 +268,7 @@ public class CreateLocation extends Fragment {
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.home_fragment_container, mapFragment);
+        transaction.replace(R.id.fl_container, mapFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -227,7 +283,7 @@ public class CreateLocation extends Fragment {
         if (startMappingFragment == null) {
             // 如果 fragment 為 null，則創建一個新的並添加
             startMappingFragment = new StartMapping();
-            transaction.add(R.id.home_fragment_container, startMappingFragment, "StartMapping");
+            transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
         } else {
             // 如果 fragment 已經存在，則顯示它
             transaction.show(startMappingFragment);

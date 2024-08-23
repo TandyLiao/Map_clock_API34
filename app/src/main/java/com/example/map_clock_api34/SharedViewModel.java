@@ -25,8 +25,8 @@ public class SharedViewModel extends ViewModel {
 
     //震動鈴聲
     // 震動鈴聲預設為 false
-    private Boolean[] vibrate = {true, true, true, true, true, true, true};
-    private Boolean[] ringtone = {true, true, true, true, true, true, true};
+    private boolean[] vibrate = {true, true, true, true, true, true, true};
+    private boolean[] ringtone = {true, true, true, true, true, true, true};
 
     // 提醒時間預設為 5
     private int[] notification = {5, 5, 5, 5, 5, 5, 5};
@@ -158,8 +158,8 @@ public class SharedViewModel extends ViewModel {
         nowLantitude = 0;
         nowLontitude = 0;
 
-        vibrate = new Boolean[]{true, true, true, true, true, true, true};
-        ringtone = new Boolean[]{true, true, true, true, true, true, true};
+        vibrate = new boolean[]{true, true, true, true, true, true, true};
+        ringtone = new boolean[]{true, true, true, true, true, true, true};
         notification = new int[]{5, 5, 5, 5, 5, 5, 5};
     }
 

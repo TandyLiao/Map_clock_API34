@@ -27,7 +27,7 @@ public class HomeFragment extends Fragment {
         //此頁面是用來做Fragment轉換用的，同一個Activity切換不同Fragment的意思
         CreateLocation createFragment = new CreateLocation();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.home_fragment_container, createFragment);
+        transaction.replace(R.id.fl_container, createFragment);
         transaction.addToBackStack(null);
         transaction.commit();
 

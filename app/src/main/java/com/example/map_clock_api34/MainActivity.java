@@ -134,12 +134,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-
-
-
-
-
     @Override
     public void onBackPressed() {
         // 鎖定返回鍵，現在所有頁面按返回都不會有反應
@@ -182,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         if (startMappingFragment == null) {
             // 如果 StartMapping 片段不存在，创建一个新的
             startMappingFragment = new StartMapping();
-            transaction.add(R.id.home_fragment_container, startMappingFragment, "StartMapping");
+            transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
             Log.d("MainActivity", "Adding new StartMapping fragment");
         } else {
             // 如果 StartMapping 片段已经存在，显示它

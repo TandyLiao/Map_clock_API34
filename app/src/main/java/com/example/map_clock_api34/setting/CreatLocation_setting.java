@@ -156,7 +156,7 @@ public class CreatLocation_setting extends Fragment {
             public void onClick(View v) {
                 CreateLocation createFragment = new CreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.home_fragment_container, createFragment);
+                transaction.replace(R.id.fl_container, createFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }

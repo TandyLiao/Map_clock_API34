@@ -3,26 +3,22 @@ package com.example.map_clock_api34.home;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,12 +27,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import android.content.Context;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,50 +39,50 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 //設定組新增
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Build;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
+
 import androidx.core.content.ContextCompat;
-import androidx.preference.PreferenceManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import java.util.Arrays;
 
 public class StartMapping extends Fragment {
 
     private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
-    private static final int NOTIFICATION_PERMISSION_CODE = 1;//設定組新增
     private boolean notificationSent = false; // 新增的变量(by設定組)
     private Ringtone mRingtone;
 
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
-    Location lastLocation;
+    Location userLocation;
+
     private GoogleMap mMap;
 
-    TextView txtTime;
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
-    int j, i = 0;
-    double pre_distance, last_distance, speed, time, totalTime = 0;
-    Location startLocation;
+    private String[] note = new String[7];
+    private boolean[] vibrate = new boolean[7];
+    private boolean[] ringtone = new boolean[7];
+    private int[] notification = new int[7];
+
+    int numberOfPlace = 0;
+
     LatLngBounds.Builder builder;
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
+
+    TextView txtTime;
     View rootView;
+    View overlayView;
 
     @SuppressLint("MissingPermission")
     @Nullable
     @Override
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         rootView = inflater.inflate(R.layout.home_start_mapping, container, false);
 
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -98,58 +92,28 @@ public class StartMapping extends Fragment {
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
-        txtTime = rootView.findViewById(R.id.txtTime);
-
-        setupButton();
-
-        // 恢复状态
-        if (savedInstanceState != null) {
-            notificationSent = savedInstanceState.getBoolean("notificationSent", false);
-            latitude = savedInstanceState.getDoubleArray("latitude");
-            longitude = savedInstanceState.getDoubleArray("longitude");
-            destinationName = savedInstanceState.getStringArray("destinationName");
-            // 恢复其他状态信息
-        }
-            // 处理初始化逻辑
-            for (j = 0; j <= sharedViewModel.getLatitude(j); j++) {
-                destinationName[j] = sharedViewModel.getDestinationName(j);
-                latitude[j] = sharedViewModel.getLatitude(j);
-                longitude[j] = sharedViewModel.getLongitude(j);
-            }
-
-
-        createNotificationChannel();
-        checkAndRequestPermissions();
-
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
 
-        loadSettings();
+        //把ShareViewModel的資料抓近來，稍後送進背景執行
+        for (int i = 0; i <= sharedViewModel.getLatitude(i); i++) {
+            destinationName[i] = sharedViewModel.getDestinationName(i);
+            latitude[i] = sharedViewModel.getLatitude(i);
+            longitude[i] = sharedViewModel.getLongitude(i);
+            notification[i] = sharedViewModel.getNotification(i);
+            vibrate[i] = sharedViewModel.getVibrate(i);
+            ringtone[i] = sharedViewModel.getRingtone(i);
+            note[i] = sharedViewModel.getNote(i);
+        }
+
+        txtTime = rootView.findViewById(R.id.txtTime);
+
+        setupButton();
+        //開始背景執行
+        startLocationUpdates();
 
         return rootView;
-    }
-
-    private void loadSettings() {
-        SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
-        boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
-        boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
-        int notificationTime = preferences.getInt("notification_time", 5); // 默认值 1
-        Log.d("Settings", "Ringtone Enabled: " + isRingtoneEnabled);
-        Log.d("Settings", "Vibration Enabled: " + isVibrationEnabled);
-        Log.d("Settings", "Notification Time: " + notificationTime);
-        // 这里可以根据需要应用这些设置值
-        // 例如，更新 UI 或者应用其他逻辑
-    }
-    private void setupButton() {
-        Button btnBack = rootView.findViewById(R.id.routeCancel);
-        btnBack.setOnClickListener(v -> {
-            EndMapping enfFragment = new EndMapping();
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.home_fragment_container, enfFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        });
     }
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -157,331 +121,140 @@ public class StartMapping extends Fragment {
         @SuppressLint("MissingPermission")
         public void onMapReady(GoogleMap googleMap) {
             mMap=googleMap;
-            //一直更新目前位置
-            locationManager.requestLocationUpdates(commandstr,10000,0,locationListener);
 
-            //取得最後的定位位置
-            lastLocation = locationManager.getLastKnownLocation(commandstr);
-
-            builder = new LatLngBounds.Builder();
-
-            // 添加起點和目的地的位置
-            builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-            startLocation = locationManager.getLastKnownLocation(commandstr);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startLocation.getLatitude(),startLocation.getLongitude()),15));
-
+            //取得用戶的定位
+            userLocation = locationManager.getLastKnownLocation(commandstr);
             //跑出藍色定位點
             mMap.setMyLocationEnabled(true);
 
-            destiantion_LatLng= new LatLng(latitude[i],longitude[i]);
-            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[i]));
-            builder.include(new LatLng(latitude[i], longitude[i]));
+            builder = new LatLngBounds.Builder();
+            // 添加起點和目的地的位置
+            builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
 
-            // 構建LatLngBounds對象
+            destiantion_LatLng= new LatLng(latitude[numberOfPlace],longitude[numberOfPlace]);
+            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[numberOfPlace]));
+
+            builder.include(new LatLng(latitude[numberOfPlace], longitude[numberOfPlace]));
             bounds = builder.build();
-
             // 計算將這個邊界框移動到地圖中心所需的偏移量
             int padding = 300; // 偏移量（以像素為單位）
-            // 移动地图视图到最后已知的位置
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
 
-
-            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0],startLocation.getLatitude(),startLocation.getLongitude())/1000;
-            time = Math.round(trip_distance/4*60);
-            txtTime.setText("目的:"+destinationName[0]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
-
+            //第一次粗略估算到達目的地所需時間
+            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0], userLocation.getLatitude(), userLocation.getLongitude())/1000;
+            double time = Math.round(trip_distance/4*60);
+            txtTime.setText("目的:"+destinationName[0]+"\n公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
         }
     };
 
-    //新增手機通知的渠道
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Destination Alert Channel";
-            String description = "Channel for destination alerts";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-
-            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }//設定組新增此方法
-
-    private void sendNotification(String message) {
-        if (!NotificationManagerCompat.from(getActivity()).areNotificationsEnabled()) {
-            Toast.makeText(getActivity(), "未啟用通知權限", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try {
-            Intent intent = new Intent(getActivity(), getActivity().getClass());
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-
-            SharedPreferences preferences = getActivity().getSharedPreferences("settings", Context.MODE_PRIVATE);
-            boolean isRingtoneEnabled = preferences.getBoolean("ringtone_enabled", false); // 默认值 false
-            boolean isVibrationEnabled = preferences.getBoolean("vibration_enabled", false); // 默认值 false
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setContentTitle("地圖鬧鐘")
-                    .setContentText(message)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-            if (isRingtoneEnabled) {
-                playRingtone();
-
-            }
-            if (isVibrationEnabled) {
-                startVibrate();
-            }
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
-            notificationManager.notify(0, builder.build());
-            notificationSent = true; // 设置标记为 true
-
-        } catch (SecurityException e) {
-            Toast.makeText(getActivity(), "無法發送通知，請求被拒絕", Toast.LENGTH_SHORT).show();
-        }
-    }//設定組新增此方法
-
-    public LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(@NonNull Location nowLocation) {
-            Activity activity = getActivity();
-            if (activity == null) {
-                Log.e("StartMapping", "Activity is null");
-                return;
-            }
-            if ( ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                SharedPreferences preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
-                int notificationTime = preferences.getInt("notification_time", 5);
-
-                totalTime += 10;
-                pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-                last_distance = Distance.getDistanceBetweenPointsNew(latitude[i], longitude[i], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-
-                if (pre_distance > 0.020) {
-                    speed = pre_distance / (totalTime / 60 / 60);
-                    time = Math.round(last_distance / speed * 60);
-                    txtTime.setText("目的地:" + destinationName[i] + "\nSpeed:" + speed + "\nPre_Km: " + pre_distance + "\n剩公里為: " + last_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
-                } else {
-                    totalTime -= 10;
-                }
-
-                if (last_distance < 0.05 && time < 3) {
-                    initPopWindow();
-                }
-
-                if ((last_distance < 0.5 && time < notificationTime) && !notificationSent) {
-                    sendNotification("快到了!");
-                    resetNotificationSent();
-                }
-            } else {
-                Log.e("StartMapping", "Activity is null or permission not granted");
-            }
-        }
-    };
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
-            if (grantResults.length > 0) {
-                boolean locationPermissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                boolean notificationsPermissionGranted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-
-                if (locationPermissionGranted && notificationsPermissionGranted) {
-                    startLocationUpdates();
-                } else {
-                    Toast.makeText(getActivity(), "需要定位和通知權限才可以喔!", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }//此方法設定組加
-
-
-    private void initPopWindow(){
+    private void ShowPopupWindow(int destinationIndex) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        TextView txt = view.findViewById(R.id.txtNote);
-
-        startLocation.setLatitude(latitude[i]);
-        startLocation.setLongitude(longitude[i]);
-        i++;
-        if(i < j){
-            txt.setText("你到目的地囉\n記得做事...\n下個地點嗎?");
-        }else{
-            txt.setText("你到目的地囉\n記得做事...\n沒地點了");
-        }
         popupWindow.setWidth(700);
-
-        popupWindow.setFocusable(true);
+        popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
-        popupWindow.setTouchable(true);
+        //讓PopupWindow顯示出來的關鍵句
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
-        popupWindow.showAtLocation(rootView, Gravity.CENTER,0,0);
+        //疊加View在底下，讓她不會按到底層就跳掉
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setClickable(true);
+        ((ViewGroup) rootView).addView(overlayView);
+
+        TextView title = view.findViewById(R.id.txtNote);
+        title.setText("目的地-"+destinationName[destinationIndex]+"-即將抵達");
 
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
-        BTNPopup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
+        BTNPopup.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            //移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
         });
-
-        Button btnSure = view.findViewById(R.id.Popupsure);
-        btnSure.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(i < j){
-                    mMap.clear();
-                    builder = new LatLngBounds.Builder();
-
-                    // 添加起點和目的地的位置
-                    builder.include(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-                    destiantion_LatLng= new LatLng(latitude[i],longitude[i]);
-                    mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[i]));
-                    builder.include(new LatLng(latitude[i], longitude[i]));
-
-                    // 構建LatLngBounds對象
-                    bounds = builder.build();
-                    // 計算將這個邊界框移動到地圖中心所需的偏移量
-                    int padding = 100; // 偏移量（以像素為單位）
-                    // 移动地图视图到最后已知的位置
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
-
-                    double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[i],longitude[i],startLocation.getLatitude(),startLocation.getLongitude())/1000;
-                    time = Math.round(trip_distance/4*60);
-                    txtTime.setText("目的:"+destinationName[i]+"\n公里為: "+trip_distance+" 公里"+"\n預估時間為: "+time+" 分鐘");
-
-                    // 在這裡重新啟動位置更新
-                    startLocationUpdates();
-                }else{
-                    EndMapping createFragment = new EndMapping();
-                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fl_container, createFragment);
-                    transaction.addToBackStack(null);
-                    transaction.commit();
-                    //getActivity().getSupportFragmentManager().popBackStack();
-                }
-                popupWindow.dismiss();
-            }
+        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+        btnsure.setOnClickListener(v -> {
+            int desNumber=destinationIndex+1;
+            sendBroadcastWithDestinationIndex(desNumber);
+            //移除疊加在底下防止點擊其他區域的View
+            removeOverlayView();
+            popupWindow.dismiss();
         });
-
+    }
+    //把疊加在底層的View刪掉
+    private void removeOverlayView() {
+        if (overlayView != null && overlayView.getParent() != null) {
+            ((ViewGroup) overlayView.getParent()).removeView(overlayView);
+            overlayView = null;
+        }
     }
 
-    private void checkAndRequestPermissions() {
-        if(getActivity() != null){
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+    private void setupButton() {
+        Button btnBack = rootView.findViewById(R.id.routeCancel);
+        btnBack.setOnClickListener(v -> {
+            EndMapping enfFragment = new EndMapping();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, enfFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+    }
 
-                ActivityCompat.requestPermissions(getActivity(), new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.POST_NOTIFICATIONS
-                }, NOTIFICATION_PERMISSION_CODE);
-            } else {
-                startLocationUpdates();
-            }
-        }else{
-
-        }
-
-    }//這方法設定組新增
-
+    //背景執行
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         Intent serviceIntent = new Intent(getActivity(), LocationService.class);
         serviceIntent.putExtra("latitude", latitude);
         serviceIntent.putExtra("longitude", longitude);
         serviceIntent.putExtra("destinationName", destinationName);
-        ContextCompat.startForegroundService(getActivity(), serviceIntent); }//這方法設定組新增
+        serviceIntent.putExtra("notification", notification);
+        serviceIntent.putExtra("vibrate", vibrate);
+        serviceIntent.putExtra("ringtone",ringtone);
+        serviceIntent.putExtra("note", note);
+        ContextCompat.startForegroundService(getActivity(), serviceIntent);
+        Log.d("StartMapping", "Vibrate before sending: " + Arrays.toString(vibrate));
+        Log.d("StartMapping", "Ringtone before sending: " + Arrays.toString(ringtone));
 
-    public void resetNotificationSent() {
-        notificationSent = false;
+
     }
 
-    private void startVibrate() {
-        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
-        if (vibrator != null && vibrator.hasVibrator()) {
-            vibrator.vibrate(1000);
-        }
+    //停止背景執行的方法
+    private void stopLocationUpdates() {
+        Intent serviceIntent = new Intent(getActivity(), LocationService.class);
+        getActivity().stopService(serviceIntent);
     }
-    private void playRingtone() {
-        Uri ringtoneUri = loadRingtoneUri();
-        if (ringtoneUri != null) {
-            mRingtone = RingtoneManager.getRingtone(requireContext(), ringtoneUri);
-            if (mRingtone != null) {
-                mRingtone.play();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        stopRingtone();
-                    }
-                }, 3000);
-            }
+    //收LocationService傳的資料
+    private BroadcastReceiver destinationUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int destinationIndex = intent.getIntExtra("destinationIndex", 0);
+            ShowPopupWindow(destinationIndex); // 显示 PopupWindow 并传递当前的 destinationIndex
         }
+    };
+    //送資料給LocationService
+    private void sendBroadcastWithDestinationIndex(int destinationIndex) {
+        Intent intent = new Intent("DESTINATION_UPDATE");
+        intent.putExtra("destinationIndex", destinationIndex);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
-    private void stopRingtone() {
-        if (mRingtone != null && mRingtone.isPlaying()) {
-            mRingtone.stop();
-        }
-    }
-    private Uri loadRingtoneUri() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        String uriString = preferences.getString("ringtone_uri", null);
-        return uriString != null ? Uri.parse(uriString) : null;
+    //切換Fragment才會觸發
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopLocationUpdates();
     }
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        // 保存已发送通知的状态
-        outState.putBoolean("notificationSent", notificationSent);
-
-        // 保存目的地的經緯度數據和名稱
-        outState.putDoubleArray("latitude", latitude);
-        outState.putDoubleArray("longitude", longitude);
-        outState.putStringArray("destinationName", destinationName);
-
-        // 保存 LatLngBounds 對象
-        if (bounds != null) {
-            outState.putParcelable("latLngBounds", bounds);
-        }
-
-        // 保存最後已知的定位位置
-        if (lastLocation != null) {
-            outState.putParcelable("lastLocation", lastLocation);
-        }
-
-        // 保存初始的定位位置
-        if (startLocation != null) {
-            outState.putParcelable("startLocation", startLocation);
-        }
-
-        // 保存目的地 LatLng 位置
-        if (destiantion_LatLng != null) {
-            outState.putParcelable("destiantion_LatLng", destiantion_LatLng);
-        }
-
-        // 保存當前顯示的目的地索引
-        outState.putInt("currentDestinationIndex", i);
-
-        // 保存顯示的文本（如时间、距离等）
-        outState.putString("txtTimeText", txtTime.getText().toString());
-
-        // 保存命令字符串的状态
-        if (commandstr != null) {
-            outState.putString("commandstr", commandstr);
-        }
-
-        // 保存地圖狀態（例如是否啟用定位點）
-        outState.putBoolean("isMyLocationEnabled", mMap.isMyLocationEnabled());
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(destinationUpdateReceiver,
+                new IntentFilter("DESTINATION_UPDATE"));
     }
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(destinationUpdateReceiver);
+    }
 }
 

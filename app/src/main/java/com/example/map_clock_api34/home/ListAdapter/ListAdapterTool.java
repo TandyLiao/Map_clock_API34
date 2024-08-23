@@ -151,7 +151,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 return;
             }
             WheatherFragment wheatherFragment = new WheatherFragment();
-            fragmentTransaction.replace(R.id.home_fragment_container, wheatherFragment);
+            fragmentTransaction.replace(R.id.fl_container, wheatherFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (position == 3) {
@@ -160,7 +160,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 return;
             }
             busMapsFragment busFragment = new busMapsFragment();
-            fragmentTransaction.replace(R.id.home_fragment_container, busFragment);
+            fragmentTransaction.replace(R.id.fl_container, busFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (position == 4) {
@@ -169,7 +169,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 return;
             }
             CreatLocation_setting createlocation_setting = new CreatLocation_setting();
-            fragmentTransaction.replace(R.id.home_fragment_container, createlocation_setting);
+            fragmentTransaction.replace(R.id.fl_container, createlocation_setting);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
 

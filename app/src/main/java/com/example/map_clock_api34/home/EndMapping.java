@@ -41,11 +41,8 @@ public class EndMapping extends Fragment {
             sharedViewModel.clearAll();
 
             // 切换回 CreateLocation Fragment
-            CreateLocation createFragment = new CreateLocation();
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.home_fragment_container, createFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+            getActivity().getSupportFragmentManager().popBackStack();
+            getActivity().getSupportFragmentManager().popBackStack();
         });
     }
 }
