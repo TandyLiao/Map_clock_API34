@@ -3,13 +3,16 @@ package com.example.map_clock_api34;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);//漢堡選單icon部會因深色模式改色
+
 
         drawerLayout = findViewById(R.id.drawerLayout);
         navigation_view = findViewById(R.id.navigation_view);
@@ -55,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+
+        updateMenuIcons();
 
         // 檢查 Intent 是否包含 "show_start_mapping"或 "show_end_map" 的額外信息
         Intent intent = getIntent();
@@ -142,9 +149,46 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        invalidateOptionsMenu();
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);  // 替換成你的菜單資源 ID
 
+        // 在這裡設置圖標顏色
+        MenuItem menuItem1 = menu.findItem(R.id.action_home);
+        menuItem1.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
+        MenuItem menuItem2 = menu.findItem(R.id.action_book);
+        menuItem2.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
+        MenuItem menuItem3 = menu.findItem(R.id.action_history);
+        menuItem3.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
+        MenuItem menuItem4 = menu.findItem(R.id.action_setting);
+        menuItem4.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
+
+        menuItem1.setVisible(false);
+        menuItem2.setVisible(false);
+        menuItem3.setVisible(false);
+        menuItem4.setVisible(false);
+
+        return true;
+    }
+    private void updateMenuIcons() {
+        // 确保菜单已经创建后再更新图标颜色
+        if (toolbar != null) {
+            toolbar.post(new Runnable() {
+                @Override
+                public void run() {
+                    invalidateOptionsMenu(); // 触发菜单更新
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        updateMenuIcons(); // 确保在创建后设置图标颜色
+    }
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);

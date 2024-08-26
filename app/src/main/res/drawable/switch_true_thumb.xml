@@ -6,8 +6,8 @@
     <corners android:radius="20dp"/>
 
     <gradient
-        android:endColor="#eeeeee"
-        android:startColor="#eeeeee" />
+        android:endColor="@color/darkgreen"
+        android:startColor="@color/darkgreen" />
 
     <stroke android:width="0dp"
         android:color="#eeeeee"/>

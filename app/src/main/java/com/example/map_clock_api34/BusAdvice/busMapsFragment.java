@@ -350,7 +350,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onPause() {
         super.onPause();
         // 停止更新
-        stationFinder.stopUpdating();
+        stationFinder.stopSearching();
     }
 
     //按重置紐後PopupWindow跳出來的設定

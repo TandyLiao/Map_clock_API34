@@ -305,7 +305,7 @@ public class SettingRemind extends Fragment {
     private void updateButtonLabels() {
         ring.setText("鈴聲");
         vibrate.setText("震動");
-        texttt.setText("測試");
+        texttt.setText("測試鈴聲與震動的觸發");
     }
 
     @Override
@@ -313,6 +313,7 @@ public class SettingRemind extends Fragment {
         super.onResume();
         // 在恢复时更新按钮标签
         updateButtonLabels();
+        setupActionBar();
     }
 
     public void onPause() {

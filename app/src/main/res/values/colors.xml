@@ -10,7 +10,10 @@
     <color name="yellow">#FCCA46</color>
     <color name="lightyellow">#fbf3e8</color>
     <color name="darkyellow">#F1E5D4</color>
+    <color name="darkyellow2">#E7D7C2</color>
     <color name="green">#619B8A</color>
+    <color name="transparent">#00E6D4BD</color>
+
 
     <color name="selected_item_background">#FFCCCB</color>
 
