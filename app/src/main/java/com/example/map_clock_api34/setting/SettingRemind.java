@@ -76,7 +76,7 @@ public class SettingRemind extends Fragment {
         vibrate = view.findViewById(R.id.text_VIBRATE);
         texttt = view.findViewById(R.id.texttt);
 
-        loadLocale(); // 加载语言设置
+        loadLocale();
 
         switchRing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -381,6 +381,3 @@ public class SettingRemind extends Fragment {
     }
 
 }
-
-
-

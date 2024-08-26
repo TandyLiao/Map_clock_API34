@@ -39,13 +39,15 @@ import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 import java.util.Arrays;
 
-
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class LocationService extends Service {
 
     private static final String CHANNEL_ID = "location_service_channel";
     private static final String WORK_TAG = "location_update_work";
-
+    private static final String LOG_FILE = "/path/to/location_service.log";
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
 
@@ -103,6 +105,7 @@ public class LocationService extends Service {
         if (intent != null) {
             if ("STOP_VIBRATION".equals(intent.getAction())) {
                 stopVibrate();
+                stopRingtone();
                 return START_NOT_STICKY;
             }
 
@@ -137,7 +140,7 @@ public class LocationService extends Service {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
 
             Log.d("LocationService", "Location updates requested");
-        } else {
+            } else {
             Log.d("LocationService", "Location permission not granted, stopping service");
             stopSelf();
         }
@@ -177,17 +180,18 @@ public class LocationService extends Service {
                 temp = destinationIndex;
                 sendBroadcastWithDestinationIndex();
                 sendNotification("快到了!");
-                resetNotificationSent(); // 重置通知状态
+
             }
             //自動更換地點
             if (last_distance < 0.01 && time < 1) {
                 if(temp==destinationIndex){
                     destinationIndex++;
+                    resetNotificationSent(); // 重置通知状态
                 }
             }
-
+            int validDestinationCount = getValidDestinationCount();
             //問~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            if (destinationIndex < latitude.length && destinationIndex < longitude.length && destinationIndex < destinationName.length) {
+            if (destinationIndex < validDestinationCount) {
                 startLocation = nowLocation;
                 Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
             } else {
@@ -209,6 +213,8 @@ public class LocationService extends Service {
         public void onReceive(Context context, Intent intent) {
             if(intent.getIntExtra("destinationIndex", 0) == destinationIndex){
                 destinationIndex++;
+                resetNotificationSent(); // 重置通知状态
+
             }
         }
     };
@@ -219,6 +225,9 @@ public class LocationService extends Service {
         if (locationManager != null) {
             locationManager.removeUpdates(locationListener);
         }
+
+        stopVibrate();
+        stopRingtone();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(destinationUpdateReceiver);
     }
 
@@ -244,13 +253,18 @@ public class LocationService extends Service {
     }
 
     private void sendNotification(String message) {
-        Context context = getApplicationContext();
+        if (notificationSent) {
+            return; // 如果已经发送过通知，则不再发送
+        }
 
+        Context context = getApplicationContext();
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
             Toast.makeText(context, "未啟用通知權限", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        int validDestinationCount = getValidDestinationCount();
+        int remainingDestinations = validDestinationCount - destinationIndex;
         try {
             Intent intent = new Intent(context, MainActivity.class);
             if (message.equals("到達最後一個目的地")) {
@@ -258,6 +272,16 @@ public class LocationService extends Service {
             } else {
                 intent.putExtra("show_start_mapping", true);
             }
+
+            Intent stopIntent = new Intent(context, LocationService.class);
+            stopIntent.setAction("STOP_VIBRATION");
+            PendingIntent stopPendingIntent = PendingIntent.getService(
+                    context,
+                    0,
+                    stopIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context,
@@ -268,13 +292,15 @@ public class LocationService extends Service {
 
             boolean isRingtoneEnabled = ringtone[destinationIndex];
             boolean isVibrationEnabled = vibrate[destinationIndex];
+            String fullMessage = message + " 還剩 " + remainingDestinations + " 個目的地";
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle("地圖鬧鐘")
-                    .setContentText(message)
+                    .setContentText(fullMessage)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)
+                    .addAction(0, "停止震動", stopPendingIntent)
                     .setAutoCancel(true);
 
             if (isRingtoneEnabled) {
@@ -286,6 +312,8 @@ public class LocationService extends Service {
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(0, builder.build());
+
+            notificationSent = true; // 更新通知状态，防止再次发送
 
         } catch (SecurityException e) {
             Toast.makeText(context, "無法發送通知，請求被拒絕", Toast.LENGTH_SHORT).show();
@@ -300,8 +328,8 @@ public class LocationService extends Service {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
             final long vibrationDuration = 3000; // 振动3秒
-            final long restDuration = 2000; // 休息2秒
-            final long totalDuration = 5 * 60 * 1000; // 总持续时间5分钟
+            final long restDuration = 1000; // 休息1秒
+            final long totalDuration = 5 * 60 * 1000;
 
             final Handler handler = new Handler();
             final long endTime = System.currentTimeMillis() + totalDuration;
@@ -331,12 +359,22 @@ public class LocationService extends Service {
         }
     }
 
+
     private void stopVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && isVibrating) {
             vibrator.cancel(); // 取消震动
             isVibrating = false; // 更新震动状态
         }
+    }
+    private int getValidDestinationCount() {
+        int count = 0;
+        for (int i = 0; i < latitude.length; i++) {
+            if (destinationName[i] != null) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private void playRingtone() {
@@ -360,6 +398,7 @@ public class LocationService extends Service {
             mRingtone.stop();
         }
     }
+
 
     private Uri loadRingtoneUri() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
