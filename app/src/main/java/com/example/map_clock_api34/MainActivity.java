@@ -74,13 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            if (intent.hasExtra("show_end_map")) {
-                boolean showEndMap = intent.getBooleanExtra("show_end_map", false);
-                if (showEndMap) {
-                    Log.d("MainActivity", "onCreate: Intent contains show_end_map, calling showEndMapFragment.");
-                    showEndMapFragment();
-                }
-            }
+            
         }
         // 初始化地圖(第一個頁面是MAP)
         if (homeFragment == null) {
@@ -203,10 +197,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (intent.hasExtra("show_end_map")) {
             boolean showEndMap = intent.getBooleanExtra("show_end_map", false);
-            if (showEndMap) {
-                Log.d("MainActivity", "onNewIntent: New Intent contains show_end_map, calling showEndMapFragment.");
-                showEndMapFragment();
-            }
+
         }
 
 }
@@ -228,19 +219,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("MainActivity", "Showing existing StartMapping fragment");
         }
 
-
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-    private void showEndMapFragment() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-
-        EndMapping endMapFragment = new EndMapping();
-
-        transaction.replace(R.id.fl_container, endMapFragment, "EndMap");
-        Log.d("MainActivity", "Replacing with new EndMap fragment");
 
         transaction.addToBackStack(null);
         transaction.commit();

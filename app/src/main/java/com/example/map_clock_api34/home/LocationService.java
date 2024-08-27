@@ -90,7 +90,7 @@ public class LocationService extends Service {
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("地圖鬧鐘正在運行")
                 .setContentText("我們正在背景中運行，監控您的位置變化。")
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.appicon_tem6)
                 .setContentIntent(pendingIntent)
                 .build();
 
@@ -263,13 +263,10 @@ public class LocationService extends Service {
             return;
         }
 
-        int validDestinationCount = getValidDestinationCount();
-        int remainingDestinations = validDestinationCount - destinationIndex;
         try {
             Intent intent = new Intent(context, MainActivity.class);
             if (message.equals("到達最後一個目的地")) {
-                intent.putExtra("show_end_map", true);
-            } else {
+               } else {
                 intent.putExtra("show_start_mapping", true);
             }
 
@@ -292,10 +289,11 @@ public class LocationService extends Service {
 
             boolean isRingtoneEnabled = ringtone[destinationIndex];
             boolean isVibrationEnabled = vibrate[destinationIndex];
-            String fullMessage = message + " 還剩 " + remainingDestinations + " 個目的地";
 
+            // 将通知内容改为 "即將抵達: " + 目的地名称
+            String fullMessage = "即將抵達: " + destinationName[destinationIndex];
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setSmallIcon(R.drawable.appicon_tem6)
                     .setContentTitle("地圖鬧鐘")
                     .setContentText(fullMessage)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
