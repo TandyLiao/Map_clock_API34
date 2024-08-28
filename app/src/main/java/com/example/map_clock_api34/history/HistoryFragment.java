@@ -424,6 +424,7 @@ public class HistoryFragment extends Fragment {
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
                     sharedViewModel.setNote(note, count++);
+
                     getLastKnownLocation();
                 }
                 locationCursor.close();

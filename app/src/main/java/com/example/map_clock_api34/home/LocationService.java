@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -137,9 +138,9 @@ public class LocationService extends Service {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // 10秒更新一次定位
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
-
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
             Log.d("LocationService", "Location updates requested");
+
             } else {
             Log.d("LocationService", "Location permission not granted, stopping service");
             stopSelf();
@@ -180,19 +181,19 @@ public class LocationService extends Service {
                 temp = destinationIndex;
                 sendBroadcastWithDestinationIndex();
                 sendNotification("快到了!");
-
             }
             //自動更換地點
-            if (last_distance < 0.01 && time < 1) {
+            if (last_distance < 0.1 && time < 1) {
                 if(temp==destinationIndex){
                     destinationIndex++;
                     resetNotificationSent(); // 重置通知状态
+                    startLocation = nowLocation;
+
                 }
             }
             int validDestinationCount = getValidDestinationCount();
             //問~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if (destinationIndex < validDestinationCount) {
-                startLocation = nowLocation;
                 Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
             } else {
                 Log.d("LocationService", "All destinations reached, stopping service");
@@ -206,12 +207,13 @@ public class LocationService extends Service {
         Intent intent = new Intent("DESTINATION_UPDATE");
         intent.putExtra("destinationIndex", destinationIndex);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
     }
     //收StartMapping送來的資料
     private BroadcastReceiver destinationUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getIntExtra("destinationIndex", 0) == destinationIndex){
+            if(intent.getIntExtra("destinationFinalIndex", 0) == destinationIndex){
                 destinationIndex++;
                 resetNotificationSent(); // 重置通知状态
 
@@ -291,7 +293,7 @@ public class LocationService extends Service {
             boolean isVibrationEnabled = vibrate[destinationIndex];
 
             // 将通知内容改为 "即將抵達: " + 目的地名称
-            String fullMessage = "即將抵達: " + destinationName[destinationIndex];
+            String fullMessage = "即將抵達: " + destinationName[temp];
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.appicon_tem6)
                     .setContentTitle("地圖鬧鐘")

@@ -53,11 +53,11 @@ public class StartMapping extends Fragment {
     private Ringtone mRingtone;
 
     private LocationManager locationManager;
-    private String commandstr = LocationManager.GPS_PROVIDER;
+    private String commandstr = LocationManager.NETWORK_PROVIDER;
     Location userLocation;
 
     private GoogleMap mMap;
-
+    private SharedViewModel sharedViewModel;
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
@@ -85,7 +85,7 @@ public class StartMapping extends Fragment {
 
         rootView = inflater.inflate(R.layout.home_start_mapping, container, false);
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapp);
@@ -176,11 +176,22 @@ public class StartMapping extends Fragment {
         });
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
+            if(destinationIndex==sharedViewModel.getLocationCount()){
+                EndMapping enfFragment = new EndMapping();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, enfFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                removeOverlayView();
+                popupWindow.dismiss();
+                return;
+            }
             int desNumber=destinationIndex+1;
             sendBroadcastWithDestinationIndex(desNumber);
             //移除疊加在底下防止點擊其他區域的View
             removeOverlayView();
             popupWindow.dismiss();
+            mMap.clear();
         });
     }
     //把疊加在底層的View刪掉
@@ -214,9 +225,6 @@ public class StartMapping extends Fragment {
         serviceIntent.putExtra("ringtone",ringtone);
         serviceIntent.putExtra("note", note);
         ContextCompat.startForegroundService(getActivity(), serviceIntent);
-        Log.d("StartMapping", "Vibrate before sending: " + Arrays.toString(vibrate));
-        Log.d("StartMapping", "Ringtone before sending: " + Arrays.toString(ringtone));
-
 
     }
 
@@ -235,8 +243,8 @@ public class StartMapping extends Fragment {
     };
     //送資料給LocationService
     private void sendBroadcastWithDestinationIndex(int destinationIndex) {
-        Intent intent = new Intent("DESTINATION_UPDATE");
-        intent.putExtra("destinationIndex", destinationIndex);
+        Intent intent = new Intent("DESTINATIONINDEX_UPDATE");
+        intent.putExtra("destinationFinalIndex", destinationIndex);
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
     //切換Fragment才會觸發
