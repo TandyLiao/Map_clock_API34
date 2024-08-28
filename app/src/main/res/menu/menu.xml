@@ -13,7 +13,7 @@
         <item
             android:id="@+id/action_book"
             android:icon="@drawable/bookmark1"
-            android:title="書籤" />
+            android:title="收藏路線" />
 
         <item
             android:id="@+id/action_history"

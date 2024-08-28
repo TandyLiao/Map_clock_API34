@@ -14,10 +14,10 @@
         android:id="@+id/txtNote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="請輸入書籤名稱"
+        android:layout_gravity="center"
+        android:text="請輸入路線名稱"
         android:textColor="@color/darkgreen"
-        android:textSize="25sp"
-        android:layout_gravity="center" />
+        android:textSize="25sp" />
 
     <View
         android:layout_width="5dp"

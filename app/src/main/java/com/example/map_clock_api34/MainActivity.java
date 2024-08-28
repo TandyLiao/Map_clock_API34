@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     bookFragment = new BookFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, bookFragment, "com/example/map_clock_api34/book").commit();
-                    Toast.makeText(MainActivity.this, "com/example/map_clock_api34/book", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "收藏路線", Toast.LENGTH_SHORT).show();
                     return true;
 
                 } else if (id == R.id.action_history) {

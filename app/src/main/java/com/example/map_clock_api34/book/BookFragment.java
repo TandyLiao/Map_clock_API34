@@ -261,7 +261,7 @@ public class BookFragment extends Fragment {
 
                 // Create TextView
                 TextView bookTitle = new TextView(requireContext());
-                bookTitle.setText("書籤");
+                bookTitle.setText("收藏路線");
                 bookTitle.setTextSize(15);
                 bookTitle.setTextColor(getResources().getColor(R.color.green)); // Change text color
                 bookTitle.setPadding(10, 10, 10, 10); // Set padding

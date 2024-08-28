@@ -292,7 +292,7 @@ public class FakeCreateLocation extends Fragment {
 
         // 創建右上角的名字
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("建立書籤");
+        bookTitle.setText("建立路線");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
