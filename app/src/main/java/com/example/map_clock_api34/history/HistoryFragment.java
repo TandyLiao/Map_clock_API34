@@ -420,8 +420,8 @@ public class HistoryFragment extends Fragment {
                     String area = locationCursor.getString(6);
                     String note = locationCursor.getString(7);
                     //設定
-                    boolean vibrate=locationCursor.getInt(8)!=2;
-                    boolean ringtone=locationCursor.getInt(9)!=2;
+                    boolean vibrate=locationCursor.getInt(8)!=0;
+                    boolean ringtone=locationCursor.getInt(9)!=0;
                     int notificationTime=locationCursor.getInt(10);
 
                     sharedViewModel.setDestination(placeName, latitude, longitude);
