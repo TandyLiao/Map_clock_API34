@@ -429,9 +429,9 @@ public class HistoryFragment extends Fragment {
                     sharedViewModel.setArea(area);
                     sharedViewModel.setNote(note, count++);
                     //設定
-                    sharedViewModel.setVibrate(vibrate,count++);
-                    sharedViewModel.setRingtone(ringtone,count++);
-                    sharedViewModel.setNotification(notificationTime,count++);
+                    sharedViewModel.setVibrate(vibrate,count);
+                    sharedViewModel.setRingtone(ringtone,count);
+                    sharedViewModel.setNotification(notificationTime,count);
 
 
                     getLastKnownLocation();

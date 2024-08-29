@@ -147,6 +147,7 @@ public class StartMapping extends Fragment {
         }
     };
 
+    @SuppressLint("MissingPermission")
     private void ShowPopupWindow(int destinationIndex) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
@@ -200,18 +201,22 @@ public class StartMapping extends Fragment {
             popupWindow.dismiss();
             mMap.clear();
             if(destinationIndex < sharedViewModel.getLocationCount()){
+                userLocation = locationManager.getLastKnownLocation(commandstr);
                 builder = new LatLngBounds.Builder();
                 // 添加起點和目的地的位置
                 builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
 
-                destiantion_LatLng= new LatLng(latitude[destinationIndex+1],longitude[destinationIndex+1]);
-                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[destinationIndex+1]));
+                destiantion_LatLng= new LatLng(latitude[desNumber],longitude[desNumber]);
+                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[desNumber]));
 
-                builder.include(new LatLng(latitude[destinationIndex+1], longitude[destinationIndex+1]));
+                builder.include(new LatLng(latitude[desNumber], longitude[desNumber]));
                 bounds = builder.build();
                 // 計算將這個邊界框移動到地圖中心所需的偏移量
                 int padding = 300; // 偏移量（以像素為單位）
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[desNumber],longitude[desNumber], userLocation.getLatitude(), userLocation.getLongitude())/1000;
+                double time = Math.round(trip_distance/4*60);
+                txtTime.setText("目的:"+destinationName[desNumber]+"\n公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
             }
         });
     }

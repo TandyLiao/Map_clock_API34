@@ -105,28 +105,24 @@ public class MainActivity extends AppCompatActivity {
                     homeFragment = new HomeFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, homeFragment, "map").commit();
-                    Toast.makeText(MainActivity.this, "Dora map", Toast.LENGTH_SHORT).show();
                     return true;
 
                 } else if (id == R.id.action_book) {
                     bookFragment = new BookFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, bookFragment, "com/example/map_clock_api34/book").commit();
-                    Toast.makeText(MainActivity.this, "收藏路線", Toast.LENGTH_SHORT).show();
                     return true;
 
                 } else if (id == R.id.action_history) {
                     historyFragment = new HistoryFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, historyFragment, "com/example/map_clock_api34/history").commit();
-                    Toast.makeText(MainActivity.this, "歷史紀錄", Toast.LENGTH_SHORT).show();
                     return true;
 
                 } else if (id == R.id.action_setting) {
                     settingRemind = new SettingRemind();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, settingRemind, "com/example/map_clock_api34/setting").commit();
-                    Toast.makeText(MainActivity.this, "設定", Toast.LENGTH_SHORT).show();
                     return true;
                 }
 

@@ -211,10 +211,13 @@ public class LocationService extends Service {
     }
     //收StartMapping送來的資料
     private BroadcastReceiver destinationUpdateReceiver = new BroadcastReceiver() {
+        @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getIntExtra("destinationFinalIndex", 0) == destinationIndex){
                 destinationIndex++;
+                //把現在位置換成起點
+                startLocation = locationManager.getLastKnownLocation(commandstr);
                 resetNotificationSent(); // 重置通知状态
 
             }

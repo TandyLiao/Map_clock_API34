@@ -485,16 +485,16 @@ public class BookFragment extends Fragment {
                     boolean vibrate=locationCursor.getInt(8)!=0;
                     boolean ringtone=locationCursor.getInt(9)!=0;
                     int notificationTime=locationCursor.getInt(10);
-
+                    Log.d("CheckPoint",String.valueOf(count));
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
                     sharedViewModel.setNote(note, count++);
                     //設定
-                    sharedViewModel.setVibrate(vibrate,count++);
-                    sharedViewModel.setRingtone(ringtone,count++);
-                    sharedViewModel.setNotification(notificationTime,count++);
-
+                    sharedViewModel.setVibrate(vibrate,count);
+                    sharedViewModel.setRingtone(ringtone,count);
+                    sharedViewModel.setNotification(notificationTime,count);
+                    Log.d("CheckPoint",String.valueOf(count));
                     getLastKnownLocation();
                 }
                 locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks
