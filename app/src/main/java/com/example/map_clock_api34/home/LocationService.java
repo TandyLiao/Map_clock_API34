@@ -291,9 +291,13 @@ public class LocationService extends Service {
 
             boolean isRingtoneEnabled = ringtone[destinationIndex];
             boolean isVibrationEnabled = vibrate[destinationIndex];
-
-            // 将通知内容改为 "即將抵達: " + 目的地名称
-            String fullMessage = "即將抵達: " + destinationName[temp];
+            String fullMessage;
+            if(note[temp]==null){
+                fullMessage = "即將抵達: " + destinationName[temp];
+            }else{
+                // 将通知内容改为 "即將抵達: " + 目的地名称
+                fullMessage = "即將抵達: " + destinationName[temp]+"\n記得要做: " + note[temp];
+            }
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.appicon_tem6)
                     .setContentTitle("地圖鬧鐘")

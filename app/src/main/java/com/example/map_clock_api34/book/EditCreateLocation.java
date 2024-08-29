@@ -46,6 +46,7 @@ import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
 import com.example.map_clock_api34.note.Note;
+import com.example.map_clock_api34.setting.CreatLocation_setting;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -166,6 +167,18 @@ public class EditCreateLocation extends Fragment {
             Note notesFragment = new Note();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, notesFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+        ImageView bookset = rootView.findViewById(R.id.bookset_imageView);
+        bookset.setOnClickListener(v -> {
+            if (arrayList.isEmpty()) {
+                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            CreatLocation_setting creatLocation_setting = new CreatLocation_setting();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, creatLocation_setting);
             transaction.addToBackStack(null);
             transaction.commit();
         });

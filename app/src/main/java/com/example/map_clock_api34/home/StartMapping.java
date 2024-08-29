@@ -66,8 +66,6 @@ public class StartMapping extends Fragment {
     private boolean[] ringtone = new boolean[7];
     private int[] notification = new int[7];
 
-    int numberOfPlace = 0;
-
     LatLngBounds.Builder builder;
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
@@ -122,6 +120,7 @@ public class StartMapping extends Fragment {
         public void onMapReady(GoogleMap googleMap) {
             mMap=googleMap;
 
+            mMap.clear();
             //取得用戶的定位
             userLocation = locationManager.getLastKnownLocation(commandstr);
             //跑出藍色定位點
@@ -131,10 +130,10 @@ public class StartMapping extends Fragment {
             // 添加起點和目的地的位置
             builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
 
-            destiantion_LatLng= new LatLng(latitude[numberOfPlace],longitude[numberOfPlace]);
-            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[numberOfPlace]));
+            destiantion_LatLng= new LatLng(latitude[0],longitude[0]);
+            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[0]));
 
-            builder.include(new LatLng(latitude[numberOfPlace], longitude[numberOfPlace]));
+            builder.include(new LatLng(latitude[0], longitude[0]));
             bounds = builder.build();
             // 計算將這個邊界框移動到地圖中心所需的偏移量
             int padding = 300; // 偏移量（以像素為單位）
@@ -166,7 +165,15 @@ public class StartMapping extends Fragment {
         ((ViewGroup) rootView).addView(overlayView);
 
         TextView title = view.findViewById(R.id.txtNote);
-        title.setText("目的地-"+destinationName[destinationIndex]+"-即將抵達");
+        title.setTextSize(25);
+        if(sharedViewModel.getNote(destinationIndex)==null){
+            title.setText("目的地-\n"+destinationName[destinationIndex]+"\n即將抵達");
+
+        }
+        else{
+            title.setText("目的地-\n"+destinationName[destinationIndex]+"\n即將抵達"+"\n記得要做: "+sharedViewModel.getNote(destinationIndex));
+        }
+
 
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
         BTNPopup.setOnClickListener(v -> {
@@ -192,6 +199,20 @@ public class StartMapping extends Fragment {
             removeOverlayView();
             popupWindow.dismiss();
             mMap.clear();
+            if(destinationIndex < sharedViewModel.getLocationCount()){
+                builder = new LatLngBounds.Builder();
+                // 添加起點和目的地的位置
+                builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
+
+                destiantion_LatLng= new LatLng(latitude[destinationIndex+1],longitude[destinationIndex+1]);
+                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[destinationIndex+1]));
+
+                builder.include(new LatLng(latitude[destinationIndex+1], longitude[destinationIndex+1]));
+                bounds = builder.build();
+                // 計算將這個邊界框移動到地圖中心所需的偏移量
+                int padding = 300; // 偏移量（以像素為單位）
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+            }
         });
     }
     //把疊加在底層的View刪掉
