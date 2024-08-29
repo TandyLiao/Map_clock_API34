@@ -554,6 +554,9 @@ public class HistoryFragment extends Fragment {
         // 從 arrayList 中刪除選中的項目
         arrayList.removeAll(selectedItems);
         listAdapterHistory.notifyDataSetChanged();
+        isEdit = false;
+        isDelete = false;
+        updateButtonState();
     }
 
     //打開導航頁面

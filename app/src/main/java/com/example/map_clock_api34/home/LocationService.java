@@ -1,6 +1,8 @@
 package com.example.map_clock_api34.home;
 
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -11,6 +13,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -40,10 +43,6 @@ import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 import java.util.Arrays;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 public class LocationService extends Service {
 
     private static final String CHANNEL_ID = "location_service_channel";
@@ -71,11 +70,17 @@ public class LocationService extends Service {
     private Location startLocation;
 
     int temp;
+    boolean isPause=false;
+
     //背景執行創建第一個啟用的方法
     @SuppressLint("MissingPermission")
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //打開收到來自StartMapping的訊息
+        LocalBroadcastManager.getInstance(this).registerReceiver(destinationServiceReceiver,
+                    new IntentFilter("DESTINATIONINDEX_UPDATE"));
 
         resetNotificationSent(); // 初始化通知状态
 
@@ -138,7 +143,7 @@ public class LocationService extends Service {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // 10秒更新一次定位
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
             Log.d("LocationService", "Location updates requested");
 
             } else {
@@ -153,76 +158,114 @@ public class LocationService extends Service {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
 
-            Log.d("LocationService", "Handling location update");
+            if(isPause==false){
+                Log.d("LocationService", "Handling location update");
 
-            if (startLocation == null) {
-                startLocation = nowLocation;
-            }
-
-            totalTime += 10;
-            //這邊~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-            last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
-            notificationTime = notification[destinationIndex];
-
-            Log.d("LocationService", "Pre-distance: " + pre_distance + " km");
-            Log.d("LocationService", "Last-distance: " + last_distance + " km");
-
-            if (pre_distance > 0.020) {
-                speed = pre_distance / (totalTime / 60 / 60);
-                time = Math.round(last_distance / speed * 60);
-                Log.d("LocationService", "Speed: " + speed + " km/h");
-                Log.d("LocationService", "Estimated time: " + time + " minutes");
-            } else {
-                totalTime -= 10;
-            }
-
-            if ((last_distance < 0.15 && time < notificationTime) && !notificationSent) {
-                temp = destinationIndex;
-                sendBroadcastWithDestinationIndex();
-                sendNotification("快到了!");
-            }
-            //自動更換地點
-            if (last_distance < 0.1 && time < 1) {
-                if(temp==destinationIndex){
-                    destinationIndex++;
-                    resetNotificationSent(); // 重置通知状态
+                if (startLocation == null) {
                     startLocation = nowLocation;
-
                 }
+
+                totalTime += 10;
+                //這邊~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
+                notificationTime = notification[destinationIndex];
+
+                Log.d("LocationService", "Pre-distance: " + pre_distance + " km");
+                Log.d("LocationService", "Last-distance: " + last_distance + " km");
+
+                if (pre_distance > 0.020) {
+                    speed = pre_distance / (totalTime / 60 / 60);
+                    time = Math.round(last_distance / speed * 60);
+                    sendBroadcast(2);
+                    Log.d("LocationService", "Speed: " + speed + " km/h");
+                    Log.d("LocationService", "Estimated time: " + time + " minutes");
+                } else {
+                    totalTime -= 10;
+                }
+
+                if ((last_distance < 0.15 && time < notificationTime) && !notificationSent) {
+                    temp = destinationIndex;
+                    sendBroadcast(1);
+                    sendNotification("快到了!");
+                }
+                //自動更換地點
+                if (last_distance < 0.1 && time < 1) {
+                    if(temp==destinationIndex){
+                        destinationIndex++;
+                        resetNotificationSent(); // 重置通知状态
+                        startLocation = nowLocation;
+                    }
+                }
+                int validDestinationCount = getValidDestinationCount();
+                //問~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                if (destinationIndex < validDestinationCount) {
+                    Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
+                } else {
+                    Log.d("LocationService", "All destinations reached, stopping service");
+                    sendNotification("到達最後一個目的地");
+                    stopSelf();
+                }
+                sendBroadcast(3);
             }
-            int validDestinationCount = getValidDestinationCount();
-            //問~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            if (destinationIndex < validDestinationCount) {
-                Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
-            } else {
-                Log.d("LocationService", "All destinations reached, stopping service");
-                sendNotification("到達最後一個目的地");
-                stopSelf();
+            else{
+                isPause=false;
             }
         }
+
     };
     //送目前地點給StartMapping
-    private void sendBroadcastWithDestinationIndex() {
+    private void sendBroadcast(int dataType) {
         Intent intent = new Intent("DESTINATION_UPDATE");
-        intent.putExtra("destinationIndex", destinationIndex);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
+        switch (dataType) {
+            case 1:
+                intent.putExtra("destinationIndex", destinationIndex);
+                break;
+            case 2:
+                intent.putExtra("mapInfo", "目的:"+destinationName[destinationIndex]+"\n剩餘公里為: "+last_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                break;
+            case 3:
+                intent.putExtra("nowIndex", destinationIndex);
+
+        }
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
     //收StartMapping送來的資料
-    private BroadcastReceiver destinationUpdateReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver destinationServiceReceiver = new BroadcastReceiver() {
         @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getIntExtra("destinationFinalIndex", 0) == destinationIndex){
-                destinationIndex++;
-                //把現在位置換成起點
-                startLocation = locationManager.getLastKnownLocation(commandstr);
-                resetNotificationSent(); // 重置通知状态
 
+            if ("DESTINATIONINDEX_UPDATE".equals(intent.getAction())){
+
+                if(intent.hasExtra("destinationFinalIndex")){
+                    if(intent.getIntExtra("destinationFinalIndex", 0) < destinationIndex){
+                        destinationIndex++;
+                        //把現在位置換成起點
+                        startLocation = locationManager.getLastKnownLocation(commandstr);
+                        resetNotificationSent(); // 重置通知状态
+                    }
+                }
+
+                if(intent.hasExtra("destinationIndexChange")){
+                    destinationIndex+=intent.getIntExtra("destinationIndexChange", 0);
+                    startLocation = locationManager.getLastKnownLocation(commandstr);
+                    resetNotificationSent(); // 重置通知状态
+                    if(Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], startLocation.getLatitude(), startLocation.getLongitude()) / 1000<0.18){
+                        isPause=true;
+                    }
+                }
+
+                if(intent.hasExtra("stopVibrateAndRing")){
+                    stopRingtone();
+                    stopVibrate();
+                }
             }
+
         }
     };
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -233,7 +276,7 @@ public class LocationService extends Service {
 
         stopVibrate();
         stopRingtone();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(destinationUpdateReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(destinationServiceReceiver);
     }
 
     @Nullable
@@ -365,7 +408,6 @@ public class LocationService extends Service {
             handler.post(vibrationRunnable); // 开始震动循环
         }
     }
-
 
     private void stopVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
