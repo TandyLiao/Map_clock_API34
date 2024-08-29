@@ -99,6 +99,7 @@ public class CreateLocation extends Fragment {
         setupNavigationDrawer();
         //初始化按鈕
         setupButtons();
+        setupSAVEButton();
         //初始化路線表和功能表
         setupRecyclerViews();
 
@@ -126,7 +127,7 @@ public class CreateLocation extends Fragment {
 
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
-            //如有選擇地點就導航，沒有就跳提醒，加上吳俊廷的匯入資料庫的程式
+            //如有選擇地點就導航，沒有就跳提醒，加上匯入資料庫的程式
             if (sharedViewModel.getLocationCount() >= 0) {
                 openStartMappingFragment();
 
@@ -134,6 +135,29 @@ public class CreateLocation extends Fragment {
                 saveInDB();
                 saveInHistoryDB();
 
+            } else {
+                Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    //初始化按鈕(儲存至紀錄)
+    private void setupSAVEButton() {
+        //新增地點按鈕初始化
+        Button btnAddItem = rootView.findViewById(R.id.btn_addItem);
+        btnAddItem.setOnClickListener(v -> {
+            checkAndRequestPermissions();
+        });
+        //重置按鈕初始化
+        btnReset = rootView.findViewById(R.id.btn_reset);
+        btnReset.setOnClickListener(v -> ShowPopupWindow());
+
+        Button btnMapping = rootView.findViewById(R.id.btn_saveOnly);
+        btnMapping.setOnClickListener(v -> {
+
+            if (sharedViewModel.getLocationCount() >= 0) {
+                Historynames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
+                saveInDB();
+                saveInHistoryDB();
             } else {
                 Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
