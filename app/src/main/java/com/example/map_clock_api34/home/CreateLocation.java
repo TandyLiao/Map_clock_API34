@@ -271,6 +271,10 @@ public class CreateLocation extends Fragment {
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
             String Note = sharedViewModel.getNote(i);
+            //設定
+            boolean vibrate=sharedViewModel.getVibrate(i);
+            boolean ringtone=sharedViewModel.getRingtone(i);
+            int notificationTime=sharedViewModel.getNotification(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -281,6 +285,10 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable.COLUMN_AREA_NAME, AreaName);
                 values.put(LocationTable.COLUMN_NOTE_INFO, Note);
+                //設定
+                values.put(LocationTable.COLUMN_VIBRATE, vibrate);
+                values.put(LocationTable.COLUMN_RINGTONE, ringtone);
+                values.put(LocationTable.COLUMN_notificationTime, notificationTime);
 
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }

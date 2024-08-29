@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
@@ -268,6 +269,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
             String Note = sharedViewModel.getNote(i);
+            //設定
+            boolean vibrate=sharedViewModel.getVibrate(i);
+            boolean ringtone=sharedViewModel.getRingtone(i);
+            int notificationTime=sharedViewModel.getNotification(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -278,6 +283,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_AREA_NAME, AreaName);
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_NOTE_INFO, Note);
+                //設定
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_VIBRATE, vibrate);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_RINGTONE, ringtone);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_notificationTime, notificationTime);
 
                 db.insert(BookDatabaseHelper.LocationTable2.TABLE_NAME, null, values);
             }

@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
@@ -292,6 +293,10 @@ public class EditCreateLocation extends Fragment {
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
             String Note = sharedViewModel.getNote(i);
+            //設定
+            boolean vibrate=sharedViewModel.getVibrate(i);
+            boolean ringtone=sharedViewModel.getRingtone(i);
+            int notificationTime=sharedViewModel.getNotification(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -302,6 +307,10 @@ public class EditCreateLocation extends Fragment {
                 values.put(LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable2.COLUMN_AREA_NAME, AreaName);
                 values.put(LocationTable2.COLUMN_NOTE_INFO, Note);
+                //設定
+                values.put(LocationTable2.COLUMN_VIBRATE, vibrate);
+                values.put(LocationTable2.COLUMN_RINGTONE, ringtone);
+                values.put(LocationTable2.COLUMN_notificationTime, notificationTime);
 
                 db.insert(LocationTable2.TABLE_NAME, null, values);
             }

@@ -419,11 +419,20 @@ public class HistoryFragment extends Fragment {
                     String city = locationCursor.getString(5);
                     String area = locationCursor.getString(6);
                     String note = locationCursor.getString(7);
+                    //設定
+                    boolean vibrate=locationCursor.getInt(8)!=2;
+                    boolean ringtone=locationCursor.getInt(9)!=2;
+                    int notificationTime=locationCursor.getInt(10);
 
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
                     sharedViewModel.setNote(note, count++);
+                    //設定
+                    sharedViewModel.setVibrate(vibrate,count++);
+                    sharedViewModel.setRingtone(ringtone,count++);
+                    sharedViewModel.setNotification(notificationTime,count++);
+
 
                     getLastKnownLocation();
                 }
