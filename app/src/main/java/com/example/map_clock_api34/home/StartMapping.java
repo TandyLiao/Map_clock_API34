@@ -74,6 +74,7 @@ public class StartMapping extends Fragment {
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
 
+    PopupWindow popupWindow;
     TextView txtTime;
     View rootView;
     View overlayView;
@@ -156,7 +157,7 @@ public class StartMapping extends Fragment {
     @SuppressLint("MissingPermission")
     private void ShowPopupWindow(int destinationIndex) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
-        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setWidth(700);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
@@ -218,11 +219,7 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            EndMapping enfFragment = new EndMapping();
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, enfFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+            getActivity().getSupportFragmentManager().popBackStack();
         });
 
         btnPre = rootView.findViewById(R.id.btnPre);
@@ -291,8 +288,9 @@ public class StartMapping extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void moveCameraAndCalculateTime(int destinationIndex){
-        if(destinationIndex < sharedViewModel.getLocationCount()){
+        if(destinationIndex < sharedViewModel.getLocationCount() && nowIndex==destinationIndex){
             //尋找下個地點
+
             int desNextIndex=destinationIndex+1;
             //傳回LocationService讓她換下個地點
             sendBroadcastWithDestinationIndex(1, desNextIndex,0);
@@ -345,6 +343,12 @@ public class StartMapping extends Fragment {
 
                 if (intent.hasExtra("destinationIndex")) {
                     int destinationIndex = intent.getIntExtra("destinationIndex", 0);
+                    if (popupWindow != null && popupWindow.isShowing()) {
+                        // 如果已經顯示，關閉它
+                        sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
+                        popupWindow.dismiss();
+                        removeOverlayView();
+                    }
                     ShowPopupWindow(destinationIndex);
                 }
 
@@ -355,6 +359,11 @@ public class StartMapping extends Fragment {
 
                 if (intent.hasExtra("nowIndex")) {
                     nowIndex = intent.getIntExtra("nowIndex",0);
+                }
+                if (intent.hasExtra("nextDestination")){
+                    int destinationIndex = intent.getIntExtra("nextDestination", 0)-1;
+                    mMap.clear();
+                    moveCameraAndCalculateTime(destinationIndex);
                 }
             }
         }

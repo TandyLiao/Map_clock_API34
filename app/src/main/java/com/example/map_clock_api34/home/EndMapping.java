@@ -39,8 +39,6 @@ public class EndMapping extends Fragment {
         btnBack.setOnClickListener(v -> {
             // 清空 ViewModel 中的数据
             sharedViewModel.clearAll();
-
-            // 切换回 CreateLocation Fragment
             getActivity().getSupportFragmentManager().popBackStack();
             getActivity().getSupportFragmentManager().popBackStack();
         });

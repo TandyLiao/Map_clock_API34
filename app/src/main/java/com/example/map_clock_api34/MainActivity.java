@@ -20,6 +20,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.map_clock_api34.book.BookFragment;
 import com.example.map_clock_api34.history.HistoryFragment;
@@ -183,12 +184,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent); // 更新 Activity 的 Intent
-
         // 检查新的 Intent 中是否包含打开 StartMapping 的标识符
         if (intent.hasExtra("show_start_mapping")) {
             boolean showStartMapping = intent.getBooleanExtra("show_start_mapping", false);
             if (showStartMapping) {
                 Log.d("MainActivity", "onNewIntent: New Intent contains show_start_mapping, calling showStartMappingFragment.");
+                if (intent.hasExtra("triggerSendBroadcast")) {
+
+                    sendBroadcastToLocationService();
+                }
                 showStartMappingFragment();
             }
         } else if (intent.hasExtra("show_end_map")) {
@@ -209,14 +213,19 @@ public class MainActivity extends AppCompatActivity {
             startMappingFragment = new StartMapping();
             transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
             Log.d("MainActivity", "Adding new StartMapping fragment");
+            transaction.addToBackStack(null);
+
         } else {
             // 如果 StartMapping 片段已经存在，显示它
             transaction.show(startMappingFragment);
             Log.d("MainActivity", "Showing existing StartMapping fragment");
         }
-
-
-        transaction.addToBackStack(null);
         transaction.commit();
+    }
+    private void sendBroadcastToLocationService() {
+
+        Intent broadcastIntent = new Intent("DESTINATIONINDEX_UPDATE");
+        broadcastIntent.putExtra("triggerSendBroadcast", true);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
     }
 }

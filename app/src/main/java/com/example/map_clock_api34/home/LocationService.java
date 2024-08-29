@@ -158,7 +158,7 @@ public class LocationService extends Service {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
 
-            if(isPause==false){
+            if(isPause==false && destinationIndex<=getValidDestinationCount()){
                 Log.d("LocationService", "Handling location update");
 
                 if (startLocation == null) {
@@ -191,10 +191,12 @@ public class LocationService extends Service {
                 }
                 //自動更換地點
                 if (last_distance < 0.1 && time < 1) {
-                    if(temp==destinationIndex){
+                    if(temp == destinationIndex){
                         destinationIndex++;
                         resetNotificationSent(); // 重置通知状态
                         startLocation = nowLocation;
+                        sendBroadcast(2);
+                        sendBroadcast(4);
                     }
                 }
                 int validDestinationCount = getValidDestinationCount();
@@ -227,6 +229,11 @@ public class LocationService extends Service {
                 break;
             case 3:
                 intent.putExtra("nowIndex", destinationIndex);
+                break;
+                //雖然底下功能一樣，但其他收到的功能不一樣，不要刪
+            case 4:
+                intent.putExtra("nextDestination", destinationIndex);
+                break;
 
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -242,6 +249,7 @@ public class LocationService extends Service {
                 if(intent.hasExtra("destinationFinalIndex")){
                     if(intent.getIntExtra("destinationFinalIndex", 0) < destinationIndex){
                         destinationIndex++;
+                        sendBroadcast(3);
                         //把現在位置換成起點
                         startLocation = locationManager.getLastKnownLocation(commandstr);
                         resetNotificationSent(); // 重置通知状态
@@ -250,6 +258,7 @@ public class LocationService extends Service {
 
                 if(intent.hasExtra("destinationIndexChange")){
                     destinationIndex+=intent.getIntExtra("destinationIndexChange", 0);
+                    sendBroadcast(3);
                     startLocation = locationManager.getLastKnownLocation(commandstr);
                     resetNotificationSent(); // 重置通知状态
                     if(Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], startLocation.getLatitude(), startLocation.getLongitude()) / 1000<0.18){
@@ -260,6 +269,11 @@ public class LocationService extends Service {
                 if(intent.hasExtra("stopVibrateAndRing")){
                     stopRingtone();
                     stopVibrate();
+                }
+                if (intent.hasExtra("triggerSendBroadcast")) {
+                    // 触发发送广播事件
+                    sendBroadcast(1);
+                    sendBroadcast(3);
                 }
             }
 
@@ -316,16 +330,8 @@ public class LocationService extends Service {
             if (message.equals("到達最後一個目的地")) {
                } else {
                 intent.putExtra("show_start_mapping", true);
+                intent.putExtra("triggerSendBroadcast", true);
             }
-
-            Intent stopIntent = new Intent(context, LocationService.class);
-            stopIntent.setAction("STOP_VIBRATION");
-            PendingIntent stopPendingIntent = PendingIntent.getService(
-                    context,
-                    0,
-                    stopIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
 
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -334,6 +340,7 @@ public class LocationService extends Service {
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
+
 
             boolean isRingtoneEnabled = ringtone[destinationIndex];
             boolean isVibrationEnabled = vibrate[destinationIndex];
@@ -350,7 +357,6 @@ public class LocationService extends Service {
                     .setContentText(fullMessage)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)
-                    .addAction(0, "停止震動", stopPendingIntent)
                     .setAutoCancel(true);
 
             if (isRingtoneEnabled) {
