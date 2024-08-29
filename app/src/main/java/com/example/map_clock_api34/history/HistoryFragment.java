@@ -243,7 +243,7 @@ public class HistoryFragment extends Fragment {
                 hashMap.put("placeName2", "\u2193");
                 hashMap.put("placeName3", afterArrow);
                 hashMap.put("time", time);
-                arrayList.add(hashMap);
+                arrayList.add(0,hashMap);
             }
             cursor.close();
         }
@@ -423,15 +423,14 @@ public class HistoryFragment extends Fragment {
                     boolean vibrate=locationCursor.getInt(8)!=0;
                     boolean ringtone=locationCursor.getInt(9)!=0;
                     int notificationTime=locationCursor.getInt(10);
-
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
-                    sharedViewModel.setNote(note, count++);
+                    sharedViewModel.setNote(note, count);
                     //設定
                     sharedViewModel.setVibrate(vibrate,count);
                     sharedViewModel.setRingtone(ringtone,count);
-                    sharedViewModel.setNotification(notificationTime,count);
+                    sharedViewModel.setNotification(notificationTime,count++);
 
 
                     getLastKnownLocation();

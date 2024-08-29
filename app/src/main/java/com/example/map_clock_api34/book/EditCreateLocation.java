@@ -181,7 +181,7 @@ public class EditCreateLocation extends Fragment {
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, creatLocation_setting);
             transaction.addToBackStack(null);
-            transaction.commit();
+             transaction.commit();
         });
     }
     private void warning(){

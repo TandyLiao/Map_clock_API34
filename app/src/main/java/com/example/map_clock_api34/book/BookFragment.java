@@ -165,11 +165,19 @@ public class BookFragment extends Fragment {
                             String area = locationCursor.getString(6);
                             String Note = locationCursor.getString(7);
 
+                            boolean vibrate=locationCursor.getInt(8)!=0;
+                            boolean ringtone=locationCursor.getInt(9)!=0;
+                            int notificationTime=locationCursor.getInt(10);
+
                             sharedViewModel.uuid = locationCursor.getString(4);
                             sharedViewModel.setDestination(placeName, latitude, longitude);
                             sharedViewModel.setCapital(city);
                             sharedViewModel.setArea(area);
-                            sharedViewModel.setNote(Note, count++);
+
+                            sharedViewModel.setNote(Note, count);
+                            sharedViewModel.setVibrate(vibrate,count);
+                            sharedViewModel.setRingtone(ringtone,count);
+                            sharedViewModel.setNotification(notificationTime,count++);
                         }
 
                         locationCursor.close();
@@ -485,16 +493,15 @@ public class BookFragment extends Fragment {
                     boolean vibrate=locationCursor.getInt(8)!=0;
                     boolean ringtone=locationCursor.getInt(9)!=0;
                     int notificationTime=locationCursor.getInt(10);
-                    Log.d("CheckPoint",String.valueOf(count));
+
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
-                    sharedViewModel.setNote(note, count++);
+                    sharedViewModel.setNote(note, count);
                     //設定
                     sharedViewModel.setVibrate(vibrate,count);
                     sharedViewModel.setRingtone(ringtone,count);
-                    sharedViewModel.setNotification(notificationTime,count);
-                    Log.d("CheckPoint",String.valueOf(count));
+                    sharedViewModel.setNotification(notificationTime,count++);
                     getLastKnownLocation();
                 }
                 locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks

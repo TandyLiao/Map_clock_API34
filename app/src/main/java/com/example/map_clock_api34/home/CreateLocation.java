@@ -275,7 +275,7 @@ public class CreateLocation extends Fragment {
             boolean vibrate=sharedViewModel.getVibrate(i);
             boolean ringtone=sharedViewModel.getRingtone(i);
             int notificationTime=sharedViewModel.getNotification(i);
-
+            Log.d("CheckPoint",String.valueOf(vibrate)+"  "+ringtone+"  "+notificationTime);
             if (name != null) {
                 ContentValues values = new ContentValues();
                 values.put(LocationTable.COLUMN_PLACE_NAME, name);
