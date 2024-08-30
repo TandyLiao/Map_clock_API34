@@ -158,7 +158,7 @@ public class LocationService extends Service {
         @Override
         public void onLocationChanged(@NonNull Location nowLocation) {
 
-            if(isPause==false && destinationIndex<=getValidDestinationCount()){
+            if(isPause==false && destinationIndex<getValidDestinationCount()){
                 Log.d("LocationService", "Handling location update");
 
                 if (startLocation == null) {
@@ -271,9 +271,14 @@ public class LocationService extends Service {
                     stopVibrate();
                 }
                 if (intent.hasExtra("triggerSendBroadcast")) {
-                    // 触发发送广播事件
-                    sendBroadcast(1);
-                    sendBroadcast(3);
+                    if(temp!=destinationIndex){
+
+                    }else{
+                        // 触发发送广播事件
+                        sendBroadcast(1);
+                        sendBroadcast(3);
+                    }
+
                 }
             }
 
