@@ -79,7 +79,7 @@ public class LocationService extends Service {
 
         //打開收到來自StartMapping的訊息
         LocalBroadcastManager.getInstance(this).registerReceiver(destinationServiceReceiver,
-                    new IntentFilter("DESTINATIONINDEX_UPDATE"));
+                new IntentFilter("DESTINATIONINDEX_UPDATE"));
 
         resetNotificationSent(); // 初始化通知状态
 
@@ -145,7 +145,7 @@ public class LocationService extends Service {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
             Log.d("LocationService", "Location updates requested");
 
-            } else {
+        } else {
             Log.d("LocationService", "Location permission not granted, stopping service");
             stopSelf();
         }
@@ -229,7 +229,7 @@ public class LocationService extends Service {
             case 3:
                 intent.putExtra("nowIndex", destinationIndex);
                 break;
-                //雖然底下功能一樣，但其他收到的功能不一樣，不要刪
+            //雖然底下功能一樣，但其他收到的功能不一樣，不要刪
             case 4:
                 intent.putExtra("nextDestination", destinationIndex);
                 break;
@@ -340,7 +340,7 @@ public class LocationService extends Service {
         try {
             Intent intent = new Intent(context, MainActivity.class);
             if (message.equals("到達最後一個目的地")) {
-               } else {
+            } else {
                 intent.putExtra("show_start_mapping", true);
                 intent.putExtra("triggerSendBroadcast", true);
             }
