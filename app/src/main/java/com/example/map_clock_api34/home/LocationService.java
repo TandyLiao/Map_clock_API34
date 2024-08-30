@@ -190,7 +190,7 @@ public class LocationService extends Service {
 
                 //自動更換地點
                 if (last_distance < 0.1 && time < 1) {
-                    if(temp == destinationIndex){
+                    if(temp == destinationIndex && destinationIndex!=getValidDestinationCount()-1){
                         destinationIndex++;
                         resetNotificationSent(); // 重置通知状态
                         startLocation = nowLocation;
@@ -269,6 +269,14 @@ public class LocationService extends Service {
                     stopRingtone();
                     stopVibrate();
                 }
+                if(intent.hasExtra("startVibrateAndRing")){
+                    if(vibrate[intent.getIntExtra("startVibrateAndRing", 0)]){
+                        startVibrate();
+                    }
+                    if(ringtone[intent.getIntExtra("startVibrateAndRing", 0)]){
+                        playRingtone();
+                    }
+                }
                 if (intent.hasExtra("triggerSendBroadcast")) {
                     if(temp!=destinationIndex){
 
@@ -345,9 +353,9 @@ public class LocationService extends Service {
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
 
-
             boolean isRingtoneEnabled = ringtone[destinationIndex];
             boolean isVibrationEnabled = vibrate[destinationIndex];
+
             String fullMessage;
             if(note[temp]==null){
                 fullMessage = "即將抵達: " + destinationName[temp];
@@ -362,6 +370,7 @@ public class LocationService extends Service {
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
+
 
             if (isRingtoneEnabled) {
                 playRingtone();

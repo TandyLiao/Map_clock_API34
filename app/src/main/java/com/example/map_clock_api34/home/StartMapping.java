@@ -218,7 +218,11 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            getActivity().getSupportFragmentManager().popBackStack();
+            EndMapping endMapping = new EndMapping();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, endMapping);
+            transaction.addToBackStack(null);
+            transaction.commit();
         });
 
         btnPre = rootView.findViewById(R.id.btnPre);
@@ -347,6 +351,7 @@ public class StartMapping extends Fragment {
                         removeOverlayView();
                     }
                     ShowPopupWindow(destinationIndex);
+                    sendBroadcastWithDestinationIndex(4, destinationIndex, 0);
                 }
 
                 if (intent.hasExtra("mapInfo")) {
@@ -379,7 +384,9 @@ public class StartMapping extends Fragment {
             case 3:
                 intent.putExtra("stopVibrateAndRing", "stop");
                 break;
-
+            case 4:
+                intent.putExtra("startVibrateAndRing", destinationIndex);
+                break;
         }
 
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
