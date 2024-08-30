@@ -225,9 +225,7 @@ public class StartMapping extends Fragment {
         btnPre.setOnClickListener(v -> {
             if(nowIndex>0){
                 nowIndex--;
-                if(nowIndex==0){
-                    Toast.makeText(getActivity(),"這是第一個地點囉",Toast.LENGTH_SHORT).show();
-                }
+
                 sendBroadcastWithDestinationIndex(2, 0,-1);
                 userLocation = locationManager.getLastKnownLocation(commandstr);
                 double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
@@ -247,18 +245,16 @@ public class StartMapping extends Fragment {
                 // 計算將這個邊界框移動到地圖中心所需的偏移量
                 int padding = 300; // 偏移量（以像素為單位）
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
-                updateResetButtonState();
             }
-
+            if(nowIndex==0){
+                Toast.makeText(getActivity(),"這是第一個地點囉",Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnNext = rootView.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(v -> {
             if(nowIndex<sharedViewModel.getLocationCount()){
                 nowIndex++;
-                if(nowIndex==sharedViewModel.getLocationCount()){
-                    Toast.makeText(getActivity(),"這是最後一個地點囉",Toast.LENGTH_SHORT).show();
-                }
 
                 sendBroadcastWithDestinationIndex(2, 0,1);
                 userLocation = locationManager.getLastKnownLocation(commandstr);
@@ -279,7 +275,9 @@ public class StartMapping extends Fragment {
                 // 計算將這個邊界框移動到地圖中心所需的偏移量
                 int padding = 300; // 偏移量（以像素為單位）
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
-                updateResetButtonState();
+            }
+            if(nowIndex==sharedViewModel.getLocationCount()){
+                Toast.makeText(getActivity(),"這是最後一個地點囉",Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -398,42 +396,12 @@ public class StartMapping extends Fragment {
         super.onResume();
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(destinationUpdateReceiver,
                 new IntentFilter("DESTINATION_UPDATE"));
-        updateResetButtonState();
 
     }
     @Override
     public void onPause() {
         super.onPause();
 
-    }
-    private void updateResetButtonState() {
-        if (nowIndex == 0) {
-            //設置可點擊狀態
-            btnPre.setEnabled(false);
-            //改變按鈕文字顏色
-            btnPre.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-            //改變按鈕的Drawable
-            btnPre.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定啟用時的背景顏色
-        }else {
-            btnPre.setEnabled(true);
-            //改變按鈕文字顏色
-            btnPre.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
-            //改變按鈕的Drawable
-            btnPre.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
-        }
-        if(nowIndex == sharedViewModel.getLocationCount()){
-            btnNext.setEnabled(false);
-            //改變按鈕文字顏色
-            btnNext.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-            //改變按鈕的Drawable
-            btnNext.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定啟用時的背景顏色
-        }else{
-            btnNext.setEnabled(true);
-            //改變按鈕文字顏色
-            btnNext.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
-            //改變按鈕的Drawable
-            btnNext.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
-        }
     }
 }
 
