@@ -392,6 +392,7 @@ public class StartMapping extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         stopLocationUpdates();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(destinationUpdateReceiver);
     }
     @Override
     public void onResume() {
@@ -404,7 +405,7 @@ public class StartMapping extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(destinationUpdateReceiver);
+
     }
     private void updateResetButtonState() {
         if (nowIndex == 0) {
