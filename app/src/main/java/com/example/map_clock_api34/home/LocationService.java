@@ -1,8 +1,6 @@
 package com.example.map_clock_api34.home;
 
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -25,6 +23,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.widget.TextView;
@@ -53,7 +52,7 @@ public class LocationService extends Service {
 
     private boolean notificationSent = false; // 新增的变量
     private boolean isVibrating = false; // 震动状态标志
-
+    private boolean isPlayingRingtone = false;
     private double[] latitude;
     private double[] longitude;
     private String[] destinationName;
@@ -183,12 +182,12 @@ public class LocationService extends Service {
                 } else {
                     totalTime -= 10;
                 }
-
                 if ((last_distance < 0.15 && time < notificationTime) && !notificationSent) {
                     temp = destinationIndex;
                     sendBroadcast(1);
                     sendNotification("快到了!");
                 }
+
                 //自動更換地點
                 if (last_distance < 0.1 && time < 1) {
                     if(temp == destinationIndex){
@@ -321,7 +320,7 @@ public class LocationService extends Service {
 
     private void sendNotification(String message) {
         if (notificationSent) {
-            return; // 如果已经发送过通知，则不再发送
+            return;
         }
 
         Context context = getApplicationContext();
@@ -353,7 +352,7 @@ public class LocationService extends Service {
             if(note[temp]==null){
                 fullMessage = "即將抵達: " + destinationName[temp];
             }else{
-                // 将通知内容改为 "即將抵達: " + 目的地名称
+
                 fullMessage = "即將抵達: " + destinationName[temp]+"\n記得要做: " + note[temp];
             }
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -374,7 +373,7 @@ public class LocationService extends Service {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(0, builder.build());
 
-            notificationSent = true; // 更新通知状态，防止再次发送
+            notificationSent = true;
 
         } catch (SecurityException e) {
             Toast.makeText(context, "無法發送通知，請求被拒絕", Toast.LENGTH_SHORT).show();
@@ -390,7 +389,7 @@ public class LocationService extends Service {
         if (vibrator != null && vibrator.hasVibrator()) {
             final long vibrationDuration = 3000; // 振动3秒
             final long restDuration = 1000; // 休息1秒
-            final long totalDuration = 5 * 60 * 1000;
+            final long totalDuration = 5 * 60 * 1000; // 总持续时间5分钟
 
             final Handler handler = new Handler();
             final long endTime = System.currentTimeMillis() + totalDuration;
@@ -400,18 +399,10 @@ public class LocationService extends Service {
                 @Override
                 public void run() {
                     if (System.currentTimeMillis() < endTime && isVibrating) {
-                        vibrator.vibrate(vibrationDuration);
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                vibrator.cancel(); // 停止震动
-                                handler.postDelayed(this, restDuration); // 休息2秒
-                            }
-                        }, vibrationDuration);
-                        handler.postDelayed(this, vibrationDuration + restDuration); // 继续下一次振动
+                        vibrator.vibrate(VibrationEffect.createOneShot(vibrationDuration, VibrationEffect.DEFAULT_AMPLITUDE)); // 震动3秒
+                        handler.postDelayed(this, vibrationDuration + restDuration); // 震动完后休息1秒再继续
                     } else {
-                        vibrator.cancel(); // 确保在结束时停止震动
-                        isVibrating = false; // 震动结束
+                        stopVibrate(); // 停止震动
                     }
                 }
             };
@@ -419,6 +410,7 @@ public class LocationService extends Service {
             handler.post(vibrationRunnable); // 开始震动循环
         }
     }
+
 
     private void stopVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -436,27 +428,46 @@ public class LocationService extends Service {
         }
         return count;
     }
-
     private void playRingtone() {
         Uri ringtoneUri = loadRingtoneUri();
         if (ringtoneUri != null) {
             mRingtone = RingtoneManager.getRingtone(getApplicationContext(), ringtoneUri);
             if (mRingtone != null) {
-                mRingtone.play();
-                new Handler().postDelayed(new Runnable() {
+                final long ringtoneDuration = 3000; // 响铃3秒
+                final long restDuration = 1000; // 休息1秒
+                final long totalDuration = 5 * 60 * 1000; // 总持续时间5分钟
+
+                final Handler handler = new Handler();
+                final long endTime = System.currentTimeMillis() + totalDuration;
+                isPlayingRingtone = true; // 设置铃声播放状态
+
+                Runnable ringtoneRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        stopRingtone();
+                        if (System.currentTimeMillis() < endTime && isPlayingRingtone) {
+                            mRingtone.play(); // 播放铃声3秒
+
+                            // 停止铃声后休息1秒
+                            handler.postDelayed(() -> mRingtone.stop(), ringtoneDuration);
+
+                            // 继续下一次响铃循环
+                            handler.postDelayed(this, ringtoneDuration + restDuration);
+                        } else {
+                            stopRingtone(); // 停止铃声
+                        }
                     }
-                }, 3000); // 播放3秒后停止
+                };
+
+                handler.post(ringtoneRunnable); // 开始铃声循环
             }
         }
     }
 
     private void stopRingtone() {
         if (mRingtone != null && mRingtone.isPlaying()) {
-            mRingtone.stop();
+            mRingtone.stop(); // 停止铃声
         }
+        isPlayingRingtone = false; // 重置铃声播放状态
     }
 
 
