@@ -191,7 +191,14 @@ public class LocationService extends Service {
                 //自動更換地點
                 if (last_distance < 0.1 && time < 1) {
                     if(temp == destinationIndex){
+                        stopVibrate();
+                        stopRingtone();
+
                         destinationIndex++;
+                        Log.d("LocationService", "Stopping vibration and ringtone for destination: " + destinationName[destinationIndex]);
+                        Log.d("LocationService", "Vibration enabled: " + vibrate[destinationIndex]);
+                        Log.d("LocationService", "Ringtone enabled: " + ringtone[destinationIndex]);
+
                         resetNotificationSent(); // 重置通知状态
                         startLocation = nowLocation;
                         sendBroadcast(2);
