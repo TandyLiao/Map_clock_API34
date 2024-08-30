@@ -203,7 +203,6 @@ public class StartMapping extends Fragment {
             //移除疊加在底下防止點擊其他區域的View
             removeOverlayView();
             popupWindow.dismiss();
-            mMap.clear();
             moveCameraAndCalculateTime(destinationIndex);
         });
     }
@@ -290,7 +289,7 @@ public class StartMapping extends Fragment {
     private void moveCameraAndCalculateTime(int destinationIndex){
         if(destinationIndex < sharedViewModel.getLocationCount() && nowIndex==destinationIndex){
             //尋找下個地點
-
+            mMap.clear();
             int desNextIndex=destinationIndex+1;
             //傳回LocationService讓她換下個地點
             sendBroadcastWithDestinationIndex(1, desNextIndex,0);
