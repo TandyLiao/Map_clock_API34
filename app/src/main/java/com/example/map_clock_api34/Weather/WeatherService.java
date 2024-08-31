@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.util.Log;
 
 
+import com.example.map_clock_api34.BuildConfig;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -17,7 +19,7 @@ import java.io.IOException;
 
 public class WeatherService {
 
-    private static final String API_KEY = "CWA-90088B0B-CD8C-470A-9064-457A4FCD60FC";
+    private static final String API_KEY = BuildConfig.WEATHER_API_KEY;
     private static final String BASE_URL = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/";
 
     WeatherLocationAreaHelper weatherHelper;

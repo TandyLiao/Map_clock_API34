@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.example.map_clock_api34.BuildConfig;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ import okhttp3.Response;
 public class GoogleDistanceHelper {
     private static final String TAG = "GoogleDistanceHelper";
     private static final String BASE_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
-    private static final String API_KEY = "AIzaSyCf6tnPO_VbhDJ_EreXXRZes48c7X5giSM";
+    private static final String API_KEY = BuildConfig.GOOGLE_DISTANCE_API_KEY;
     private static final int MAX_DESTINATIONS_PER_REQUEST = 25;
     private static final int RATE_LIMIT = 50; // 每秒最多請求次數
     private static final long TIME_WINDOW = 1000L; // 毫秒

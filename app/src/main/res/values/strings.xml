@@ -2,7 +2,6 @@
     <string name="app_name">地圖鬧鐘</string>
     <string name="drawer_open">Drawer_opened</string>
     <string name="drawer_close">Drawer_closed</string>
-    <string name="google_maps_key" translatable="false">AIzaSyCbpeVvXVw2iTtAS_Fe-CS8_v8RHq2kX3k</string>
     <string name="choose_ringtone">Choose Ringtone</string>
     <string name="back">Back</string>
     <string name="test_ring">Test Ringtone</string>
