@@ -1,7 +1,10 @@
 package com.example.map_clock_api34.history;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -40,6 +43,7 @@ import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.HistoryTable;
 import com.example.map_clock_api34.home.HomeFragment;
+import com.example.map_clock_api34.tutorial;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -75,6 +79,28 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.history_fragment_history, container, false);
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("HistoryLogin", false);
+
+        Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
+        if(isLoggedIn==false)
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("WhichPage",1);
+            //editor.putBoolean("HistoryLogin",true);
+            editor.apply();
+
+            tutorial tutorialFragment = new tutorial();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.hide(currentFragment);
+            transaction.add(R.id.fl_container, tutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+        }
+
+
 
         dbHelper = new HistoryDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);

@@ -98,23 +98,31 @@ public class CreateLocation extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+
+
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("CreateLogin", false);
 
-
+        Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
         if(isLoggedIn==false)
         {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",0);
-            editor.putBoolean("CreateLogin",true);
+            //editor.putBoolean("CreateLogin",true);
             editor.apply();
+
             tutorial tutorialFragment = new tutorial();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, tutorialFragment);
+            transaction.hide(currentFragment);
+            transaction.add(R.id.fl_container, tutorialFragment);
             transaction.addToBackStack(null);
             transaction.commit();
 
         }
+
+
+
+
 
         //初始化ActionBar
         setupActionBar();
