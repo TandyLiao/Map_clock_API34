@@ -224,7 +224,7 @@ public class LocationService extends Service {
                 intent.putExtra("destinationIndex", destinationIndex);
                 break;
             case 2:
-                intent.putExtra("mapInfo", "目的:"+destinationName[destinationIndex]+"\n剩餘公里為: "+last_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                intent.putExtra("mapInfo", destinationName[destinationIndex]+"\n剩餘公里為: "+last_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
                 break;
             case 3:
                 intent.putExtra("nowIndex", destinationIndex);
@@ -361,7 +361,7 @@ public class LocationService extends Service {
                 fullMessage = "即將抵達: " + destinationName[temp];
             }else{
 
-                fullMessage = "即將抵達: " + destinationName[temp]+"\n記得要做: " + note[temp];
+                fullMessage = "即將抵達：\n" + destinationName[temp]+"\n\n代辦事項：\n" + note[temp];
             }
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.appicon_tem6)
@@ -369,8 +369,8 @@ public class LocationService extends Service {
                     .setContentText(fullMessage)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
-
+                    .setAutoCancel(true)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(fullMessage));
 
             if (isRingtoneEnabled) {
                 playRingtone();

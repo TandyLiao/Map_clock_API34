@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
 
@@ -22,6 +23,9 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,6 +45,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.StyleSpan;
 //設定組新增
 import android.content.Intent;
 import android.widget.Toast;
@@ -173,15 +178,16 @@ public class StartMapping extends Fragment {
         ((ViewGroup) rootView).addView(overlayView);
 
         TextView title = view.findViewById(R.id.txtNote);
-        title.setTextSize(25);
-        if(sharedViewModel.getNote(destinationIndex)==null){
-            title.setText("目的地-\n"+destinationName[destinationIndex]+"\n即將抵達");
+        title.setTextSize(18);
 
+        SpannableStringBuilder spannableBuilder = new SpannableStringBuilder();
+        if(sharedViewModel.getNote(destinationIndex)==null){
+            title.setText("即將抵達：\n"+destinationName[destinationIndex]);
         }
         else{
-            title.setText("目的地-\n"+destinationName[destinationIndex]+"\n即將抵達"+"\n記得要做: "+sharedViewModel.getNote(destinationIndex));
-        }
+            title.setText("即將抵達：\n"+destinationName[destinationIndex]+"\n\n代辦事項：\n"+sharedViewModel.getNote(destinationIndex));
 
+        }
 
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
         BTNPopup.setText("停止震鈴");
@@ -191,6 +197,7 @@ public class StartMapping extends Fragment {
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
             if(destinationIndex==sharedViewModel.getLocationCount()){
+                sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
                 EndMapping enfFragment = new EndMapping();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fl_container, enfFragment);
@@ -204,6 +211,7 @@ public class StartMapping extends Fragment {
             removeOverlayView();
             popupWindow.dismiss();
             moveCameraAndCalculateTime(destinationIndex);
+            sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
         });
     }
     //把疊加在底層的View刪掉
