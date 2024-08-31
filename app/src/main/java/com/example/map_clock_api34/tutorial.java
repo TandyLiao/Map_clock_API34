@@ -19,16 +19,13 @@ import androidx.fragment.app.Fragment;
 
 public class tutorial extends Fragment {
     View rootView;
-    public int count =0;
+    public int count = 1;
     public String name, drawablename;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_tutorial, container, false);
-
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
-        int page = sharedPreferences.getInt("WhichPage", -1);
 
         // 隱藏 ActionBar
         if (getActivity() != null && getActivity() instanceof AppCompatActivity) {
@@ -38,11 +35,15 @@ public class tutorial extends Fragment {
             }
         }
 
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        int page = sharedPreferences.getInt("WhichPage", -1);
+
         Button next = rootView.findViewById(R.id.nextpage);
         next.setOnClickListener(v ->{
             count++;
             getImage();
         });
+
         switch (page)
         {
             case 0:
@@ -69,6 +70,7 @@ public class tutorial extends Fragment {
 
     public void getImage()
     {
+
         ImageView imageView = rootView.findViewById(R.id.TutoImage);
         name= drawablename + count;
         int id= getResources().getIdentifier(name,"drawable",getActivity().getPackageName());

@@ -215,6 +215,7 @@ public class LocationService extends Service {
         }
 
     };
+
     //送目前地點給StartMapping
     private void sendBroadcast(int dataType) {
         Intent intent = new Intent("DESTINATION_UPDATE");
