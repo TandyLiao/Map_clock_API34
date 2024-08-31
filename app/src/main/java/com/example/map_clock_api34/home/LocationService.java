@@ -77,7 +77,7 @@ public class LocationService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        //打開收到來自StartMapping的訊息
+        // 打开收到来自 StartMapping 的消息
         LocalBroadcastManager.getInstance(this).registerReceiver(destinationServiceReceiver,
                 new IntentFilter("DESTINATIONINDEX_UPDATE"));
 
@@ -86,6 +86,37 @@ public class LocationService extends Service {
         Log.d("+", "Service is being created");
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // 定义 LocationListener
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                // 这里处理位置更新
+                Log.d("LocationService", "Location updated using " + location.getProvider());
+                // 根据需要更新位置处理逻辑
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {}
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                // Network 提供者无法使用时，回退到 GPS
+                if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+                    Log.d("LocationService", "Network provider disabled, switching to GPS");
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
+                }
+            }
+        };
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // 首次使用 Network 提供者
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
+            Log.d("LocationService", "Network location updates requested");
+        } else {
+            Log.d("LocationService", "Location permission not granted, stopping service");
+            stopSelf();
+        }
 
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
@@ -101,7 +132,6 @@ public class LocationService extends Service {
 
         startForeground(1, notification);
     }
-
     //背景執行創建後被第二個調用的方法
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
