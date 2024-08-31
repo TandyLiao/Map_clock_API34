@@ -48,7 +48,7 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginBottom="2dp"
                     android:gravity="center_vertical"
-                    android:text="書籤名稱:"
+                    android:text="路線名稱:"
                     android:textColor="@color/green"
                     android:textSize="18sp" />
 

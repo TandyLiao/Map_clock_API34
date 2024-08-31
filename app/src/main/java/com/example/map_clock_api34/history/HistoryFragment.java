@@ -243,7 +243,7 @@ public class HistoryFragment extends Fragment {
                 hashMap.put("placeName2", "\u2193");
                 hashMap.put("placeName3", afterArrow);
                 hashMap.put("time", time);
-                arrayList.add(hashMap);
+                arrayList.add(0,hashMap);
             }
             cursor.close();
         }
@@ -419,11 +419,20 @@ public class HistoryFragment extends Fragment {
                     String city = locationCursor.getString(5);
                     String area = locationCursor.getString(6);
                     String note = locationCursor.getString(7);
-
+                    //設定
+                    boolean vibrate=locationCursor.getInt(8)!=0;
+                    boolean ringtone=locationCursor.getInt(9)!=0;
+                    int notificationTime=locationCursor.getInt(10);
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
-                    sharedViewModel.setNote(note, count++);
+                    sharedViewModel.setNote(note, count);
+                    //設定
+                    sharedViewModel.setVibrate(vibrate,count);
+                    sharedViewModel.setRingtone(ringtone,count);
+                    sharedViewModel.setNotification(notificationTime,count++);
+
+
                     getLastKnownLocation();
                 }
                 locationCursor.close();
@@ -545,6 +554,9 @@ public class HistoryFragment extends Fragment {
         // 從 arrayList 中刪除選中的項目
         arrayList.removeAll(selectedItems);
         listAdapterHistory.notifyDataSetChanged();
+        isEdit = false;
+        isDelete = false;
+        updateButtonState();
     }
 
     //打開導航頁面

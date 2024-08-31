@@ -1,5 +1,7 @@
 package com.example.map_clock_api34.home;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -7,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
 
@@ -19,6 +22,10 @@ import android.annotation.SuppressLint;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,8 +45,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.StyleSpan;
 //設定組新增
 import android.content.Intent;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -53,11 +62,11 @@ public class StartMapping extends Fragment {
     private Ringtone mRingtone;
 
     private LocationManager locationManager;
-    private String commandstr = LocationManager.GPS_PROVIDER;
+    private String commandstr = LocationManager.NETWORK_PROVIDER;
     Location userLocation;
 
     private GoogleMap mMap;
-
+    private SharedViewModel sharedViewModel;
     private String[] destinationName = new String[7];
     private double[] latitude = new double[7];
     private double[] longitude = new double[7];
@@ -66,15 +75,16 @@ public class StartMapping extends Fragment {
     private boolean[] ringtone = new boolean[7];
     private int[] notification = new int[7];
 
-    int numberOfPlace = 0;
-
     LatLngBounds.Builder builder;
     LatLng destiantion_LatLng;
     LatLngBounds bounds;
 
+    PopupWindow popupWindow;
     TextView txtTime;
     View rootView;
     View overlayView;
+    Button btnPre, btnNext;
+    int nowIndex=0;
 
     @SuppressLint("MissingPermission")
     @Nullable
@@ -85,7 +95,7 @@ public class StartMapping extends Fragment {
 
         rootView = inflater.inflate(R.layout.home_start_mapping, container, false);
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapp);
@@ -122,6 +132,7 @@ public class StartMapping extends Fragment {
         public void onMapReady(GoogleMap googleMap) {
             mMap=googleMap;
 
+            mMap.clear();
             //取得用戶的定位
             userLocation = locationManager.getLastKnownLocation(commandstr);
             //跑出藍色定位點
@@ -131,10 +142,10 @@ public class StartMapping extends Fragment {
             // 添加起點和目的地的位置
             builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
 
-            destiantion_LatLng= new LatLng(latitude[numberOfPlace],longitude[numberOfPlace]);
-            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[numberOfPlace]));
+            destiantion_LatLng= new LatLng(latitude[0],longitude[0]);
+            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[0]));
 
-            builder.include(new LatLng(latitude[numberOfPlace], longitude[numberOfPlace]));
+            builder.include(new LatLng(latitude[0], longitude[0]));
             bounds = builder.build();
             // 計算將這個邊界框移動到地圖中心所需的偏移量
             int padding = 300; // 偏移量（以像素為單位）
@@ -143,14 +154,15 @@ public class StartMapping extends Fragment {
             //第一次粗略估算到達目的地所需時間
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0], userLocation.getLatitude(), userLocation.getLongitude())/1000;
             double time = Math.round(trip_distance/4*60);
-            txtTime.setText("目的:"+destinationName[0]+"\n公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+            txtTime.setText("目的:"+destinationName[0]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
         }
     };
 
+    @SuppressLint("MissingPermission")
     private void ShowPopupWindow(int destinationIndex) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
-        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setWidth(700);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
@@ -166,21 +178,40 @@ public class StartMapping extends Fragment {
         ((ViewGroup) rootView).addView(overlayView);
 
         TextView title = view.findViewById(R.id.txtNote);
-        title.setText("目的地-"+destinationName[destinationIndex]+"-即將抵達");
+        title.setTextSize(18);
+
+        SpannableStringBuilder spannableBuilder = new SpannableStringBuilder();
+        if(sharedViewModel.getNote(destinationIndex)==null){
+            title.setText("即將抵達：\n"+destinationName[destinationIndex]);
+        }
+        else{
+            title.setText("即將抵達：\n"+destinationName[destinationIndex]+"\n\n代辦事項：\n"+sharedViewModel.getNote(destinationIndex));
+
+        }
 
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        BTNPopup.setText("停止震鈴");
         BTNPopup.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            //移除疊加在底下防止點擊其他區域的View
-            removeOverlayView();
+            sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
         });
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
-            int desNumber=destinationIndex+1;
-            sendBroadcastWithDestinationIndex(desNumber);
+            if(destinationIndex==sharedViewModel.getLocationCount()){
+                sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
+                EndMapping enfFragment = new EndMapping();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_container, enfFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                removeOverlayView();
+                popupWindow.dismiss();
+                return;
+            }
             //移除疊加在底下防止點擊其他區域的View
             removeOverlayView();
             popupWindow.dismiss();
+            moveCameraAndCalculateTime(destinationIndex);
+            sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
         });
     }
     //把疊加在底層的View刪掉
@@ -191,15 +222,106 @@ public class StartMapping extends Fragment {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            EndMapping enfFragment = new EndMapping();
+            EndMapping endMapping = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, enfFragment);
+            transaction.replace(R.id.fl_container, endMapping);
             transaction.addToBackStack(null);
             transaction.commit();
         });
+
+        btnPre = rootView.findViewById(R.id.btnPre);
+        btnPre.setOnClickListener(v -> {
+            if(nowIndex>0){
+                nowIndex--;
+
+                sendBroadcastWithDestinationIndex(2, 0,-1);
+                userLocation = locationManager.getLastKnownLocation(commandstr);
+                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
+                double time = Math.round(trip_distance/4*60);
+                txtTime.setText("目的:"+destinationName[nowIndex]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+
+                mMap.clear();
+                builder = new LatLngBounds.Builder();
+                // 添加起點和目的地的位置
+                builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
+
+                destiantion_LatLng= new LatLng(latitude[nowIndex],longitude[nowIndex]);
+                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[nowIndex]));
+
+                builder.include(new LatLng(latitude[nowIndex], longitude[nowIndex]));
+                bounds = builder.build();
+                // 計算將這個邊界框移動到地圖中心所需的偏移量
+                int padding = 300; // 偏移量（以像素為單位）
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+            }
+            if(nowIndex==0){
+                Toast.makeText(getActivity(),"這是第一個地點囉",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnNext = rootView.findViewById(R.id.btnNext);
+        btnNext.setOnClickListener(v -> {
+            if(nowIndex<sharedViewModel.getLocationCount()){
+                nowIndex++;
+
+                sendBroadcastWithDestinationIndex(2, 0,1);
+                userLocation = locationManager.getLastKnownLocation(commandstr);
+                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
+                double time = Math.round(trip_distance/4*60);
+                txtTime.setText("目的:"+destinationName[nowIndex]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+
+                mMap.clear();
+                builder = new LatLngBounds.Builder();
+                // 添加起點和目的地的位置
+                builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
+
+                destiantion_LatLng= new LatLng(latitude[nowIndex],longitude[nowIndex]);
+                mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[nowIndex]));
+
+                builder.include(new LatLng(latitude[nowIndex], longitude[nowIndex]));
+                bounds = builder.build();
+                // 計算將這個邊界框移動到地圖中心所需的偏移量
+                int padding = 300; // 偏移量（以像素為單位）
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+            }
+            if(nowIndex==sharedViewModel.getLocationCount()){
+                Toast.makeText(getActivity(),"這是最後一個地點囉",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private void moveCameraAndCalculateTime(int destinationIndex){
+        if(destinationIndex < sharedViewModel.getLocationCount() && nowIndex==destinationIndex){
+            //尋找下個地點
+            mMap.clear();
+            int desNextIndex=destinationIndex+1;
+            //傳回LocationService讓她換下個地點
+            sendBroadcastWithDestinationIndex(1, desNextIndex,0);
+
+            userLocation = locationManager.getLastKnownLocation(commandstr);
+
+            builder = new LatLngBounds.Builder();
+            // 添加起點和目的地的位置
+            builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
+
+            destiantion_LatLng= new LatLng(latitude[desNextIndex],longitude[desNextIndex]);
+            mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[desNextIndex]));
+
+            builder.include(new LatLng(latitude[desNextIndex], longitude[desNextIndex]));
+            bounds = builder.build();
+            // 計算將這個邊界框移動到地圖中心所需的偏移量
+            int padding = 300; // 偏移量（以像素為單位）
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[desNextIndex],longitude[desNextIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
+            double time = Math.round(trip_distance/4*60);
+            txtTime.setText("目的:"+destinationName[desNextIndex]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+        }
     }
 
     //背景執行
@@ -214,9 +336,6 @@ public class StartMapping extends Fragment {
         serviceIntent.putExtra("ringtone",ringtone);
         serviceIntent.putExtra("note", note);
         ContextCompat.startForegroundService(getActivity(), serviceIntent);
-        Log.d("StartMapping", "Vibrate before sending: " + Arrays.toString(vibrate));
-        Log.d("StartMapping", "Ringtone before sending: " + Arrays.toString(ringtone));
-
 
     }
 
@@ -229,14 +348,55 @@ public class StartMapping extends Fragment {
     private BroadcastReceiver destinationUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int destinationIndex = intent.getIntExtra("destinationIndex", 0);
-            ShowPopupWindow(destinationIndex); // 显示 PopupWindow 并传递当前的 destinationIndex
+            if ("DESTINATION_UPDATE".equals(intent.getAction())) {
+
+                if (intent.hasExtra("destinationIndex")) {
+                    int destinationIndex = intent.getIntExtra("destinationIndex", 0);
+                    if (popupWindow != null && popupWindow.isShowing()) {
+                        // 如果已經顯示，關閉它
+                        sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
+                        popupWindow.dismiss();
+                        removeOverlayView();
+                    }
+                    ShowPopupWindow(destinationIndex);
+                    sendBroadcastWithDestinationIndex(4, destinationIndex, 0);
+                }
+
+                if (intent.hasExtra("mapInfo")) {
+                    String mapInfo = intent.getStringExtra("mapInfo");
+                    txtTime.setText(mapInfo);
+                }
+
+                if (intent.hasExtra("nowIndex")) {
+                    nowIndex = intent.getIntExtra("nowIndex",0);
+                }
+                if (intent.hasExtra("nextDestination")){
+                    int destinationIndex = intent.getIntExtra("nextDestination", 0)-1;
+                    mMap.clear();
+                    moveCameraAndCalculateTime(destinationIndex);
+                }
+            }
         }
     };
     //送資料給LocationService
-    private void sendBroadcastWithDestinationIndex(int destinationIndex) {
-        Intent intent = new Intent("DESTINATION_UPDATE");
-        intent.putExtra("destinationIndex", destinationIndex);
+    private void sendBroadcastWithDestinationIndex(int dataType, int destinationIndex, int change) {
+        Intent intent = new Intent("DESTINATIONINDEX_UPDATE");
+
+        switch (dataType) {
+            case 1:
+                intent.putExtra("destinationFinalIndex", destinationIndex);
+                break;
+            case 2:
+                intent.putExtra("destinationIndexChange", change);
+                break;
+            case 3:
+                intent.putExtra("stopVibrateAndRing", "stop");
+                break;
+            case 4:
+                intent.putExtra("startVibrateAndRing", destinationIndex);
+                break;
+        }
+
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
     //切換Fragment才會觸發
@@ -244,17 +404,19 @@ public class StartMapping extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         stopLocationUpdates();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(destinationUpdateReceiver);
     }
     @Override
     public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(destinationUpdateReceiver,
                 new IntentFilter("DESTINATION_UPDATE"));
+
     }
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(destinationUpdateReceiver);
+
     }
 }
 

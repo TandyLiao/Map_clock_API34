@@ -154,11 +154,7 @@ public class CreatLocation_setting extends Fragment {
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CreateLocation createFragment = new CreateLocation();
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fl_container, createFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
     }

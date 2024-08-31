@@ -37,7 +37,7 @@
             android:layout_weight="6"
             android:gravity="center_horizontal"
             android:padding="5dp"
-            android:text="書籤名稱"
+            android:text="路線名稱"
             android:textColor="@color/green"
             android:textSize="20dp" />
     </LinearLayout>
@@ -117,7 +117,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:padding="8dp"
-                    android:text="建立書籤"
+                    android:text="建立路線"
                     android:textColor="@color/green"
                     android:textSize="15sp" />
             </LinearLayout>
@@ -162,7 +162,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:padding="8dp"
-                    android:text="修改書籤"
+                    android:text="修改路線"
                     android:textColor="@color/green"
                     android:textSize="15sp" />
 

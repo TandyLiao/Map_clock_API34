@@ -1,7 +1,5 @@
 package com.example.map_clock_api34;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class SharedViewModel extends ViewModel {
@@ -29,7 +27,7 @@ public class SharedViewModel extends ViewModel {
     private boolean[] ringtone = {true, true, true, true, true, true, true};
 
     // 提醒時間預設為 5
-    private int[] notification = {5, 5, 5, 5, 5, 5, 5};
+    private int[] notificationTime = {5, 5, 5, 5, 5, 5, 5};
 
 
     public String time, routeName, uuid;
@@ -44,7 +42,7 @@ public class SharedViewModel extends ViewModel {
     public void setPosition(int position){ this.position = position;}
     public void setNote(String note, int position){    this.note[position]=note;  }
     //benson
-    public void setNotification(int whichTime, int position){ this.notification[position] = whichTime; }
+    public void setNotification(int whichTime, int position){ this.notificationTime[position] = whichTime; }
     public void setVibrate(Boolean check, int position){ this.vibrate[position] = check; }
     public void setRingtone(Boolean check, int position){ this.ringtone[position] = check; }
 
@@ -76,7 +74,7 @@ public class SharedViewModel extends ViewModel {
     //benson
     public String getNote(int position){    return note[position];  }
     //benson
-    public int getNotification(int position){ return notification[position]; }
+    public int getNotification(int position){ return notificationTime[position]; }
     public Boolean getVibrate(int position){ return vibrate[position]; }
     public Boolean getRingtone(int position){ return ringtone[position]; }
 
@@ -130,9 +128,9 @@ public class SharedViewModel extends ViewModel {
         vibrate[start] = vibrate[end];
         vibrate[end] = btemp;
 
-        itemp = notification[start];
-        notification[start] = notification[end];
-        notification[end] = itemp;
+        itemp = notificationTime[start];
+        notificationTime[start] = notificationTime[end];
+        notificationTime[end] = itemp;
     }
 
     public void delet(int position) {
@@ -160,7 +158,7 @@ public class SharedViewModel extends ViewModel {
 
         vibrate = new boolean[]{true, true, true, true, true, true, true};
         ringtone = new boolean[]{true, true, true, true, true, true, true};
-        notification = new int[]{5, 5, 5, 5, 5, 5, 5};
+        notificationTime = new int[]{5, 5, 5, 5, 5, 5, 5};
     }
 
     public int getLocationCount() {

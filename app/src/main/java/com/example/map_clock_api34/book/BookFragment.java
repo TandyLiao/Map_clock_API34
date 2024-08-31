@@ -165,11 +165,19 @@ public class BookFragment extends Fragment {
                             String area = locationCursor.getString(6);
                             String Note = locationCursor.getString(7);
 
+                            boolean vibrate=locationCursor.getInt(8)!=0;
+                            boolean ringtone=locationCursor.getInt(9)!=0;
+                            int notificationTime=locationCursor.getInt(10);
+
                             sharedViewModel.uuid = locationCursor.getString(4);
                             sharedViewModel.setDestination(placeName, latitude, longitude);
                             sharedViewModel.setCapital(city);
                             sharedViewModel.setArea(area);
-                            sharedViewModel.setNote(Note, count++);
+
+                            sharedViewModel.setNote(Note, count);
+                            sharedViewModel.setVibrate(vibrate,count);
+                            sharedViewModel.setRingtone(ringtone,count);
+                            sharedViewModel.setNotification(notificationTime,count++);
                         }
 
                         locationCursor.close();
@@ -261,7 +269,7 @@ public class BookFragment extends Fragment {
 
                 // Create TextView
                 TextView bookTitle = new TextView(requireContext());
-                bookTitle.setText("書籤");
+                bookTitle.setText("收藏路線");
                 bookTitle.setTextSize(15);
                 bookTitle.setTextColor(getResources().getColor(R.color.green)); // Change text color
                 bookTitle.setPadding(10, 10, 10, 10); // Set padding
@@ -481,11 +489,19 @@ public class BookFragment extends Fragment {
                     String area = locationCursor.getString(6);
                     String note = locationCursor.getString(7);
 
+                    //設定
+                    boolean vibrate=locationCursor.getInt(8)!=0;
+                    boolean ringtone=locationCursor.getInt(9)!=0;
+                    int notificationTime=locationCursor.getInt(10);
+
                     sharedViewModel.setDestination(placeName, latitude, longitude);
                     sharedViewModel.setCapital(city);
                     sharedViewModel.setArea(area);
-                    sharedViewModel.setNote(note, count++);
-
+                    sharedViewModel.setNote(note, count);
+                    //設定
+                    sharedViewModel.setVibrate(vibrate,count);
+                    sharedViewModel.setRingtone(ringtone,count);
+                    sharedViewModel.setNotification(notificationTime,count++);
                     getLastKnownLocation();
                 }
                 locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks

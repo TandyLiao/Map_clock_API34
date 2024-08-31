@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.example.map_clock_api34.BuildConfig;
+
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -16,12 +18,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import com.example.map_clock_api34.BuildConfig;
+
+
 public class AuthHelper {
 
     // 常量，用於OAuth2.0身份驗證
     private static final String TOKEN_URL = "https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token";
-    private static final String CLIENT_ID = "410631773-c1cdfe37-9629-4d15"; // 替換為你的Client ID
-    private static final String CLIENT_SECRET = "0c434717-9fe4-4326-a7a4-b8c08394587f"; // 替換為你的Client Secret
+    private static final String CLIENT_ID = BuildConfig.AUTH_CLIENT_ID; // 替換為你的Client ID
+    private static final String CLIENT_SECRET = BuildConfig.AUTH_CLIENT_SECRET; // 替換為你的Client Secret
     private static final long TOKEN_EXPIRY_BUFFER = 60 * 1000; // 1分鐘的緩衝時間
 
     // 用於保存和加載token的SharedPreferences鍵名

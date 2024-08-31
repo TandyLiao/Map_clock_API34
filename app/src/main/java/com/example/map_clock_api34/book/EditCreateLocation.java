@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
@@ -46,6 +47,7 @@ import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
 import com.example.map_clock_api34.note.Note;
+import com.example.map_clock_api34.setting.CreatLocation_setting;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -169,6 +171,18 @@ public class EditCreateLocation extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
+        ImageView bookset = rootView.findViewById(R.id.bookset_imageView);
+        bookset.setOnClickListener(v -> {
+            if (arrayList.isEmpty()) {
+                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            CreatLocation_setting creatLocation_setting = new CreatLocation_setting();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, creatLocation_setting);
+            transaction.addToBackStack(null);
+             transaction.commit();
+        });
     }
     private void warning(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
@@ -279,6 +293,10 @@ public class EditCreateLocation extends Fragment {
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
             String Note = sharedViewModel.getNote(i);
+            //設定
+            boolean vibrate=sharedViewModel.getVibrate(i);
+            boolean ringtone=sharedViewModel.getRingtone(i);
+            int notificationTime=sharedViewModel.getNotification(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -289,6 +307,10 @@ public class EditCreateLocation extends Fragment {
                 values.put(LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable2.COLUMN_AREA_NAME, AreaName);
                 values.put(LocationTable2.COLUMN_NOTE_INFO, Note);
+                //設定
+                values.put(LocationTable2.COLUMN_VIBRATE, vibrate);
+                values.put(LocationTable2.COLUMN_RINGTONE, ringtone);
+                values.put(LocationTable2.COLUMN_notificationTime, notificationTime);
 
                 db.insert(LocationTable2.TABLE_NAME, null, values);
             }
@@ -342,7 +364,7 @@ public class EditCreateLocation extends Fragment {
 
         // 創建右上角的名字
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("修改書籤");
+        bookTitle.setText("修改路線");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
         bookTitle.setPadding(10, 10, 10, 10); // 设置内边距

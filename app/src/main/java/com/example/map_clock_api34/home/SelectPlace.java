@@ -71,11 +71,8 @@ public class SelectPlace extends Fragment {
     String destiantion_Name, cityName, areaName;
     private Geocoder geocoder;
     private View overlayView;
-    private boolean isRingtoneEnabled;
-    private boolean isVibrationEnabled;
-    private int notificationTime;
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
+    private OnMapReadyCallback callback = new OnMapReadyCallback() {
         @SuppressLint("MissingPermission")
         public void onMapReady(GoogleMap googleMap) {
 
@@ -140,7 +137,6 @@ public class SelectPlace extends Fragment {
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        geocoder = new Geocoder(requireContext(), Locale.getDefault());
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
@@ -343,7 +339,7 @@ public class SelectPlace extends Fragment {
         }
 
         // 使用內置的 Geocoder 獲取其他地區名稱
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses != null && !addresses.isEmpty()) {
@@ -366,7 +362,7 @@ public class SelectPlace extends Fragment {
     public String getAreaNameCustom(Context context,double latitude, double longitude) {
 
         // 使用內置的 Geocoder 獲取其他地區名稱
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses != null && !addresses.isEmpty()) {
@@ -387,5 +383,9 @@ public class SelectPlace extends Fragment {
 
         // 返回默認值
         return "";
+    }
+
+    public void onPause() {
+        super.onPause();
     }
 }

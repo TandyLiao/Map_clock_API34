@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
+import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
@@ -65,16 +66,16 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         item1.put("data", "記事");
         arrayList.add(item1);
         HashMap<String, String> item2 = new HashMap<>();
-        item2.put("data", "加入書籤");
+        item2.put("data", "地點設定");
         arrayList.add(item2);
         HashMap<String, String> item3 = new HashMap<>();
-        item3.put("data", "天氣");
+        item3.put("data", "收藏路線");
         arrayList.add(item3);
         HashMap<String, String> item4 = new HashMap<>();
         item4.put("data", "直達公車路線");
         arrayList.add(item4);
         HashMap<String, String> item5 = new HashMap<>();
-        item5.put("data", "地點設定");
+        item5.put("data", "天氣");
         arrayList.add(item5);
     }
 
@@ -92,6 +93,20 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.commit();
         }
         else if (position == 1) {
+            if (sharedViewModel.getLocationCount() == -1) {
+                Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            CreatLocation_setting createlocation_setting = new CreatLocation_setting();
+            fragmentTransaction.replace(R.id.fl_container, createlocation_setting);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+
+        }
+
+
+
+        else if (position == 2) {
             if (sharedViewModel.getLocationCount() == -1) {
                 Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
                 return;
@@ -125,10 +140,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                         // 處理確定按鈕點擊事件
                         saveInLocationDB();
                         saveInBookDB(bookmarkName);
-                        Toast.makeText(context, "書籤 '" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "路線'" + bookmarkName + "' 已添加", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     } else {
-                        Toast.makeText(context, "請輸入書籤名稱", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "請輸入路線名稱", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -141,19 +156,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             });
 
             dialog.show();
-        }
 
-
-
-        else if (position == 2) {
-            if (sharedViewModel.getLocationCount() == -1) {
-                Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            WheatherFragment wheatherFragment = new WheatherFragment();
-            fragmentTransaction.replace(R.id.fl_container, wheatherFragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
         } else if (position == 3) {
             if (sharedViewModel.getLocationCount() == -1) {
                 Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
@@ -168,13 +171,15 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 Toast.makeText(context, "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
                 return;
             }
-            CreatLocation_setting createlocation_setting = new CreatLocation_setting();
-            fragmentTransaction.replace(R.id.fl_container, createlocation_setting);
+            WheatherFragment wheatherFragment = new WheatherFragment();
+            fragmentTransaction.replace(R.id.fl_container, wheatherFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
 
+
         } else if (position == 5) {
-           // settingsHandler.showSettingsPopupWindow();
+
+
         }
     }
 
@@ -191,7 +196,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             case "記事":
                 holder.horecycleimageView.setImageResource(R.drawable.note);
                 break;
-            case "加入書籤":
+            case "收藏路線":
                 holder.horecycleimageView.setImageResource(R.drawable.addbookmark);
                 break;
             case "天氣":
@@ -264,6 +269,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
             String Note = sharedViewModel.getNote(i);
+            //設定
+            boolean vibrate=sharedViewModel.getVibrate(i);
+            boolean ringtone=sharedViewModel.getRingtone(i);
+            int notificationTime=sharedViewModel.getNotification(i);
 
             if (name != null) {
                 ContentValues values = new ContentValues();
@@ -274,6 +283,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_CITY_NAME, CityName);
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_AREA_NAME, AreaName);
                 values.put(BookDatabaseHelper.LocationTable2.COLUMN_NOTE_INFO, Note);
+                //設定
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_VIBRATE, vibrate);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_RINGTONE, ringtone);
+                values.put(BookDatabaseHelper.LocationTable2.COLUMN_notificationTime, notificationTime);
 
                 db.insert(BookDatabaseHelper.LocationTable2.TABLE_NAME, null, values);
             }

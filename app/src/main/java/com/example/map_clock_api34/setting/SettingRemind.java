@@ -68,7 +68,7 @@ public class SettingRemind extends Fragment {
         mAudioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
 
         chooseButton = view.findViewById(R.id.choose_setting);
-        ringTest = view.findViewById(R.id.ring_test);
+        //ringTest = view.findViewById(R.id.ring_test);
         vibrateTest = view.findViewById(R.id.vibrate_testt);
         switchRing = view.findViewById(R.id.switch_Ring);
         switchVibrate = view.findViewById(R.id.switch_VIBRATE);
@@ -102,12 +102,12 @@ public class SettingRemind extends Fragment {
             }
         });
 
-        ringTest.setOnClickListener(new View.OnClickListener() {
+       /*ringTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 playRingtoneWithIncreasingVolume();
             }
-        });
+        });*/
 
         vibrateTest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -305,7 +305,6 @@ public class SettingRemind extends Fragment {
     private void updateButtonLabels() {
         ring.setText("鈴聲");
         vibrate.setText("震動");
-        texttt.setText("測試鈴聲與震動的觸發");
     }
 
     @Override

@@ -8,9 +8,6 @@
         <!-- Status bar color -->
         <item name="android:windowBackground">@color/lightyellow</item>
         <item name="android:statusBarColor">@color/lightgreen</item>
-
-
-
     </style>
 
 
