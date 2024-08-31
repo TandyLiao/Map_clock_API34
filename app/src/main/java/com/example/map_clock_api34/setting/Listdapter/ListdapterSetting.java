@@ -120,8 +120,13 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
+        boolean vibrate = sharedViewModel.getVibrate(position);
+        boolean ringtone = sharedViewModel.getRingtone(position);
+        int notification = sharedViewModel.getNotification(position);
+
+
         if (!enableDrag) {
-            if (position == selectedPosition) {
+            if (!vibrate || ! ringtone || notification !=5) {
                 holder.dragHandle.setImageResource(R.drawable.anya062516);
             } else {
                 holder.dragHandle.setImageResource(R.drawable.vibrate);
@@ -168,6 +173,9 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
             sharedViewModel.setRingtone(ringtoneSwitch.isChecked(), selectedPosition);
             sharedViewModel.setNotification(newNotificationTime, selectedPosition);
 
+            // 刷新 RecyclerView
+            notifyDataSetChanged();
+
             String destinationName = arrayList.get(selectedPosition).get("data"); // 取得選定的目的地名稱
 
             Toast.makeText(context, "已存取設定", Toast.LENGTH_SHORT).show();
@@ -176,6 +184,7 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
                     ", Vibration = " + newVibrationEnabled +
                     ", Time = " + newNotificationTime +
                     ", Destination = " + destinationName);
+
         });
     }
 
@@ -199,6 +208,9 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
             return 5;
         }
         return 5; // 默認值
+    }
+    private void updateicon(){
+
     }
 }
 

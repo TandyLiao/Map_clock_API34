@@ -35,6 +35,16 @@
                     android:orientation="vertical">
 
                     <!-- First Card -->
+                    <TextView
+                        android:id="@+id/texttt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="45dp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/set_remind1"
+                        android:textColor="@color/green"
+                        android:textSize="24dp" />
+
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardView1_1"
                         android:layout_width="match_parent"
@@ -58,7 +68,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="30dp"
                                 android:layout_marginTop="10dp"
-                                android:text="鈴 聲"
+                                android:text="@string/set_remind2"
                                 android:textColor="@color/green"
                                 android:textSize="25dp"
                                  />
@@ -101,7 +111,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="30dp"
                                 android:layout_marginTop="10dp"
-                                android:text="震 動"
+                                android:text="@string/set_remind3"
                                 android:textColor="@color/green"
                                 android:textSize="25dp"
                                  />
@@ -140,159 +150,14 @@
                             android:layout_marginTop="0dp"
                             android:background="@android:color/transparent"
                             android:gravity="start"
-                            android:text="選擇鈴聲"
+                            android:text="@string/set_remind4"
                             android:textColor="@color/green"
                             android:textSize="25dp"
 
                             app:backgroundTint="@null" />
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Fourth Card with RadioGroup -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardView1_4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginBottom="15dp"
-                        app:cardBackgroundColor="@color/darkyellow2"
-                        app:cardCornerRadius="20dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center|start"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="45dp"
-                                android:layout_marginTop="20dp"
-                                android:layout_marginBottom="10dp"
-                                android:text="震動時長"
-                                android:textColor="@color/green"
-                                android:textSize="25sp"
-/>
-
-                            <RadioGroup
-                                android:id="@+id/radioGroupVIBRATE"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="20dp"
-                                android:gravity="center"
-                                android:orientation="horizontal">
-
-                                <RadioButton
-                                    android:id="@+id/radioVIBRATE1"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="3秒鐘"
-                                    android:textColor="@color/green"
-                                    android:textSize="20dp"
-                                     />
-
-                                <RadioButton
-                                    android:id="@+id/radioVIBRATE2"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="5秒鐘"
-                                    android:textColor="@color/green"
-                                    android:textSize="20dp"
-                                    />
-
-                                <RadioButton
-                                    android:id="@+id/radioVIBRATE3"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="10秒鐘"
-                                    android:textColor="@color/green"
-                                    android:textSize="20dp"
-                                     />
-                            </RadioGroup>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardView2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="5dp"
-                app:cardBackgroundColor="@color/darkyellow"
-                app:cardCornerRadius="20dp">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardView2_1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="15dp"
-                    app:cardBackgroundColor="@color/darkyellow2"
-                    app:cardCornerRadius="20dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center|start"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="45dp"
-                            android:layout_marginTop="20dp"
-                            android:layout_marginBottom="10dp"
-                            android:text="幾分鐘內發送通知"
-                            android:textColor="@color/green"
-                            android:textSize="25sp"
-/>
-
-                        <RadioGroup
-                            android:id="@+id/radioGroupNotificationTime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="20dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <RadioButton
-                                android:id="@+id/radioOneMinute"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="1分鐘"
-                                android:textColor="@color/green"
-                                android:textSize="20dp"
-                                />
-
-                            <RadioButton
-                                android:id="@+id/radioThreeMinutes"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="3分鐘"
-                                android:textColor="@color/green"
-                                android:textSize="20dp"
-                                />
-
-                            <RadioButton
-                                android:id="@+id/radioFiveMinutes"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="5分鐘"
-                                android:textColor="@color/green"
-                                android:textSize="20dp"
-                                 />
-                        </RadioGroup>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
@@ -310,43 +175,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/texttt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="45dp"
-                        android:layout_marginTop="10dp"
-                        android:text="示範鈴聲與震動的觸發"
-                        android:textColor="@color/green"
-                        android:textSize="24dp"
-                        />
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardView3_1"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginBottom="5dp"
-                        app:cardBackgroundColor="@color/darkyellow2"
-                        app:cardCornerRadius="20dp">
-
-                        <Button
-                            android:id="@+id/ring_test"
-                            android:layout_width="match_parent"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="30dp"
-                            android:layout_marginTop="0dp"
-                            android:background="@android:color/transparent"
-                            android:gravity="start"
-                            android:text="點我示範鈴聲"
-                            android:textColor="@color/green"
-                            android:textSize="25dp"
-
-                            app:backgroundTint="@null" />
-                    </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardView3_2"
@@ -367,7 +195,7 @@
                             android:layout_marginTop="0dp"
                             android:background="@android:color/transparent"
                             android:gravity="start"
-                            android:text="點我示範震動"
+                            android:text="@string/set_remind5"
                             android:textColor="@color/green"
                             android:textSize="25dp"
 
