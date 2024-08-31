@@ -55,5 +55,8 @@ dependencies {
     implementation 'org.json:json:20210307'
     implementation 'com.google.code.gson:gson:2.8.6'
 
+    //是ViewPager
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
 
 }

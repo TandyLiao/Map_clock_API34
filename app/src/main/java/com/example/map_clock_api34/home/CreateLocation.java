@@ -1,7 +1,10 @@
 package com.example.map_clock_api34.home;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -46,6 +49,7 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
+import com.example.map_clock_api34.tutorial;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,6 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
 
 public class CreateLocation extends Fragment {
 
@@ -92,6 +97,24 @@ public class CreateLocation extends Fragment {
         dbHistoryHelper = new HistoryDatabaseHelper(requireContext());
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("CreateLogin", false);
+
+
+        if(isLoggedIn==false)
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("WhichPage",0);
+            editor.putBoolean("CreateLogin",true);
+            editor.apply();
+            tutorial tutorialFragment = new tutorial();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, tutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+        }
 
         //初始化ActionBar
         setupActionBar();

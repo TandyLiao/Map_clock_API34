@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/green</item>
         <item name="colorAccent">@color/lightyellow</item>
         <!-- Status bar color -->
-        <item name="android:windowBackground">@color/black</item>
+        <item name="android:windowBackground">@color/lightyellow</item>
         <item name="android:statusBarColor">@color/lightgreen</item>
 
 

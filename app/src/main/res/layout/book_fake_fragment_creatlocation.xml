@@ -157,13 +157,13 @@
 
                     <ImageView
                         android:id="@+id/bookcreate_imageView"
-                        android:layout_width="81dp"
+                        android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:layout_gravity="center"
                         android:background="@drawable/addbookmark"
                         android:clickable="true"
                         android:padding="20dp"
-                        app:srcCompat="@drawable/anya062516" />
+                         />
 
                     <TextView
                         android:id="@+id/bookcreate_Name"
@@ -205,10 +205,10 @@
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:layout_gravity="center"
-                        android:background="@drawable/bookmark2"
+                        android:background="@drawable/setting1"
                         android:clickable="true"
                         android:padding="20dp"
-                        app:srcCompat="@drawable/anya062516" />
+                         />
 
                     <TextView
                         android:id="@+id/bookset_Name"
