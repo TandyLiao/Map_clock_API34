@@ -3,6 +3,9 @@ package com.example.map_clock_api34.note;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +33,7 @@ public class NoteEnterContent extends Fragment {
     private SharedViewModel sharedViewModel;
     private EditText detailTextView;
     private TextView title;
+    private TextView counttextview;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.note_note_enter_content, container, false);
@@ -37,8 +41,8 @@ public class NoteEnterContent extends Fragment {
         detailTextView = rootView.findViewById(R.id.textView3);//benson
         title = rootView.findViewById(R.id.textView4);
         //改尺寸
-
         title.setTextColor(getResources().getColor(R.color.black)); // 更改文字颜色
+        counttextview=rootView.findViewById(R.id.textcount);
 
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -57,7 +61,29 @@ public class NoteEnterContent extends Fragment {
 
             }
         });
+        detailTextView.setFilters(new InputFilter[]{
+                new InputFilter.LengthFilter(100)
+        });
+        detailTextView.addTextChangedListener(new LineLimitWatcher(20, detailTextView));
+        // 設置 TextWatcher 來監聽輸入變化
+        detailTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // 輸入前的操作
+            }
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // 當輸入內容改變時
+                int length = s.length();
+                counttextview.setText(length + "/100"); // 更新字數顯示
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // 輸入後的操作
+            }
+        });
 
         return rootView;
     }
@@ -181,6 +207,7 @@ public class NoteEnterContent extends Fragment {
         super.onResume();
         detailTextView.setText(sharedViewModel.getNote(sharedViewModel.getPosition()));
     }
+
 
 }
 
