@@ -10,7 +10,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleViewnote"
         android:layout_width="match_parent"
-        android:layout_height="600dp"
+        android:layout_height="550dp"
         android:background="@drawable/recyclerview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -32,7 +32,8 @@
             android:id="@+id/btn_reset"
             android:layout_width="100dp"
             android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="50dp"
             android:background="@drawable/btn_additem"
             android:text="重置"
             android:textColor="@color/green"
@@ -49,7 +50,8 @@
             android:id="@+id/btn_sure"
             android:layout_width="100dp"
             android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="1dp"
+            android:layout_marginTop="50dp"
             android:background="@drawable/btn_additem"
             android:text="確認"
             android:textColor="@color/green"

@@ -3,6 +3,8 @@ package com.example.map_clock_api34.setting.Listdapter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -140,7 +142,11 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
     }
 
     public void showSettingsPopupWindow() {
-        View settingsView = LayoutInflater.from(context).inflate(R.layout.popupwindow_settings, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
+
+        //套用XML的布局
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View settingsView = inflater.inflate(R.layout.popupwindow_settings, null);
 
         Switch ringtoneSwitch = settingsView.findViewById(R.id.switchRingtone);
         Switch vibrationSwitch = settingsView.findViewById(R.id.switchVibration);
@@ -155,11 +161,10 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         ringtoneSwitch.setChecked(isRingtoneEnabled);
         vibrationSwitch.setChecked(isVibrationEnabled);
         setSelectedNotificationTime(notificationTime, notificationTimeGroup);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
         builder.setView(settingsView);
 
         final AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.show();
 
         cancelButton.setOnClickListener(v -> dialog.dismiss());

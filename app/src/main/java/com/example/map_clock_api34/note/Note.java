@@ -152,7 +152,7 @@ public class Note extends Fragment {
             //設置可點擊狀態
             btnreset.setEnabled(true);
             //改變按鈕文字顏色
-            btnreset.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
+            btnreset.setTextColor(ContextCompat.getColor(requireContext(), R.color.green));
             //改變按鈕的Drawable
             btnreset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem)); // 設定啟用時的背景顏色
         } else {
@@ -188,7 +188,8 @@ public class Note extends Fragment {
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
         );
-        params.setMarginStart(10); // 设置左边距
+        params.setMarginStart(10);
+        mark.setPadding(10,10,10,10);
         mark.setLayoutParams(params);
 
         // 創建TextView

@@ -18,6 +18,8 @@
     <string name="AddRoute">新增路線</string>
     <string name="cancel_button">取消</string>
 
+    <string name="creatlocation1">請按「新增」添加地點</string>
+
     <string name="set_remind1">測試鈴聲震動</string>
     <string name="set_remind2">鈴聲</string>
     <string name="set_remind3">震動</string>

@@ -30,30 +30,17 @@
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/start_autocomplete_fragment2"
             android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-            android:layout_width="0dp"
+            android:layout_width="300dp"
             android:layout_height="50dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/search_location_frame"
-            app:layout_constraintEnd_toStartOf="@+id/microphoneButton"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/returnpage"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/map"/>
 
-        <ImageView
-            android:id="@+id/microphoneButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:adjustViewBounds="true"
-            android:maxWidth="45dp"
-            android:maxHeight="45dp"
-            android:padding="10dp"
-            android:src="@drawable/microphone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/start_autocomplete_fragment2" />
 
         <fragment
             android:id="@+id/map"

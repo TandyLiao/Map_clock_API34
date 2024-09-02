@@ -3,12 +3,12 @@
     android:shape="rectangle">
 
     <!-- Background color of the PopupWindow -->
-    <solid android:color="@color/lightyellow" />
+    <solid android:color="@color/darkyellow" />
 
     <!-- Border width and color -->
     <stroke
         android:width="3dp"
-        android:color="@color/darkyellow" />
+        android:color="@color/darkyellow2" />
 
     <!-- Optional: Corner radius for rounded corners -->
     <corners android:topLeftRadius="20dp"

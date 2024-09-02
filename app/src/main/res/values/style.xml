@@ -16,4 +16,8 @@
         <item name="android:textColorPrimary">#000000</item> <!-- 设置主要文本颜色为黑色 -->
         <item name="android:textColorSecondary">#333333</item> <!-- 设置次要文本颜色为深灰色 -->
     </style>
+    <style name="EditText" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:colorControlNormal">@color/gray</item> <!-- 设置主要文本颜色为黑色 -->
+        <item name="android:colorControlActivated">@color/darkgreen</item> <!-- 设置次要文本颜色为深灰色 -->
+    </style>
 </resources>

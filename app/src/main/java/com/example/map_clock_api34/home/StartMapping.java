@@ -81,6 +81,7 @@ public class StartMapping extends Fragment {
 
     PopupWindow popupWindow;
     TextView txtTime;
+    TextView locatetionTitle;
     View rootView;
     View overlayView;
     Button btnPre, btnNext;
@@ -118,6 +119,7 @@ public class StartMapping extends Fragment {
         }
 
         txtTime = rootView.findViewById(R.id.txtTime);
+        locatetionTitle=rootView.findViewById(R.id.locatetionTitle);
 
         setupButton();
         //開始背景執行
@@ -154,7 +156,8 @@ public class StartMapping extends Fragment {
             //第一次粗略估算到達目的地所需時間
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0], userLocation.getLatitude(), userLocation.getLongitude())/1000;
             double time = Math.round(trip_distance/4*60);
-            txtTime.setText("目的:"+destinationName[0]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+            locatetionTitle.setText("地點:"+destinationName[0]);
+            txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
         }
     };
@@ -242,7 +245,8 @@ public class StartMapping extends Fragment {
                 userLocation = locationManager.getLastKnownLocation(commandstr);
                 double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
                 double time = Math.round(trip_distance/4*60);
-                txtTime.setText("目的:"+destinationName[nowIndex]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                locatetionTitle.setText("地點:"+destinationName[nowIndex]);
+                txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
                 mMap.clear();
                 builder = new LatLngBounds.Builder();
@@ -272,7 +276,8 @@ public class StartMapping extends Fragment {
                 userLocation = locationManager.getLastKnownLocation(commandstr);
                 double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
                 double time = Math.round(trip_distance/4*60);
-                txtTime.setText("目的:"+destinationName[nowIndex]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                locatetionTitle.setText("地點:"+destinationName[nowIndex]);
+                txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
                 mMap.clear();
                 builder = new LatLngBounds.Builder();
@@ -320,7 +325,8 @@ public class StartMapping extends Fragment {
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[desNextIndex],longitude[desNextIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
             double time = Math.round(trip_distance/4*60);
-            txtTime.setText("目的:"+destinationName[desNextIndex]+"\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+            locatetionTitle.setText("地點:"+destinationName[desNextIndex]);
+            txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
         }
     }
 

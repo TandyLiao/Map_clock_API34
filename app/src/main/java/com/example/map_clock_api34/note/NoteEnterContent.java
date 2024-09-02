@@ -110,6 +110,7 @@ public class NoteEnterContent extends Fragment {
                 100, // 设置宽度为 100 像素
                 100 // 设置高度为 100 像素
         );
+        mark.setPadding(10,10,10,10);
         params.setMarginStart(10); // 设置左边距
         mark.setLayoutParams(params);
 

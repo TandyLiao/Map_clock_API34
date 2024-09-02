@@ -255,7 +255,7 @@ public class LocationService extends Service {
                 intent.putExtra("destinationIndex", destinationIndex);
                 break;
             case 2:
-                intent.putExtra("mapInfo", destinationName[destinationIndex]+"\n剩餘公里為: "+last_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                intent.putExtra("mapInfo", "\n剩餘公里為: "+last_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
                 break;
             case 3:
                 intent.putExtra("nowIndex", destinationIndex);

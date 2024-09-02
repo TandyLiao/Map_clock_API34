@@ -16,7 +16,7 @@
         android:checkable="true"
         app:cardBackgroundColor="@color/lightyellow"
         app:cardCornerRadius="20dp"
-        app:strokeColor="@color/darkyellow"
+        app:strokeColor="@color/darkyellow2"
         app:strokeWidth="2dp"
         android:layout_margin="10dp">
 

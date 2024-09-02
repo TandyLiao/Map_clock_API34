@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="350dp"
     android:layout_height="200dp"
-    android:background="@drawable/recycleview_item_weather"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_gravity="center"
     android:layout_margin="20dp"
-    android:layout_gravity="center">
+    android:background="@drawable/recycleview_item_weather">
 
 
     <ImageView
         android:id="@+id/weather_imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="3"
         android:background="@drawable/weather_rounded_image"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
@@ -23,58 +22,65 @@
         android:id="@+id/weather_card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="#60003366"
         app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:cardBackgroundColor="#60003366"
         app:layout_constraintHeight_percent="0.5"
-        android:layout_margin="10dp">
+        app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="match_parent">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/text_location"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:orientation="vertical">
+                android:layout_margin="10dp"
+                android:lines="2"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:text="讀檔中請稍後"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/temperature"/>
 
-                <TextView
-                    android:id="@+id/text_location"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_weight="2"
-                    android:gravity="center_vertical"
-                    android:text="讀檔中請稍後"
-                    android:textColor="@color/white"
-                    android:textSize="20dp" />
+            <TextView
+                android:id="@+id/cityname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:text="修但幾勒"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/temperature"
+                app:layout_constraintTop_toBottomOf="@id/text_location"/>
 
-                <TextView
-                    android:id="@+id/cityname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_weight="2"
-                    android:text="找城市"
-                    android:textColor="@color/white"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:id="@+id/text_wheather"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_weight="2"
-                    android:text="讀檔中請稍後~"
-                    android:textColor="@color/white"
-                    android:textSize="15sp" />
-
-            </LinearLayout>
+            <TextView
+                android:id="@+id/text_wheather"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="120dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:lines="3"
+                android:text="修但幾勒\n修但幾勒\n修但幾勒"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/cityname"
+                app:layout_constraintEnd_toStartOf="@id/temperature"
+                app:layout_constraintTop_toBottomOf="@id/cityname"/>
 
             <TextView
                 android:id="@+id/temperature"
@@ -82,13 +88,16 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"
-                android:layout_weight="2"
                 android:gravity="right"
-                android:text="溫度"
                 android:singleLine="true"
+                android:text="溫度"
                 android:textColor="@color/white"
-                android:textSize="30sp" />
-        </LinearLayout>
+                android:textSize="30sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
 

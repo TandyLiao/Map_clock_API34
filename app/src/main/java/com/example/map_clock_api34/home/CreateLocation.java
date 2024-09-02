@@ -536,7 +536,7 @@ public class CreateLocation extends Fragment {
             //設置可點擊狀態
             btnReset.setEnabled(true);
             //改變按鈕文字顏色
-            btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
+            btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.green));
             //改變按鈕的Drawable
             btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem)); // 設定啟用時的背景顏色
         } else {
@@ -553,7 +553,7 @@ public class CreateLocation extends Fragment {
             notification.setText("");
         }else{
             TextView notification = rootView.findViewById(R.id.textView6);
-            notification.setText("請按新增增加地點");
+            notification.setText("請按「新增」添加地點");
         }
     }
 

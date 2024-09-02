@@ -77,6 +77,7 @@ public class CreatLocation_setting extends Fragment {
                 100 // 设置高度为 100 像素
         );
         params.setMarginStart(10); // 设置左边距
+        mark.setPadding(10,10,10,10);
         mark.setLayoutParams(params);
 
         // 创建 TextView
