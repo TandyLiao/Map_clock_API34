@@ -104,6 +104,7 @@ public class CreateLocation extends Fragment {
         Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
         if(isLoggedIn==false)
         {
+
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",0);
             //editor.putBoolean("CreateLogin",true);

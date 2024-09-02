@@ -26,7 +26,6 @@ public class tutorial extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_tutorial, container, false);
-
         // 隱藏 ActionBar
         if (getActivity() != null && getActivity() instanceof AppCompatActivity) {
             AppCompatActivity activity = (AppCompatActivity) getActivity();
@@ -47,7 +46,7 @@ public class tutorial extends Fragment {
         switch (page)
         {
             case 0:
-                drawablename ="setting";
+                drawablename ="joking";
                 getImage();
                 break;
             case 1:
@@ -74,6 +73,8 @@ public class tutorial extends Fragment {
         ImageView imageView = rootView.findViewById(R.id.TutoImage);
         name= drawablename + count;
         int id= getResources().getIdentifier(name,"drawable",getActivity().getPackageName());
+
+        int backStackCount = getActivity().getSupportFragmentManager().getBackStackEntryCount();
         if (id==0)
         {
             getActivity().getSupportFragmentManager().popBackStack();
