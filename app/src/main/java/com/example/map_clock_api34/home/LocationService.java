@@ -50,8 +50,8 @@ public class LocationService extends Service {
     private LocationManager locationManager;
     private String commandstr = LocationManager.GPS_PROVIDER;
 
-    private boolean notificationSent = false; // 新增的变量
-    private boolean isVibrating = false; // 震动状态标志
+    private boolean notificationSent = false;
+    private boolean isVibrating = false;
     private boolean isPlayingRingtone = false;
     private double[] latitude;
     private double[] longitude;
@@ -71,29 +71,25 @@ public class LocationService extends Service {
     int temp;
     boolean isPause=false;
 
-    //背景執行創建第一個啟用的方法
     @SuppressLint("MissingPermission")
     @Override
     public void onCreate() {
         super.onCreate();
 
-        // 打开收到来自 StartMapping 的消息
         LocalBroadcastManager.getInstance(this).registerReceiver(destinationServiceReceiver,
                 new IntentFilter("DESTINATIONINDEX_UPDATE"));
 
-        resetNotificationSent(); // 初始化通知状态
-
+        resetNotificationSent();
         Log.d("+", "Service is being created");
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        // 定义 LocationListener
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                // 这里处理位置更新
+
                 Log.d("LocationService", "Location updated using " + location.getProvider());
-                // 根据需要更新位置处理逻辑
+
             }
 
             @Override
@@ -101,7 +97,6 @@ public class LocationService extends Service {
 
             @Override
             public void onProviderDisabled(String provider) {
-                // Network 提供者无法使用时，回退到 GPS
                 if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
                     Log.d("LocationService", "Network provider disabled, switching to GPS");
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
@@ -110,7 +105,7 @@ public class LocationService extends Service {
         };
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // 首次使用 Network 提供者
+
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
             Log.d("LocationService", "Network location updates requested");
         } else {
@@ -119,8 +114,9 @@ public class LocationService extends Service {
         }
 
         createNotificationChannel();
+
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.putExtra("show_start_mapping", true); // 添加额外信息
+        notificationIntent.putExtra("show_start_mapping", true);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -129,6 +125,7 @@ public class LocationService extends Service {
                 .setSmallIcon(R.drawable.appicon_tem6)
                 .setContentIntent(pendingIntent)
                 .build();
+
 
         startForeground(1, notification);
     }
@@ -195,7 +192,6 @@ public class LocationService extends Service {
                 }
 
                 totalTime += 10;
-                //這邊~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 pre_distance = Distance.getDistanceBetweenPointsNew(startLocation.getLatitude(), startLocation.getLongitude(), nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
                 last_distance = Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], nowLocation.getLatitude(), nowLocation.getLongitude()) / 1000;
                 notificationTime = notification[destinationIndex];
@@ -222,14 +218,13 @@ public class LocationService extends Service {
                 if (last_distance < 0.1 && time < 1) {
                     if(temp == destinationIndex && destinationIndex!=getValidDestinationCount()-1){
                         destinationIndex++;
-                        resetNotificationSent(); // 重置通知状态
+                        resetNotificationSent();
                         startLocation = nowLocation;
                         sendBroadcast(2);
                         sendBroadcast(4);
                     }
                 }
                 int validDestinationCount = getValidDestinationCount();
-                //問~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 if (destinationIndex < validDestinationCount) {
                     Log.d("LocationService", "Moving to next destination: " + destinationName[destinationIndex]);
                 } else {
@@ -282,7 +277,7 @@ public class LocationService extends Service {
                         sendBroadcast(3);
                         //把現在位置換成起點
                         startLocation = locationManager.getLastKnownLocation(commandstr);
-                        resetNotificationSent(); // 重置通知状态
+                        resetNotificationSent();
                     }
                 }
 
@@ -290,7 +285,7 @@ public class LocationService extends Service {
                     destinationIndex+=intent.getIntExtra("destinationIndexChange", 0);
                     sendBroadcast(3);
                     startLocation = locationManager.getLastKnownLocation(commandstr);
-                    resetNotificationSent(); // 重置通知状态
+                    resetNotificationSent();
                     if(Distance.getDistanceBetweenPointsNew(latitude[destinationIndex], longitude[destinationIndex], startLocation.getLatitude(), startLocation.getLongitude()) / 1000<0.18){
                         isPause=true;
                     }
@@ -312,7 +307,6 @@ public class LocationService extends Service {
                     if(temp!=destinationIndex){
 
                     }else{
-                        // 触发发送广播事件
                         sendBroadcast(1);
                         sendBroadcast(3);
                     }
@@ -427,27 +421,27 @@ public class LocationService extends Service {
     private void startVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
-            final long vibrationDuration = 3000; // 振动3秒
-            final long restDuration = 1000; // 休息1秒
-            final long totalDuration = 5 * 60 * 1000; // 总持续时间5分钟
+            final long vibrationDuration = 3000;
+            final long restDuration = 1000;
+            final long totalDuration = 5 * 60 * 1000;
 
             final Handler handler = new Handler();
             final long endTime = System.currentTimeMillis() + totalDuration;
-            isVibrating = true; // 设置震动状态
+            isVibrating = true;
 
             Runnable vibrationRunnable = new Runnable() {
                 @Override
                 public void run() {
                     if (System.currentTimeMillis() < endTime && isVibrating) {
-                        vibrator.vibrate(VibrationEffect.createOneShot(vibrationDuration, VibrationEffect.DEFAULT_AMPLITUDE)); // 震动3秒
-                        handler.postDelayed(this, vibrationDuration + restDuration); // 震动完后休息1秒再继续
+                        vibrator.vibrate(VibrationEffect.createOneShot(vibrationDuration, VibrationEffect.DEFAULT_AMPLITUDE));
+                        handler.postDelayed(this, vibrationDuration + restDuration);
                     } else {
-                        stopVibrate(); // 停止震动
+                        stopVibrate();
                     }
                 }
             };
 
-            handler.post(vibrationRunnable); // 开始震动循环
+            handler.post(vibrationRunnable);
         }
     }
 
@@ -455,8 +449,8 @@ public class LocationService extends Service {
     private void stopVibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && isVibrating) {
-            vibrator.cancel(); // 取消震动
-            isVibrating = false; // 更新震动状态
+            vibrator.cancel();
+            isVibrating = false;
         }
     }
     private int getValidDestinationCount() {
@@ -473,41 +467,39 @@ public class LocationService extends Service {
         if (ringtoneUri != null) {
             mRingtone = RingtoneManager.getRingtone(getApplicationContext(), ringtoneUri);
             if (mRingtone != null) {
-                final long ringtoneDuration = 3000; // 响铃3秒
-                final long restDuration = 1000; // 休息1秒
-                final long totalDuration = 5 * 60 * 1000; // 总持续时间5分钟
+                final long ringtoneDuration = 3000;
+                final long restDuration = 1000;
+                final long totalDuration = 5 * 60 * 1000;
 
                 final Handler handler = new Handler();
                 final long endTime = System.currentTimeMillis() + totalDuration;
-                isPlayingRingtone = true; // 设置铃声播放状态
+                isPlayingRingtone = true;
 
                 Runnable ringtoneRunnable = new Runnable() {
                     @Override
                     public void run() {
                         if (System.currentTimeMillis() < endTime && isPlayingRingtone) {
-                            mRingtone.play(); // 播放铃声3秒
+                            mRingtone.play();
 
-                            // 停止铃声后休息1秒
                             handler.postDelayed(() -> mRingtone.stop(), ringtoneDuration);
 
-                            // 继续下一次响铃循环
                             handler.postDelayed(this, ringtoneDuration + restDuration);
                         } else {
-                            stopRingtone(); // 停止铃声
+                            stopRingtone();
                         }
                     }
                 };
 
-                handler.post(ringtoneRunnable); // 开始铃声循环
+                handler.post(ringtoneRunnable);
             }
         }
     }
 
     private void stopRingtone() {
         if (mRingtone != null && mRingtone.isPlaying()) {
-            mRingtone.stop(); // 停止铃声
+            mRingtone.stop();
         }
-        isPlayingRingtone = false; // 重置铃声播放状态
+        isPlayingRingtone = false;
     }
 
 

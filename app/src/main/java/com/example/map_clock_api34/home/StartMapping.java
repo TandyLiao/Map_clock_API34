@@ -46,7 +46,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.StyleSpan;
-//設定組新增
 import android.content.Intent;
 import android.widget.Toast;
 
@@ -57,8 +56,8 @@ import java.util.Arrays;
 
 public class StartMapping extends Fragment {
 
-    private static final String CHANNEL_ID = "destination_alert_channel";//設定組新增
-    private boolean notificationSent = false; // 新增的变量(by設定組)
+    private static final String CHANNEL_ID = "destination_alert_channel";
+    private boolean notificationSent = false;
     private Ringtone mRingtone;
 
     private LocationManager locationManager;

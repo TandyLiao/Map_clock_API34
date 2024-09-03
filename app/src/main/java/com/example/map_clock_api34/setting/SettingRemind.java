@@ -119,8 +119,10 @@ public class SettingRemind extends Fragment {
                     return;
                 }
 
-                final long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000}; // {等待, 震动1秒, 等待1秒, 震动2秒, 等待1秒, 震动3秒}
-                vibrator.vibrate(vibrationPattern, -1); // -1 表示不重复
+                final long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000};
+                vibrator.vibrate(vibrationPattern, -1);
+
+
             }
         });
 
@@ -135,7 +137,7 @@ public class SettingRemind extends Fragment {
             }
         });
         setupActionBar();
-        updateButtonLabels(); // 初始化时更新按钮文本
+        updateButtonLabels();
 
         return view;
     }
@@ -167,12 +169,11 @@ public class SettingRemind extends Fragment {
     }
 
     private void playRingtoneWithIncreasingVolume() {
-        Uri ringtoneUri = loadRingtoneUri(); // 加載保存的鈴聲 URI
-
-        final int totalDuration = 10000; // 總時長 10 秒
-        final int intervals = 3; // 音量增量的次數
-        final int duration = totalDuration / intervals; // 每個步驟的持續時間
-        final float volumeIncrement = 1.0f / intervals; // 音量增量
+        Uri ringtoneUri = loadRingtoneUri();
+        final int totalDuration = 10000;
+        final int intervals = 3;
+        final int duration = totalDuration / intervals;
+        final float volumeIncrement = 1.0f / intervals;
 
         mMediaPlayer = MediaPlayer.create(requireContext(), ringtoneUri);
 
@@ -180,8 +181,6 @@ public class SettingRemind extends Fragment {
             return;
         }
         mMediaPlayer.setLooping(false);
-
-        // 使用 Handler 來控制音量增加和播放
         Handler mHandler = new Handler(Looper.getMainLooper());
 
         for (int i = 0; i < intervals; i++) {
@@ -310,7 +309,6 @@ public class SettingRemind extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // 在恢复时更新按钮标签
         updateButtonLabels();
         setupActionBar();
     }

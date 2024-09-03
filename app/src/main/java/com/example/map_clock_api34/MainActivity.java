@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateMenuIcons();
 
-        // 檢查 Intent 是否包含 "show_start_mapping"或 "show_end_map" 的額外信息
+
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra("show_start_mapping")) {
@@ -183,8 +183,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        setIntent(intent); // 更新 Activity 的 Intent
-        // 检查新的 Intent 中是否包含打开 StartMapping 的标识符
+        setIntent(intent);
         if (intent.hasExtra("show_start_mapping")) {
             boolean showStartMapping = intent.getBooleanExtra("show_start_mapping", false);
             if (showStartMapping) {
@@ -196,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
                 showStartMappingFragment();
             }
         } else if (intent.hasExtra("show_end_map")) {
-            boolean showEndMap = intent.getBooleanExtra("show_end_map", false);
 
         }
 
@@ -206,17 +204,14 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        // 查找是否存在 StartMapping 片段
         StartMapping startMappingFragment = (StartMapping) fragmentManager.findFragmentByTag("StartMapping");
         if (startMappingFragment == null) {
-            // 如果 StartMapping 片段不存在，创建一个新的
             startMappingFragment = new StartMapping();
             transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
             Log.d("MainActivity", "Adding new StartMapping fragment");
             transaction.addToBackStack(null);
 
         } else {
-            // 如果 StartMapping 片段已经存在，显示它
             transaction.show(startMappingFragment);
             Log.d("MainActivity", "Showing existing StartMapping fragment");
         }
