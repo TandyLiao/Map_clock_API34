@@ -2,6 +2,7 @@ package com.example.map_clock_api34.book;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,17 +14,17 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -35,10 +36,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.R;
-import com.example.map_clock_api34.SharedViewModel;
+
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
 import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
+
+import com.example.map_clock_api34.R;
+import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
@@ -51,26 +54,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class EditCreateLocation extends Fragment {
+public class BookCreateLocation extends Fragment {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001; // 定義位置權限請求代碼
 
-    private ActionBar actionBar;
-    private Button btnReset;        // 重置按鈕
-    private EditText bookNameInput; // 獲取書名的輸入框
-    private ImageView noteView;     //記事的圖片
-
-    private SharedViewModel sharedViewModel; // 共享的 ViewModel，用來在Fragment之間共享資料
-
     private View rootView;
     private View overlayView; // 用來覆蓋畫面的遮罩
-    private RecyclerView recyclerViewRoute; // 用來顯示路線的 RecyclerView
-    private RecyclerViewActionHome recyclerViewActionHome; // RecyclerView 的行為控制類
-    private ListAdapterRoute listAdapterRoute; // 路線的適配器
 
-    private ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 用來儲存路線的列表
+    private ActionBar actionBar;
+    private Button btnReset;    // 重置按鈕
+    private EditText bookNameInput;     // 書籤名稱的輸入框
+
+    private SharedViewModel sharedViewModel; // 共享的 ViewModel，用來在片段之間共享資料
 
     private BookDatabaseHelper dbBookHelper;
+
+    private RecyclerView recyclerViewRoute; // 用來顯示路線的 RecyclerView
+    private ListAdapterRoute listAdapterRoute; // 路線的適配器
+
+    private final ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 用來儲存路線的列表
+
     private String uniqueID;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,52 +83,21 @@ public class EditCreateLocation extends Fragment {
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         bookNameInput = rootView.findViewById(R.id.BookName);
 
-        setupActionBar();       // 初始化 ActionBar
-        setupButtons();         // 初始化按鈕
-        setupRecyclerViews();   // 初始化 RecyclerView
-        setupEditTextFocus();   // 監測書籤名稱是否改變，並即時儲存
+        setupActionBar();   // 初始化 ActionBar
+        setupButtons();     // 初始化按鈕
+        setupRecyclerViews(); // 初始化 RecyclerView
 
         return rootView;
     }
 
-    // 監測書籤名稱是否改變
-    private void setupEditTextFocus(){
-
-        // 讓使用者輸入書籤名稱後直接存入ShareViewModel
-        EditText editText = rootView.findViewById(R.id.BookName);
-        editText.setText(sharedViewModel.routeName); // 設置共享的路線名稱
-        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-
-            private String previousText = ""; // 用來保存更改名稱之前的文字內容
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    // 當獲得焦點時，保存當前文字內容
-                    previousText = editText.getText().toString();
-                } else {
-                    String inputText = editText.getText().toString();
-                    if (inputText.length() > 10) {
-                        // 文字長度大於10時顯示訊息，並將文字恢復到之前的狀態
-                        Toast.makeText(getActivity(), "書籤名稱的長度必須小於10個字", Toast.LENGTH_SHORT).show();
-                        editText.setText(previousText); // 恢復之前的文字
-                    } else {
-                        // 當失去焦點時，更新共享的路線名稱
-                        sharedViewModel.routeName = inputText;
-                    }
-                }
-            }
-        });
-    }
-
-    // 初始化按鈕，包括新增地點按鈕和重置按鈕
+    // 初始化按鈕，包括新增地點按鈕和重置按鈕的行為
     private void setupButtons() {
         // 新增地點按鈕
         Button btnAddItem = rootView.findViewById(R.id.btn_addItem);
         btnAddItem.setOnClickListener(v -> {
             // 如果使用者同意了位置權限，則打開選擇地點的頁面
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                if (sharedViewModel.getLocationCount() < 6) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (sharedViewModel.getLocationCount() < 6) { // 限制最多只能添加6個地點
                     openSelectPlaceFragment();
                 }
             } else {
@@ -148,40 +120,43 @@ public class EditCreateLocation extends Fragment {
                     return;
                 }
 
-                // 執行刪除和保存到資料庫的操作
-                deleteItemFromDB();
-                saveInLocationDB();
-                saveInBookDB();
-                sharedViewModel.clearAll(); // 清空共享資料
-                arrayList.clear();  // 清空路線列表
-                getActivity().getSupportFragmentManager().popBackStack(); // 回到上一頁
+                // 書籤名稱長度限制
+                if (bookNameInput.getText().toString().length() > 10) {
+                    Toast.makeText(getActivity(), "書籤名稱的長度必須小於10個字", Toast.LENGTH_SHORT).show();
+                } else {
+                    // 保存至資料庫並返回上一頁
+                    saveInLocationDB();
+                    saveInBookDB();
+                    sharedViewModel.clearAll();
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
             } else {
-                showWarningDialog(); // 如果沒有選擇地點，彈出提醒對話框
+                Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
             }
         });
 
-        noteView = rootView.findViewById(R.id.bookcreate_imageView);
+        // 記事按鈕
+        ImageView noteView = rootView.findViewById(R.id.bookcreate_imageView);
         noteView.setOnClickListener(v -> {
             if (arrayList.isEmpty()) {
                 Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // 打開記事頁面
-            Note notesFragment = new Note();
+            Note notesFragment = new Note(); // 打開記事頁面
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, notesFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
 
-        ImageView bookset = rootView.findViewById(R.id.bookset_imageView);
-        bookset.setOnClickListener(v -> {
+        // 設定按鈕
+        ImageView bookSetting = rootView.findViewById(R.id.bookset_imageView);
+        bookSetting.setOnClickListener(v -> {
             if (arrayList.isEmpty()) {
                 Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
                 return;
             }
-            //打開地點設定頁面
-            CreatLocation_setting creatLocation_setting = new CreatLocation_setting(); // 打開設置頁面
+            CreatLocation_setting creatLocation_setting = new CreatLocation_setting(); // 打開設定頁面
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, creatLocation_setting);
             transaction.addToBackStack(null);
@@ -189,66 +164,11 @@ public class EditCreateLocation extends Fragment {
         });
     }
 
-    // 顯示警告對話框，提示用戶確認刪除
-    private void showWarningDialog() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
-
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        View customView = inflater.inflate(R.layout.dialog_delete_waring, null);
-        builder.setView(customView);
-
-        // 創建並顯示對話框
-        AlertDialog dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(false); // 點擊外部不會關閉對話框
-
-        Button positiveButton = customView.findViewById(R.id.Popupsure);
-        Button negativeButton = customView.findViewById(R.id.PopupCancel);
-
-        //設置對話框裡確認按鈕的點擊監聽器
-        positiveButton.setOnClickListener(v -> {
-            deleteItemFromDB(); // 刪除資料庫內容
-            getActivity().getSupportFragmentManager().popBackStack(); // 回到上一頁
-            dialog.cancel();
-        });
-
-        //設置對話框裡取消按鈕的點擊監聽器
-        negativeButton.setOnClickListener(v -> {
-            dialog.cancel(); // 取消對話框
-        });
-
-        dialog.show();  // 顯示對話框
-    }
-
-    // 刪除資料庫中的內容
-    private void deleteItemFromDB() {
-
-        SQLiteDatabase bookDB = dbBookHelper.getWritableDatabase();
-
-        bookDB.beginTransaction();
-        try {
-            // 刪除書籍表中的記錄
-            String sql = "DELETE FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + "=?";
-            bookDB.execSQL(sql, new String[]{sharedViewModel.time});
-
-            // 刪除位置表中的記錄
-            String locationSql = "DELETE FROM " + LocationTable2.TABLE_NAME + " WHERE " + LocationTable2.COLUMN_ALARM_NAME + "=?";
-            bookDB.execSQL(locationSql, new String[]{sharedViewModel.uuid});
-
-            bookDB.setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            bookDB.endTransaction();
-            bookDB.close();
-        }
-    }
-
     // 將數據保存到書籍資料庫中
     private void saveInBookDB() {
         try {
-            SQLiteDatabase writeDB = dbBookHelper.getWritableDatabase();
-            SQLiteDatabase readDB = dbBookHelper.getReadableDatabase();
+            SQLiteDatabase writeDB = dbBookHelper.getWritableDatabase(); // 可寫資料庫
+            SQLiteDatabase readDB = dbBookHelper.getReadableDatabase(); // 可讀資料庫
 
             Cursor cursor = readDB.rawQuery("SELECT location_id " +
                     "FROM location WHERE alarm_name=?", new String[]{uniqueID});    //取得地點資料表的Cursor
@@ -260,6 +180,7 @@ public class EditCreateLocation extends Fragment {
             // 用來控制排列編號
             int arranged_id_local = 0;
 
+            // 將每個地點插入書籍表中
             while (cursor.moveToNext()) {
                 if (bookNameInput.getText().toString() != null) {
 
@@ -275,6 +196,7 @@ public class EditCreateLocation extends Fragment {
 
             writeDB.close();
             readDB.close();
+            cursor.close();
 
         } catch (Exception e) {
             Log.d("DBProblem", e.getMessage());
@@ -340,7 +262,7 @@ public class EditCreateLocation extends Fragment {
         recyclerViewRoute.setAdapter(listAdapterRoute);
 
         // 控制 RecyclerView 的行為，如交換、刪除等
-        recyclerViewActionHome = new RecyclerViewActionHome();
+        RecyclerViewActionHome recyclerViewActionHome = new RecyclerViewActionHome();
         recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
     }
 
@@ -348,14 +270,12 @@ public class EditCreateLocation extends Fragment {
     private void RecycleViewReset() {
 
         arrayList.clear(); // 清空列表
-        String shortLocationName;
 
+        String shortLocationName;
         if (sharedViewModel.getLocationCount() != -1) {
             for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
-
                 HashMap<String, String> hashMap = new HashMap<>();
                 shortLocationName = sharedViewModel.getDestinationName(j);
-
                 // 如果地名超過20個字，截斷並添加 "..."
                 if (shortLocationName.length() > 20) {
                     hashMap.put("data", shortLocationName.substring(0, 20) + "...");
@@ -371,11 +291,10 @@ public class EditCreateLocation extends Fragment {
 
     // 顯示重置按鈕的彈窗，確認是否重置
     private void ShowPopupWindow() {
-
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setWidth(700); // 設置寬度
-        popupWindow.setFocusable(false);        // 設置不可點擊其他地方
+        popupWindow.setFocusable(false); // 設置不可點擊其他地方
         popupWindow.setOutsideTouchable(false); // 不允許點擊外部關閉
         popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0); // 顯示彈窗
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -387,17 +306,17 @@ public class EditCreateLocation extends Fragment {
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
-        //對話框的取消按鈕
+        //設置對話框內的取消按紐
         Button btnCancel = view.findViewById(R.id.PopupCancel);
         btnCancel.setOnClickListener(v -> {
             popupWindow.dismiss(); // 關閉彈窗
             removeOverlayView(); // 移除覆蓋視圖
         });
 
-        //對話框的確認按鈕
-        Button btnsure = view.findViewById(R.id.Popupsure);
-        btnsure.setOnClickListener(v -> {
-            // 更新ShareViewModel 的地點計數並更新列表
+        //設置對話框內的確認按紐
+        Button btnSure = view.findViewById(R.id.Popupsure);
+        btnSure.setOnClickListener(v -> {
+            // 重置ShareViewModel 的地點計數並更新列表
             while (sharedViewModel.getLocationCount() >= 0) {
                 arrayList.remove(sharedViewModel.getLocationCount());
                 sharedViewModel.setLocationCount();
@@ -419,7 +338,6 @@ public class EditCreateLocation extends Fragment {
 
     // 更新重置按鈕的狀態
     private void updateResetButtonState() {
-
         if (sharedViewModel.getLocationCount() >= 0) {
             btnReset.setEnabled(true); // 設置為可點擊
             btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen)); // 改變按鈕顏色
@@ -445,7 +363,6 @@ public class EditCreateLocation extends Fragment {
 
     // 初始化 ActionBar 的外觀和行為
     private void setupActionBar() {
-
         actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
@@ -463,7 +380,7 @@ public class EditCreateLocation extends Fragment {
 
         // 添加書籤圖標
         ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.bookmark2);
+        bookmark.setImageResource(R.drawable.addbookmark);
         bookmark.setPadding(10, 10, 5, 10); // 設置圖標邊距
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
         params.setMarginStart(10); // 設置左邊距
@@ -471,7 +388,7 @@ public class EditCreateLocation extends Fragment {
 
         // 添加標題文字
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("修改路線");
+        bookTitle.setText("建立路線");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 設置文字顏色
         bookTitle.setPadding(10, 10, 30, 10); // 設置內距
@@ -525,14 +442,14 @@ public class EditCreateLocation extends Fragment {
         });
     }
 
+    // 當片段顯示時，重置 RecyclerView 並重新顯示 ActionBar
     @Override
     public void onResume() {
         super.onResume();
-
         RecycleViewReset(); // 重置路線表
-
         if (actionBar != null) {
             setupActionBar(); // 重新顯示 ActionBar
         }
     }
+
 }
