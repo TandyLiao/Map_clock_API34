@@ -88,7 +88,7 @@ public class HistoryFragment extends Fragment {
         {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",1);
-            //editor.putBoolean("HistoryLogin",true);
+            editor.putBoolean("HistoryLogin",true);
             editor.apply();
 
             tutorial tutorialFragment = new tutorial();
@@ -322,7 +322,7 @@ public class HistoryFragment extends Fragment {
         bookTitle.setText("歷史紀錄");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green));
-        bookTitle.setPadding(10, 10, 10, 10);
+        bookTitle.setPadding(10, 10, 30, 10);
 
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);

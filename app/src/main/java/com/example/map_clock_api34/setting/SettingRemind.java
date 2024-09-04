@@ -360,7 +360,7 @@ public class SettingRemind extends Fragment {
         bookTitle.setText("設定");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green));
-        bookTitle.setPadding(10, 10, 10, 10);
+        bookTitle.setPadding(10, 10, 30, 10);
 
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);

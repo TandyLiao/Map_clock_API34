@@ -367,7 +367,7 @@ public class EditCreateLocation extends Fragment {
         bookTitle.setText("修改路線");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setPadding(10, 10, 30, 10); // 设置内边距
 
         linearLayout.addView(bookmark);
         linearLayout.addView(bookTitle);

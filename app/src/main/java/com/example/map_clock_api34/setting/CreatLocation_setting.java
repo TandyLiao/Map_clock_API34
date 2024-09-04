@@ -73,10 +73,11 @@ public class CreatLocation_setting extends Fragment {
         ImageView mark = new ImageView(requireContext());
         mark.setImageResource(R.drawable.vibrate);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                80, // 设置宽度为 100 像素
+                80 // 设置高度为 100 像素
         );
-        params.setMarginStart(10); // 设置左边距
+        // 设置边距
+        params.setMargins(30,10,0,10);
         mark.setPadding(10,10,10,10);
         mark.setLayoutParams(params);
 
@@ -85,7 +86,7 @@ public class CreatLocation_setting extends Fragment {
         bookTitle.setText("地點設定");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setPadding(10, 10, 30, 10); // 设置内边距
 
         // 将 ImageView 和 TextView 添加到 LinearLayout
         linearLayout.addView(mark);

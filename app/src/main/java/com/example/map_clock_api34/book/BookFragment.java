@@ -272,7 +272,7 @@ public class BookFragment extends Fragment {
                 bookTitle.setText("收藏路線");
                 bookTitle.setTextSize(15);
                 bookTitle.setTextColor(getResources().getColor(R.color.green)); // Change text color
-                bookTitle.setPadding(10, 10, 10, 10); // Set padding
+                bookTitle.setPadding(10, 10, 30, 10); // Set padding
 
                 // Add ImageView and TextView to LinearLayout
                 linearLayout.addView(mark);

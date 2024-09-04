@@ -107,7 +107,8 @@ public class CreateLocation extends Fragment {
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",0);
-            //editor.putBoolean("CreateLogin",true);
+            //可以改變出現的值 True為已教學過
+            editor.putBoolean("CreateLogin",true);
             editor.apply();
             tutorial tutorialFragment = new tutorial();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -396,7 +397,7 @@ public class CreateLocation extends Fragment {
         bookTitle.setText("路線規劃");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setPadding(10, 10, 30, 10); // 设置内边距
         linearLayout.addView(bookmark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
