@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/lightyellow"
-    android:theme="@style/NoTheme">
+    android:background="@color/lightyellow">
 
     <!-- 最上方的橫向 LinearLayout，包含兩個文字視圖 -->
     <LinearLayout
@@ -29,18 +28,18 @@
             android:padding="5dp"
             android:text="創立時間"
             android:textColor="@color/green"
-            android:textSize="20dp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/textViewWord2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="6"
+            android:layout_weight="5"
             android:gravity="center_horizontal"
             android:padding="5dp"
             android:text="紀錄名稱"
             android:textColor="@color/green"
-            android:textSize="20dp" />
+            android:textSize="15sp" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -50,7 +49,8 @@
         android:background="@drawable/recyclerview"
         app:layout_constraintBottom_toTopOf="@+id/bottomContainer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topContainer" />
+        app:layout_constraintTop_toBottomOf="@+id/topContainer"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/textView5"
@@ -79,32 +79,35 @@
         <Button
             android:id="@+id/EditButton"
             android:layout_width="100dp"
-            android:layout_height="60dp"
+            android:layout_height="45dp"
             android:layout_margin="5dp"
             android:background="@drawable/btn_additem"
             android:text="編輯"
             android:textColor="@color/green"
-            app:backgroundTint="@null" />
+            app:backgroundTint="@null"
+            android:textSize="15sp"/>
 
         <Button
             android:id="@+id/ClearAllButton"
             android:layout_width="100dp"
-            android:layout_height="60dp"
+            android:layout_height="45dp"
             android:layout_margin="5dp"
             android:background="@drawable/btn_additem"
             android:text="全部清除"
             android:textColor="@color/green"
-            app:backgroundTint="@null" />
+            app:backgroundTint="@null"
+            android:textSize="12sp"/>
 
         <Button
             android:id="@+id/SelectButton"
             android:layout_width="100dp"
-            android:layout_height="60dp"
+            android:layout_height="45dp"
             android:layout_margin="5dp"
             android:background="@drawable/btn_additem"
             android:text="套用"
             android:textColor="@color/green"
-            app:backgroundTint="@null" />
+            app:backgroundTint="@null"
+            android:textSize="15sp"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

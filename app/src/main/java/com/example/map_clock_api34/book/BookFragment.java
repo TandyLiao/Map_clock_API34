@@ -247,7 +247,7 @@ public class BookFragment extends Fragment {
 
                 // 建立頁面小圖示
                 ImageView mark = new ImageView(requireContext());
-                mark.setImageResource(R.drawable.bookmark1);
+                mark.setImageResource(R.drawable.routemark);
                 mark.setPadding(10, 10, 5, 10);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
                 params.setMarginStart(10); // 設置左邊距

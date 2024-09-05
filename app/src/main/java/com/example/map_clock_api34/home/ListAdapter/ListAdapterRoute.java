@@ -112,11 +112,11 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
             } else {
                 String note = sharedViewModel.getNote(position);
                 if (note != null && !note.isEmpty()){
-                    holder.dragHandle.setImageResource(R.drawable.anya062516);
+                    holder.dragHandle.setImageResource(R.drawable.note_yellow);
                 }
 
                 else {
-                    holder.dragHandle.setImageResource(R.drawable.note); // 未選擇的圖標}
+                    holder.dragHandle.setImageResource(R.drawable.note_red); // 未選擇的圖標}
                 }
             }
         }

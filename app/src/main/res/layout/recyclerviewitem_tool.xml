@@ -39,7 +39,7 @@
                 android:id="@+id/horecycle_Name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textColor="@color/green"
                 android:padding="8dp"
                 android:layout_gravity="center"/>
