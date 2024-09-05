@@ -28,51 +28,52 @@
             android:padding="5dp"
             android:text="創立時間"
             android:textColor="@color/green"
-            android:textSize="20dp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/textViewWord2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="6"
+            android:layout_weight="5"
             android:gravity="center_horizontal"
             android:padding="5dp"
             android:text="路線名稱"
             android:textColor="@color/green"
-            android:textSize="20dp" />
+            android:textSize="15sp" />
     </LinearLayout>
     <!-- RecyclerView -->
 
+    <!-- Controls Container -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleView_book"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
         android:background="@drawable/recyclerview"
-        app:layout_constraintBottom_toTopOf="@+id/controls_container"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topContainer" />
 
-    <!-- Controls Container -->
     <TextView
         android:id="@+id/textView7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="目前還沒有東西喔"
+        android:text="目前還沒有收藏路線喔"
         android:textColor="@color/lightgreen"
-        android:textSize="32sp"
+        android:textSize="25sp"
         app:layout_constraintBottom_toBottomOf="@+id/recycleView_book"
         app:layout_constraintTop_toTopOf="@+id/recycleView_book"
         tools:layout_editor_absoluteX="176dp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controls_container"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/book_usesure"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/recycleView_book">
@@ -82,15 +83,17 @@
             android:id="@+id/bookadd_card"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
             android:clickable="true"
             android:focusable="true"
             app:cardBackgroundColor="@color/lightyellow"
             app:cardCornerRadius="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.3"
-            app:strokeColor="@color/darkyellow"
+            app:strokeColor="@color/darkyellow2"
             app:strokeWidth="2dp">
 
             <LinearLayout
@@ -99,16 +102,18 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:layout_margin="5dp">
 
                 <ImageView
                     android:id="@+id/bookcreate_imageView"
-                    android:layout_width="81dp"
-                    android:layout_height="80dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:layout_gravity="center"
                     android:background="@drawable/routeadd"
                     android:clickable="true"
                     android:focusable="true"
+                    android:layout_marginBottom="10dp"
                     android:padding="20dp" />
 
                 <TextView
@@ -116,28 +121,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:padding="8dp"
                     android:text="建立路線"
                     android:textColor="@color/green"
                     android:textSize="15sp" />
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
-        <!-- Book Add Card -->
-        <!-- Book Set Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/bookset_card"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
             android:clickable="true"
             android:focusable="true"
             app:cardBackgroundColor="@color/lightyellow"
             app:cardCornerRadius="20dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.3"
-            app:strokeColor="@color/darkyellow"
+            app:strokeColor="@color/darkyellow2"
             app:strokeWidth="2dp">
 
             <LinearLayout
@@ -145,23 +148,25 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:layout_margin="5dp">
 
                 <ImageView
                     android:id="@+id/bookset_imageView"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:layout_gravity="center"
                     android:background="@drawable/route_change"
                     android:clickable="true"
-                    android:padding="20dp" />
+                    android:padding="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:focusable="true" />
 
                 <TextView
                     android:id="@+id/bookset_Name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:padding="8dp"
                     android:text="修改路線"
                     android:textColor="@color/green"
                     android:textSize="15sp" />
@@ -174,12 +179,14 @@
     <Button
         android:id="@+id/book_usesure"
         android:layout_width="100dp"
-        android:layout_height="60dp"
-        android:layout_margin="5dp"
-        android:layout_marginBottom="8dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/btn_additem"
         android:text="套用"
-        android:textColor="@color/green"
+        android:textColor="@color/darkgreen"
         app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.example.map_clock_api34.BuildConfig;
 import com.example.map_clock_api34.SharedViewModel;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -187,7 +188,7 @@ public class SelectPlace extends Fragment {
 
     private void iniAutocomplete(){
 
-        String apiKey="AIzaSyCf6tnPO_VbhDJ_EreXXRZes48c7X5giSM";
+        String apiKey= BuildConfig.GOOGLE_DISTANCE_API_KEY;
         if(!Places.isInitialized()){
             Places.initialize(getActivity().getApplicationContext(),apiKey);
         }

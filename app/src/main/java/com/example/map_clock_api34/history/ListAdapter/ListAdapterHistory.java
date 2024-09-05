@@ -58,7 +58,20 @@ public class ListAdapterHistory extends RecyclerView.Adapter<ListAdapterHistory.
         holder.routeName.setText(item.get("placeName"));
         holder.routeName2.setText(item.get("placeName2"));
         holder.routeName3.setText(item.get("placeName3"));
-        holder.time.setText(item.get("time"));
+
+        String time = item.get("time");
+        //日期和時間分開
+        if (time != null && time.contains(" ")) {
+            String[] timeParts = time.split(" ");
+            if (timeParts.length == 2) {
+                holder.time.setText(timeParts[0] + "\n" + timeParts[1]);
+            } else {
+                holder.time.setText(time); // 如果時間隔是不對，直接顯示原始字串
+            }
+        } else {
+            holder.time.setText(time); // 如果字串不包含空格，直接顯示
+        }
+
 
         // 設置背景顏色
         if (item.getOrDefault("isSelected", "false").equals("true")) {
