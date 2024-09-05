@@ -68,10 +68,8 @@ public class CreateLocation extends Fragment {
 
     private HistoryDatabaseHelper dbHistoryHelper;
 
-    String names;
     String Historynames;
-    double latitudes;
-    double longitudes;
+
     String uniqueID;
 
     ActionBar actionBar;
@@ -79,8 +77,6 @@ public class CreateLocation extends Fragment {
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawerLayout;
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 100;
     private static final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 101;
     private AlertDialog permissionDialog;
     View rootView;
@@ -277,6 +273,9 @@ public class CreateLocation extends Fragment {
 
     // 顯示Dialog並跳轉到設置頁面
     private void showPermissionDeniedDialog(int locationDenyCount, int notificationDenyCount) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        permissionDialog = builder.create();
+
         StringBuilder message = new StringBuilder("您已多次拒絕以下權限:\n");
 
         if (locationDenyCount >= MAX_DENY_COUNT) {
@@ -285,24 +284,44 @@ public class CreateLocation extends Fragment {
         if (notificationDenyCount >= MAX_DENY_COUNT) {
             message.append(" - 通知權限\n");
         }
-        message.append("請在設置中手動打開這些權限。");
+        message.append("請在設置中手動打開這些權限");
 
-        // 建立並顯示 Dialog
-        permissionDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("權限請求")
-                .setMessage(message.toString())
-                .setPositiveButton("打開設置", (dialog, which) -> {
-                    // 跳轉到應用設置頁面
-                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
-                    intent.setData(uri);
-                    startActivity(intent);
-                })
-                .setNegativeButton("取消", (dialog, which) -> {
-                    getActivity().finish();
-                    dialog.dismiss();
-                })
-                .create();
+        // 套用自訂佈局
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View customView = inflater.inflate(R.layout.dialog_deltebook, null);
+
+        Button positiveButton = customView.findViewById(R.id.Popupsure);
+        Button negativeButton = customView.findViewById(R.id.PopupCancel);
+        TextView showTitle = customView.findViewById(R.id.txtNote);
+
+        positiveButton.setText("打開設置");
+        //設置對話框裡確認按鈕的點擊監聽器
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 跳轉到應用設置頁面
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+                permissionDialog.cancel(); // 關閉對話框
+            }
+        });
+
+        //設置對話框裡取消按鈕的點擊監聽器
+        negativeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+                permissionDialog.cancel(); // 關閉對話框
+            }
+
+        });
+
+        showTitle.setText(message);
+        showTitle.setTextSize(20);
+
+        permissionDialog.setView(customView);
         permissionDialog.setCanceledOnTouchOutside(false);
         permissionDialog.show(); // 顯示對話框
     }
