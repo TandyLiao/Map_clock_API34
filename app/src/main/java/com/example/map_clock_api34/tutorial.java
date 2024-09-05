@@ -25,7 +25,7 @@ public class tutorial extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.activity_tutorial, container, false);
+        rootView = inflater.inflate(R.layout.tutorial_fragment, container, false);
         // 隱藏 ActionBar
         if (getActivity() != null && getActivity() instanceof AppCompatActivity) {
             AppCompatActivity activity = (AppCompatActivity) getActivity();

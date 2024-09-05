@@ -176,6 +176,7 @@
         android:layout_width="100dp"
         android:layout_height="60dp"
         android:layout_margin="5dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/btn_additem"
         android:text="套用"
         android:textColor="@color/green"

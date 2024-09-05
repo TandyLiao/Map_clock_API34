@@ -1,5 +1,7 @@
 package com.example.map_clock_api34;
 
+import static com.google.android.material.internal.ViewUtils.hideKeyboard;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,12 +10,18 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -135,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // 鎖定返回鍵，現在所有頁面按返回都不會有反應
+        super.onBackPressed();
     }
 
     @Override
@@ -223,4 +232,32 @@ public class MainActivity extends AppCompatActivity {
         broadcastIntent.putExtra("triggerSendBroadcast", true);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
     }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        View view = getCurrentFocus();
+        if (view != null && ev.getAction() == MotionEvent.ACTION_DOWN) {
+
+            if (view instanceof EditText) {
+                Rect outRect = new Rect();
+                view.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                    // 點擊到 EditText 以外的區域
+                    view.clearFocus();
+                    hideKeyboard(view);  // 傳遞 view
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && view != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+
 }

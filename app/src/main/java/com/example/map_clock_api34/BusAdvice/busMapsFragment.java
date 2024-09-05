@@ -210,7 +210,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         }
     }
     private Bitmap createCustomMarker(Context context, @DrawableRes int resource, String title, Boolean isDestination) {
-        View markerView = LayoutInflater.from(context).inflate(R.layout.bus_custom_marker, null);
+        View markerView = LayoutInflater.from(context).inflate(R.layout.bus_advice_bus_custom_marker, null);
 
         ImageView markerImage = markerView.findViewById(R.id.marker_image);
         markerImage.setImageResource(resource);

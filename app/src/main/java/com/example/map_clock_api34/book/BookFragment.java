@@ -17,8 +17,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -46,9 +44,9 @@ import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.book.RecycleViewActionBook.SwipeToDeleteCallback;
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
-import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
 import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
+import com.example.map_clock_api34.home.CreateLocation;
 import com.example.map_clock_api34.home.HomeFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -60,137 +58,130 @@ import java.util.HashMap;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.content.DialogInterface;
 import android.widget.Toast;
-
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
-
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class BookFragment extends Fragment {
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private Toolbar toolbar;
-    private ImageView createbook_imageView;
-    private ImageView setbook_imageView;
-    private Button user_sure;
-    private ActionBarDrawerToggle toggle;
-    private DrawerLayout drawerLayout;
-    SharedViewModel sharedViewModel;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001; // 定義位置權限請求代碼
 
     private View rootView;
-    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
-    RecyclerView recyclerViewBook;
-    ListAdapterHistory listAdapterBook;
+    private Toolbar toolbar;                // 定義工具列
+    private ImageView editbook_imageView;   // 編輯書籍按鈕的圖片
+    private ActionBarDrawerToggle toggle;   // 側邊選單的開關
+    private DrawerLayout drawerLayout;      // 抽屜佈局
 
-    private BookDatabaseHelper dbHelper;
+    private SharedViewModel sharedViewModel; // ViewModel 用來在Fragment間共享數據
 
-    private FusedLocationProviderClient fusedLocationClient;
+    private final ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 用來儲存書籍資料的列表
+    private RecyclerView recyclerViewBook; // RecyclerView 用來顯示書籍項目
+    private ListAdapterHistory listAdapterBook;
+
+    private BookDatabaseHelper dbHelper; // 資料庫輔助類
+
+    private FusedLocationProviderClient fusedLocationClient; // 用來獲取位置的客戶端
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.book_fragment_book, container, false);
 
         dbHelper = new BookDatabaseHelper(requireContext());
-
-        setupActionBar();
-
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        dbHelper = new BookDatabaseHelper(requireContext()); // 初始化資料庫輔助類
 
+        setupRecyclerViews(); // 設置 RecyclerView
+        addItemFromDB(); // 從資料庫中讀取數據
         setButton();
+        setupActionBar(); // 設置工具列
 
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
             toolbar = requireActivity().findViewById(R.id.toolbar);
         }
 
-        dbHelper = new BookDatabaseHelper(requireContext());
-        setupRecyclerViews();
-
-        addFromDB();
-        //dbHelper.clearAllTables();
         return rootView;
     }
 
+    // 設置按鈕的行為
     private void setButton() {
 
-        createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
-        setbook_imageView = rootView.findViewById(R.id.bookset_imageView);
-        user_sure = rootView.findViewById(R.id.book_usesure);
+        editbook_imageView = rootView.findViewById(R.id.bookset_imageView);
+
         // 禁用 setbook_imageView，直到選擇了一個項目
-        setbook_imageView.setEnabled(false);
-        // Set click listeners for ImageViews
+        editbook_imageView.setEnabled(false);
+
+        // 創建書籍按鈕的圖片
+        ImageView createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
+        // 設置創建書籍按鈕的點擊監聽器
         createbook_imageView.setOnClickListener(v -> {
-            sharedViewModel.clearAll();
-            Log.d("BookFragment", "createbook_imageView clicked");
-            FakeCreateLocation createFbook = new FakeCreateLocation();
+            sharedViewModel.clearAll(); // 清空共享數據
+            //轉換頁面到書籤的建立地點 122-126
+            BookCreateLocation bookCreateLocation = new BookCreateLocation();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, createFbook);
+            transaction.replace(R.id.fl_container, bookCreateLocation);
             transaction.addToBackStack(null);
             transaction.commit();
-
         });
 
-        setbook_imageView.setOnClickListener(v -> {
-
-            HashMap<String, String> selectedItem = listAdapterBook.getSelectedItem();
+        // 設置設置編輯書籍按鈕的點擊監聽器
+        editbook_imageView.setOnClickListener(v -> {
+            HashMap<String, String> selectedItem = listAdapterBook.getSelectedItem(); // 獲取使用者選中的項目
 
             if (selectedItem != null) {
+
+                sharedViewModel.clearAll(); // 清空共享數據
+
+                //站存路線名稱和時間
                 sharedViewModel.routeName = selectedItem.get("placeName2");
                 sharedViewModel.time = selectedItem.get("time");
-                sharedViewModel.clearAll();
                 String time = sharedViewModel.time;
 
-                int count = 0;
+                int count = 0;  //讓存進ShareViewModel可以從第一個位置開始儲存
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor cursor = db.rawQuery("SELECT * FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+                Cursor cursor = db.rawQuery("SELECT * FROM " + BookTable.TABLE_NAME +
+                        " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});  //取得路線資料表的Cursor
 
                 try {
                     while (cursor.moveToNext()) {
 
                         String locationId = cursor.getString(0);
-                        Cursor locationCursor = db.rawQuery("SELECT * FROM " + LocationTable2.TABLE_NAME + " WHERE " + LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+                        Cursor locationCursor = db.rawQuery("SELECT * FROM " + LocationTable2.TABLE_NAME +
+                                " WHERE " + LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});//取得地點資料表的Cursor
 
+                        // 獲取數據並設置到共享模型中
                         if (locationCursor.moveToFirst()) {
-                            String placeName = locationCursor.getString(3);
-                            Double latitude = locationCursor.getDouble(2);
-                            Double longitude = locationCursor.getDouble(1);
-                            String city = locationCursor.getString(5);
-                            String area = locationCursor.getString(6);
-                            String Note = locationCursor.getString(7);
 
-                            boolean vibrate=locationCursor.getInt(8)!=0;
-                            boolean ringtone=locationCursor.getInt(9)!=0;
-                            int notificationTime=locationCursor.getInt(10);
+                            String placeName    = locationCursor.getString(3);
+                            Double latitude     = locationCursor.getDouble(2);
+                            Double longitude    = locationCursor.getDouble(1);
+                            String city     = locationCursor.getString(5);
+                            String area     = locationCursor.getString(6);
+                            String Note     = locationCursor.getString(7);
+
+                            boolean vibrate     = locationCursor.getInt(8) != 0;
+                            boolean ringtone    = locationCursor.getInt(9) != 0;
+                            int notificationTime = locationCursor.getInt(10);
 
                             sharedViewModel.uuid = locationCursor.getString(4);
                             sharedViewModel.setDestination(placeName, latitude, longitude);
                             sharedViewModel.setCapital(city);
                             sharedViewModel.setArea(area);
-
                             sharedViewModel.setNote(Note, count);
                             sharedViewModel.setVibrate(vibrate,count);
                             sharedViewModel.setRingtone(ringtone,count);
                             sharedViewModel.setNotification(notificationTime,count++);
                         }
-
-                        locationCursor.close();
+                        locationCursor.close(); // 關閉地點 Cursor
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    e.printStackTrace(); // 打印錯誤信息
                 } finally {
-                    db.close();
-                    cursor.close();
+                    db.close(); // 關閉資料庫
+                    cursor.close(); // 關閉路線 Cursor
                 }
 
-                // 處理選擇的項目
-                // 你可以在這裡執行與選擇的項目相關的邏輯
+                // 轉換頁面到編輯書籤 188-192
                 EditCreateLocation editCreateLocation = new EditCreateLocation();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fl_container, editCreateLocation);
@@ -199,112 +190,103 @@ public class BookFragment extends Fragment {
             }
         });
 
+        // 使用者確認按鈕
+        Button user_sure = rootView.findViewById(R.id.book_usesure);
+        // 設置使用者確認按鈕的點擊監聽器
         user_sure.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) { //檢查是否授予位置權限
 
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                // 套用按鈕在這實現功能
-                saveInShareviewModel();
+                saveInShareviewModel(); // 保存至SharedViewModel
             } else {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
-            }
 
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE); // 請求位置權限
+                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show(); // 顯示權限提示
+            }
         });
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setupActionBar();
-        setupNavigationDrawer();
-        RecycleViewReset();
-        changeNotification();
+        setupActionBar();   // 設置工具列
+        setupNavigationDrawer();    // 設置側邊欄
+        RecycleViewReset();         // 重置 RecyclerView
+        changeNotification();       // 更新UI
     }
 
+    // 重置 RecyclerView 的數據
     private void RecycleViewReset() {
-        arrayList.clear();
-        addFromDB();
-        listAdapterBook.notifyDataSetChanged();
+        arrayList.clear();  // 清空列表
+        addItemFromDB();        // 從資料庫中重新加載數據
+        listAdapterBook.notifyDataSetChanged(); // 通知適配器更新數據
     }
 
+    // 設置工具列
     private void setupActionBar() {
+
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+
         if (actionBar != null) {
-            // Ensure drawerLayout is not null
             if (drawerLayout != null) {
-                // Set up ActionBarDrawerToggle
                 if (toggle == null) {
-                    toggle = new ActionBarDrawerToggle(
-                            requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+                    toggle = new ActionBarDrawerToggle(requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
                     drawerLayout.addDrawerListener(toggle);
                     toggle.syncState();
                 }
                 toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
 
-                // Create CardView and add it to the ActionBar
                 CardView cardViewtitle = new CardView(requireContext());
-                cardViewtitle.setLayoutParams(new CardView.LayoutParams(
-                        ActionBar.LayoutParams.MATCH_PARENT,
-                        ActionBar.LayoutParams.MATCH_PARENT));
+                cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
                 Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
                 cardViewtitle.setBackground(drawable);
 
-                // Create LinearLayout inside CardView
                 LinearLayout linearLayout = new LinearLayout(requireContext());
-                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT));
+                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
                 linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-                // Create ImageView
+                // 建立頁面小圖示
                 ImageView mark = new ImageView(requireContext());
                 mark.setImageResource(R.drawable.routemark);
                 mark.setPadding(10, 10, 5, 10);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        100, // Width in pixels
-                        100 // Height in pixels
-                );
-                params.setMarginStart(10); // Set left margin
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
+                params.setMarginStart(10); // 設置左邊距
                 mark.setLayoutParams(params);
 
-                // Create TextView
+                // 建立頁面標題
                 TextView bookTitle = new TextView(requireContext());
                 bookTitle.setText("收藏路線");
                 bookTitle.setTextSize(15);
-                bookTitle.setTextColor(getResources().getColor(R.color.green)); // Change text color
-                bookTitle.setPadding(10, 10, 30, 10); // Set padding
+                bookTitle.setTextColor(getResources().getColor(R.color.green)); // 改變文字顏色
+                bookTitle.setPadding(10, 10, 30, 10); // 設置內距
 
-                // Add ImageView and TextView to LinearLayout
+                // 將 ImageView 和 TextView 加入到線性佈局
                 linearLayout.addView(mark);
                 linearLayout.addView(bookTitle);
                 cardViewtitle.addView(linearLayout);
 
-                // Set custom view to ActionBar
-                actionBar.setDisplayShowTitleEnabled(false); // Hide default title
+                actionBar.setDisplayShowTitleEnabled(false); // 隱藏預設標題
                 actionBar.setDisplayShowCustomEnabled(true);
-                actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
-                        ActionBar.LayoutParams.WRAP_CONTENT, // Width as WRAP_CONTENT
-                        ActionBar.LayoutParams.WRAP_CONTENT, // Height as WRAP_CONTENT
-                        Gravity.END)); // Align to the end
+                actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.END)); // 將 CardView 設置為工具列的自訂視圖，並對齊右側
 
-                actionBar.show();
+                actionBar.show(); // 顯示工具列
             }
-
         }
     }
 
+    // 設置側邊欄
     private void setupNavigationDrawer() {
         drawerLayout = requireActivity().findViewById(R.id.drawerLayout);
         toolbar = requireActivity().findViewById(R.id.toolbar);
-        toggle = new ActionBarDrawerToggle(
-                requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        toggle = new ActionBarDrawerToggle(requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
     }
 
-    //1刪除
+    // 設置 RecyclerView
     private void setupRecyclerViews() {
+
         recyclerViewBook = rootView.findViewById(R.id.recycleView_book);
         recyclerViewBook.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewBook.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
@@ -315,16 +297,16 @@ public class BookFragment extends Fragment {
             @Override
             public void onItemSelected() {
                 // 當選擇了項目時啟用 setbook_imageView
-                setbook_imageView.setEnabled(listAdapterBook.getSelectedPosition() != RecyclerView.NO_POSITION);
+                editbook_imageView.setEnabled(listAdapterBook.getSelectedPosition() != RecyclerView.NO_POSITION);
             }
         });
+        recyclerViewBook.setAdapter(listAdapterBook); // 設置適配器
 
-        recyclerViewBook.setAdapter(listAdapterBook);
         // 添加左滑刪除功能
-        // 創建並設置 ItemTouchHelper
         SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(getContext(), new SwipeToDeleteCallback.OnSwipedListener() {
             @Override
             public void onSwiped(int position) {
+                // 當滑動刪除時顯示刪除確認對話框
                 View itemView = recyclerViewBook.getLayoutManager().findViewByPosition(position);
                 if (itemView != null) {
                     showDeleteConfirmationDialog(itemView, position);
@@ -333,95 +315,201 @@ public class BookFragment extends Fragment {
         });
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
-        itemTouchHelper.attachToRecyclerView(recyclerViewBook);
-
+        itemTouchHelper.attachToRecyclerView(recyclerViewBook); // 將滑動刪除功能附加到 RecyclerView
     }
 
-    //刪除提醒
+    // 顯示刪除確認對話框
     private void showDeleteConfirmationDialog(View view, int position) {
-        Context context = view.getContext();
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
 
-        //套用XML的布局
+        Context context = view.getContext();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog); // 創建對話框
+
+        // 套用自訂佈局
         LayoutInflater inflater = LayoutInflater.from(context);
         View customView = inflater.inflate(R.layout.dialog_deltebook, null);
+        builder.setView(customView); // 設置佈局
 
-        builder.setView(customView);
-
-        // 创建并显示对话框
+        // 創建並顯示對話框
         AlertDialog dialog = builder.create();
-        // 設置點擊對話框外部不會關閉對話框
-        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCanceledOnTouchOutside(false); // 設置點擊外部不會關閉對話框
 
         Button positiveButton = customView.findViewById(R.id.Popupsure);
         Button negativeButton = customView.findViewById(R.id.PopupCancel);
 
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // 設置背景為透明
 
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-
+        //設置對話框裡確認按鈕的點擊監聽器
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                removeItem(position);
-                changeNotification();
-                dialog.cancel();
+                removeItemFromDB(position); // 刪除項目
+                changeNotification(); // 更新UI
+                dialog.cancel(); // 關閉對話框
             }
         });
 
+        //設置對話框裡取消按鈕的點擊監聽器
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listAdapterBook.notifyItemChanged(position);
-                dialog.cancel();
+                listAdapterBook.notifyItemChanged(position); // 通知適配器取消使用者的選取
+                dialog.cancel(); // 關閉對話框
             }
 
         });
 
-        dialog.show();
-
+        dialog.show(); // 顯示對話框
     }
 
-    //刪除項目
-    private void removeItem(int position) {
+    // 刪除項目
+    private void removeItemFromDB(int position) {
+
         HashMap<String, String> item = arrayList.get(position);
         String time = item.get("time");
 
-        // 從數據庫中刪除選中的項目
+        // 從資料庫中刪除選中的項目
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
         db.beginTransaction();
         try {
 
-            String locationId = DatabaseUtils.stringForQuery(db,
-                    "SELECT " + BookTable.COLUMN_LOCATION_ID +
-                            " FROM " + BookTable.TABLE_NAME +
-                            " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
+            String locationId = DatabaseUtils.stringForQuery(db, "SELECT " + BookTable.COLUMN_LOCATION_ID +
+                    " FROM " + BookTable.TABLE_NAME + " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
-            String locationUUID = DatabaseUtils.stringForQuery(db,
-                    "SELECT " + LocationTable2.COLUMN_ALARM_NAME +
-                            " FROM " + LocationTable2.TABLE_NAME +
-                            " WHERE " + LocationTable2.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
-            // 刪除 BookTable 中的項目
+
+            String locationUUID = DatabaseUtils.stringForQuery(db, "SELECT " + LocationTable2.COLUMN_ALARM_NAME +
+                    " FROM " + LocationTable2.TABLE_NAME + " WHERE " + LocationTable2.COLUMN_LOCATION_ID + "= ?", new String[]{locationId});
+
+            // 從路線表中刪除
             db.execSQL("DELETE FROM " + BookTable.TABLE_NAME +
                     " WHERE " + BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
 
-            // 刪除 LocationTable2 中的相關項目
+            // 從地點表中刪除
             db.execSQL("DELETE FROM " + LocationTable2.TABLE_NAME +
                     " WHERE " + LocationTable2.COLUMN_ALARM_NAME + " = ?", new String[]{locationUUID});
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // 打印錯誤信息
         } finally {
             db.endTransaction();
-            db.close();
+            db.close(); // 關閉資料庫
         }
 
-        // 從 arrayList 中刪除項目
-        arrayList.remove(position);
-        listAdapterBook.notifyItemRemoved(position);
+        arrayList.remove(position); // 從列表中刪除項目
+        listAdapterBook.notifyItemRemoved(position); // 通知適配器該項目已被刪除
     }
 
+    // 從資料庫中添加數據到列表
+    private void addItemFromDB() {
+
+        String time;
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM book WHERE arranged_id=0", null);  //取得路線資料表的Cursor
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+
+                String placeNameTemp = cursor.getString(3);
+                time = cursor.getString(1);
+
+                HashMap<String, String> hashMap = new HashMap<>();
+                hashMap.put("placeName2", placeNameTemp);
+                hashMap.put("time", time);
+                arrayList.add(0, hashMap); // 將數據插入到列表
+            }
+            cursor.close(); // 關閉 Cursor
+        }
+        db.close(); // 關閉資料庫
+    }
+
+    // 將數據保存到ShareViewModel
+    private void saveInShareviewModel() {
+
+        sharedViewModel.clearAll(); // 清空共享數據
+        String time = "";
+        for (HashMap<String, String> item : arrayList) {
+            if ("true".equals(item.get("isSelected"))) {
+                time = item.get("time"); // 獲取選中的時間
+            }
+        }
+
+        int count = 0;  //讓存進ShareViewModel可以從第一個位置開始儲存
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.BookTable.TABLE_NAME +
+                " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});   //取得路線資料表的Cursor
+
+        db.beginTransaction();
+        try {
+            while (cursor.moveToNext()) {
+
+                // 獲取位置數據並存進ShareViewModel
+                String locationId = cursor.getString(0);
+                Cursor locationCursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME +
+                        " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
+
+                if (locationCursor.moveToFirst()) {
+                    String placeName    = locationCursor.getString(3);
+                    Double latitude     = locationCursor.getDouble(2);
+                    Double longitude    = locationCursor.getDouble(1);
+                    String city = locationCursor.getString(5);
+                    String area = locationCursor.getString(6);
+                    String note = locationCursor.getString(7);
+
+                    boolean vibrate     = locationCursor.getInt(8) != 0;
+                    boolean ringtone    = locationCursor.getInt(9) != 0;
+                    int notificationTime = locationCursor.getInt(10);
+
+                    sharedViewModel.setDestination(placeName, latitude, longitude);
+                    sharedViewModel.setCapital(city);
+                    sharedViewModel.setArea(area);
+                    sharedViewModel.setNote(note, count);
+                    sharedViewModel.setVibrate(vibrate,count);
+                    sharedViewModel.setRingtone(ringtone,count);
+                    sharedViewModel.setNotification(notificationTime,count++);
+                    getLastKnownLocation(); // 獲取當前位置
+                }
+                locationCursor.close(); // 關閉 Cursor
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("BookFragment", "Error while trying to save in ShareViewModel", e); // 打印錯誤信息
+        } finally {
+            db.endTransaction(); // 結束事務
+            cursor.close(); // 關閉 Cursor
+
+            //頁面轉換到創建路線 505-509
+            CreateLocation createLocationFragment = new CreateLocation();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, createLocationFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+            //側邊選單顯示改成路線規劃
+            NavigationView navigationView = getActivity().findViewById(R.id.navigation_view);
+            navigationView.setCheckedItem(R.id.action_home);
+        }
+    }
+
+    // 獲取當前最後已知的位置
+    @SuppressLint("MissingPermission")
+    private void getLastKnownLocation() {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
+                            Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
+                        } else {
+                            Toast.makeText(requireContext(), "無法取得現在位置", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    // 更改UI信息
     private void changeNotification() {
         if (arrayList.isEmpty()) {
             TextView notification = rootView.findViewById(R.id.textView7);
@@ -439,106 +527,7 @@ public class BookFragment extends Fragment {
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(false);
             actionBar.setCustomView(null);
-            actionBar.setDisplayShowTitleEnabled(true); // Restore title display
+            actionBar.setDisplayShowTitleEnabled(true);
         }
-    }
-
-    private void addFromDB() {
-
-        String time;
-
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM book WHERE arranged_id=0", null);
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-
-                String placeNameTemp = cursor.getString(3);
-                time = cursor.getString(1);
-
-                HashMap<String, String> hashMap = new HashMap<>();
-                hashMap.put("placeName2", placeNameTemp);
-                hashMap.put("time", time);
-                arrayList.add(0, hashMap);
-            }
-            cursor.close();
-        }
-        db.close();
-    }
-
-    private void saveInShareviewModel() {
-        sharedViewModel.clearAll();
-        String time = "";
-        for (HashMap<String, String> item : arrayList) {
-            if ("true".equals(item.get("isSelected"))) {
-                time = item.get("time");
-            }
-        }
-        int count = 0;
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.BookTable.TABLE_NAME + " WHERE " + BookDatabaseHelper.BookTable.COLUMN_START_TIME + " = ?", new String[]{time});
-        db.beginTransaction();
-        try {
-            while (cursor.moveToNext()) {
-                String locationId = cursor.getString(0);
-                Cursor locationCursor = db.rawQuery("SELECT * FROM " + BookDatabaseHelper.LocationTable2.TABLE_NAME + " WHERE " + BookDatabaseHelper.LocationTable2.COLUMN_LOCATION_ID + " = ?", new String[]{locationId});
-                if (locationCursor.moveToFirst()) {
-                    String placeName = locationCursor.getString(3);
-                    Double latitude = locationCursor.getDouble(2);
-                    Double longitude = locationCursor.getDouble(1);
-                    String city = locationCursor.getString(5);
-                    String area = locationCursor.getString(6);
-                    String note = locationCursor.getString(7);
-
-                    //設定
-                    boolean vibrate=locationCursor.getInt(8)!=0;
-                    boolean ringtone=locationCursor.getInt(9)!=0;
-                    int notificationTime=locationCursor.getInt(10);
-
-                    sharedViewModel.setDestination(placeName, latitude, longitude);
-                    sharedViewModel.setCapital(city);
-                    sharedViewModel.setArea(area);
-                    sharedViewModel.setNote(note, count);
-                    //設定
-                    sharedViewModel.setVibrate(vibrate,count);
-                    sharedViewModel.setRingtone(ringtone,count);
-                    sharedViewModel.setNotification(notificationTime,count++);
-                    getLastKnownLocation();
-                }
-                locationCursor.close(); // Ensure the cursor is closed to avoid memory leaks
-            }
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            Log.e("BookFragment", "Error while trying to save in ShareViewModel", e);
-        } finally {
-            db.endTransaction();
-            cursor.close(); // Ensure the cursor is closed to avoid memory leaks
-
-            HomeFragment createLocationFragment = new HomeFragment();
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, createLocationFragment); // 確保R.id.fl_container是你的Fragment容器ID
-            transaction.addToBackStack(null);
-            transaction.commit();
-
-            NavigationView navigationView = getActivity().findViewById(R.id.navigation_view);
-            navigationView.setCheckedItem(R.id.action_home);
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private void getLastKnownLocation() {
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
-                            // Logic to handle location object
-                            Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
-                        } else {
-                            Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
     }
 }

@@ -4,14 +4,18 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,6 +31,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -77,7 +82,7 @@ public class CreateLocation extends Fragment {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 100;
     private static final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 101;
-
+    private AlertDialog permissionDialog;
     View rootView;
     View overlayView;
     RecyclerView recyclerViewRoute;
@@ -125,7 +130,6 @@ public class CreateLocation extends Fragment {
         setupNavigationDrawer();
         //初始化按鈕
         setupButtons();
-        setupSAVEButton();
         //初始化路線表和功能表
         setupRecyclerViews();
 
@@ -134,9 +138,6 @@ public class CreateLocation extends Fragment {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
             toolbar = requireActivity().findViewById(R.id.toolbar);
         }
-
-        //resetFields();
-
         return rootView;
     }
 
@@ -145,7 +146,9 @@ public class CreateLocation extends Fragment {
         //新增地點按鈕初始化
         Button btnAddItem = rootView.findViewById(R.id.btn_addItem);
         btnAddItem.setOnClickListener(v -> {
-            checkAndRequestPermissions();
+            if (sharedViewModel.getLocationCount() < 6) {
+                openSelectPlaceFragment();
+            }
         });
         //重置按鈕初始化
         btnReset = rootView.findViewById(R.id.btn_reset);
@@ -166,88 +169,143 @@ public class CreateLocation extends Fragment {
             }
         });
     }
-    //初始化按鈕(儲存至紀錄)
-    private void setupSAVEButton() {
-        //新增地點按鈕初始化
-        Button btnAddItem = rootView.findViewById(R.id.btn_addItem);
-        btnAddItem.setOnClickListener(v -> {
-            checkAndRequestPermissions();
-        });
-        //重置按鈕初始化
-        btnReset = rootView.findViewById(R.id.btn_reset);
-        btnReset.setOnClickListener(v -> ShowPopupWindow());
-
-        Button btnMapping = rootView.findViewById(R.id.btn_saveOnly);
-        btnMapping.setOnClickListener(v -> {
-
-            if (sharedViewModel.getLocationCount() >= 0) {
-                Historynames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
-                saveInDB();
-                saveInHistoryDB();
-            } else {
-                Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     //檢查權限請求
+    private static final String PREFS_NAME = "PermissionPrefs";
+    private static final String LOCATION_DENY_COUNT = "locationDenyCount";
+    private static final String NOTIFICATION_DENY_COUNT = "notificationDenyCount";
+    private static final int MAX_DENY_COUNT = 2; // 兩次拒絕後跳轉到設置頁面
+    // 檢查權限請求
     private void checkAndRequestPermissions() {
+        SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        int locationDenyCount = prefs.getInt(LOCATION_DENY_COUNT, 0);
+        int notificationDenyCount = prefs.getInt(NOTIFICATION_DENY_COUNT, 0);
+
         List<String> permissionsNeeded = new ArrayList<>();
 
         // 檢查定位權限
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            if (locationDenyCount < MAX_DENY_COUNT) { // 兩次拒絕前繼續請求
+                permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+        }else {
+            // 如果權限已授予，重置拒絕次數
+            prefs.edit().putInt(LOCATION_DENY_COUNT, 0).apply();
         }
 
         // 檢查通知權限（僅在Android 13及以上版本需要）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
+                if (notificationDenyCount < MAX_DENY_COUNT) { // 兩次拒絕前繼續請求
+                    permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
+                }
+            }else {
+                // 如果權限已授予，重置拒絕次數
+                prefs.edit().putInt(NOTIFICATION_DENY_COUNT, 0).apply();
             }
         }
 
-        // 如果有需要請求的權限，則進行請求
-        if (!permissionsNeeded.isEmpty()) {
-            requestPermissions(permissionsNeeded.toArray(new String[0]), MULTIPLE_PERMISSIONS_REQUEST_CODE);
-        } else {
-            if (sharedViewModel.getLocationCount() < 6) {openSelectPlaceFragment();}
-
+        // 如果拒絕次數達到上限，顯示設定頁面提示，這應該放在最前面
+        if (locationDenyCount >= MAX_DENY_COUNT || notificationDenyCount >= MAX_DENY_COUNT) {
+            showPermissionDeniedDialog(locationDenyCount, notificationDenyCount);
+            return; // 已經達到拒絕次數上限，直接返回
         }
+
+        // 如果所有權限都已授予，則不進行任何請求或顯示Dialog
+        if (permissionsNeeded.isEmpty()) {
+            return; // 所有權限都已授予，直接返回
+        }
+
+        // 如果有需要請求的權限，則進行請求
+        requestPermissions(permissionsNeeded.toArray(new String[0]), MULTIPLE_PERMISSIONS_REQUEST_CODE);
+
+
     }
-    //請求權限
+
+    // 請求權限的結果處理
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
         if (requestCode == MULTIPLE_PERMISSIONS_REQUEST_CODE) {
-            boolean locationPermissionGranted = false;
-            boolean notificationsPermissionGranted = false;
+            boolean locationPermissionGranted = true;
+            boolean notificationsPermissionGranted = true;
 
             // 檢查每個權限的結果
             for (int i = 0; i < permissions.length; i++) {
                 if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
                     locationPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                    if (!locationPermissionGranted) {
+                        incrementDenyCount(prefs, editor, LOCATION_DENY_COUNT);
+                    }
                 } else if (permissions[i].equals(Manifest.permission.POST_NOTIFICATIONS)) {
                     notificationsPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                    if (!notificationsPermissionGranted) {
+                        incrementDenyCount(prefs, editor, NOTIFICATION_DENY_COUNT);
+                    }
                 }
             }
 
-            if (locationPermissionGranted && notificationsPermissionGranted) {
-                // 兩個權限都被授予，這裡可以開始與定位和通知相關的操作
-                if (sharedViewModel.getLocationCount() < 6) {openSelectPlaceFragment();}
-
-            } else {
-                // 其中一個或兩個權限被拒絕，這裡可以顯示相關提示或執行其他操作
+            // 當所有權限都已處理後，再來做檢查
+            if (!locationPermissionGranted || !notificationsPermissionGranted) {
+                // 檢查未授予的權限並顯示一次Toast
+                StringBuilder message = new StringBuilder("需要");
                 if (!locationPermissionGranted) {
-                    Toast.makeText(getActivity(), "需要定位權限才能正常運行", Toast.LENGTH_SHORT).show();
+                    message.append(" 定位");
                 }
                 if (!notificationsPermissionGranted) {
-                    Toast.makeText(getActivity(), "需要通知權限才能正常運行", Toast.LENGTH_SHORT).show();
+                    message.append(" 通知");
                 }
+                message.append(" 權限才能正常運行");
+                Toast.makeText(getActivity(), message.toString(), Toast.LENGTH_LONG).show();
+                getActivity().finish();  // 關閉當前Activity，退出APP
             }
         }
+        editor.apply();
     }
 
+    // 增加拒絕次數
+    private void incrementDenyCount(SharedPreferences prefs, SharedPreferences.Editor editor, String key) {
+
+        int count = prefs.getInt(key, 0);
+        editor.putInt(key, count + 1);
+        editor.commit();  // 保存更新
+    }
+
+    // 顯示Dialog並跳轉到設置頁面
+    private void showPermissionDeniedDialog(int locationDenyCount, int notificationDenyCount) {
+        StringBuilder message = new StringBuilder("您已多次拒絕以下權限:\n");
+
+        if (locationDenyCount >= MAX_DENY_COUNT) {
+            message.append(" - 定位權限\n");
+        }
+        if (notificationDenyCount >= MAX_DENY_COUNT) {
+            message.append(" - 通知權限\n");
+        }
+        message.append("請在設置中手動打開這些權限。");
+
+        // 建立並顯示 Dialog
+        permissionDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("權限請求")
+                .setMessage(message.toString())
+                .setPositiveButton("打開設置", (dialog, which) -> {
+                    // 跳轉到應用設置頁面
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                })
+                .setNegativeButton("取消", (dialog, which) -> {
+                    getActivity().finish();
+                    dialog.dismiss();
+                })
+                .create();
+        permissionDialog.setCanceledOnTouchOutside(false);
+        permissionDialog.show(); // 顯示對話框
+    }
 
     private void saveInHistoryDB() {
         try {
@@ -514,7 +572,15 @@ public class CreateLocation extends Fragment {
         super.onResume();
         //重新更新RecycleView
         RecycleViewReset();
-
+        checkAndRequestPermissions();
+        // 如果權限已經授予，並且 Dialog 還在顯示，則將其關閉
+        if (permissionDialog != null && permissionDialog.isShowing()) {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)) {
+                permissionDialog.dismiss();
+            }
+        }
         //換頁回來再召喚漢堡選單
         setupNavigationDrawer();
         if (actionBar != null) {
@@ -532,6 +598,10 @@ public class CreateLocation extends Fragment {
         }
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+    }
     // 更新重置按鈕的狀態
     private void updateResetButtonState() {
         if (sharedViewModel.getLocationCount() >= 0) {

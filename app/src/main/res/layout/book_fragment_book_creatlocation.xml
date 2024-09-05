@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/lightyellow"
     android:theme="@style/NoTheme"
+
     tools:context=".home.SelectPlace">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -125,11 +126,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_sure"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_addItem">
+            app:layout_constraintStart_toStartOf="parent">
 
             <!-- Book Add Card -->
             <com.google.android.material.card.MaterialCardView
@@ -162,8 +162,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/write_add"
                         android:clickable="true"
-                        android:padding="20dp"
-                         />
+                        android:padding="20dp" />
 
                     <TextView
                         android:id="@+id/bookcreate_Name"
@@ -207,8 +206,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/setting1"
                         android:clickable="true"
-                        android:padding="20dp"
-                         />
+                        android:padding="20dp" />
 
                     <TextView
                         android:id="@+id/bookset_Name"
@@ -225,15 +223,12 @@
 
         <Button
             android:id="@+id/btn_sure"
-            android:layout_width="120dp"
+            android:layout_width="100dp"
             android:layout_height="60dp"
-            android:layout_marginStart="140dp"
-            android:layout_marginEnd="151dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/btn_additem"
             android:text="確定"
-            android:textColor="@color/darkgreen"
-            android:textSize="20dp"
+            android:textColor="@color/green"
             app:backgroundTint="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
