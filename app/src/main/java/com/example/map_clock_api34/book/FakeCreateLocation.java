@@ -301,7 +301,7 @@ public class FakeCreateLocation extends Fragment {
 
         //設置右上角的小圖示
         ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.addbookmark);
+        bookmark.setImageResource(R.drawable.routeadd);
         bookmark.setPadding(10, 10, 5, 10);//設定icon邊界
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 100, // 设置宽度为 100 像素

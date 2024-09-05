@@ -258,7 +258,7 @@ public class BookFragment extends Fragment {
 
                 // Create ImageView
                 ImageView mark = new ImageView(requireContext());
-                mark.setImageResource(R.drawable.bookmark1);
+                mark.setImageResource(R.drawable.routemark);
                 mark.setPadding(10, 10, 5, 10);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         100, // Width in pixels

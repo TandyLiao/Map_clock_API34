@@ -129,7 +129,7 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
 
         if (!enableDrag) {
             if (!vibrate || ! ringtone || notification !=5) {
-                holder.dragHandle.setImageResource(R.drawable.anya062516);
+                holder.dragHandle.setImageResource(R.drawable.vibrate_red);
             } else {
                 holder.dragHandle.setImageResource(R.drawable.vibrate);
             }
