@@ -281,7 +281,7 @@ public class BusStationFinderHelper {
         return Math.abs(stopLat - targetLat) <= latDiff && Math.abs(stopLon - targetLon) <= lonDiff;
     }
 
-    // 過濾 500 公尺內步行可到的站牌
+    // 過濾 700 公尺內步行可到的站牌
     private void filterNearbyStops(double originLat, double originLon, List<BusStation> firstList, List<BusStation> resultList, Runnable callback) {
         List<String> destinations = new ArrayList<>();
         for (BusStation station : firstList) {
@@ -297,8 +297,8 @@ public class BusStationFinderHelper {
 
                     for (BusStation station : stopDistances) {
                         String key = station.getStopName() + "," + station.getStopLat() + "," + station.getStopLon();
-                        if (Integer.valueOf(station.getDistance()) <= 500 && !seenStops.contains(key)) {
-                            resultList.add(station); // 新增 500 公尺內的站牌到結果列表
+                        if (Integer.valueOf(station.getDistance()) <= 700 && !seenStops.contains(key)) {
+                            resultList.add(station); // 新增 700 公尺內的站牌到結果列表
                             seenStops.add(key); // 記錄已處理的站牌
                         }
                     }
@@ -404,26 +404,31 @@ public class BusStationFinderHelper {
                         JSONObject routeObj = jsonArray.getJSONObject(i);
                         String routeName = routeObj.getJSONObject("RouteName").getString("Zh_tw");
                         JSONArray stopsArray = routeObj.getJSONArray("Stops");
-                        Map<BusStation.LatLng, String> routeStops = new HashMap<>();
 
+                        List<BusStation.LatLng> routeLatLngs = new ArrayList<>();
+
+                        // 取得該路線的站牌序列
                         for (int j = 0; j < stopsArray.length(); j++) {
                             JSONObject stopObj = stopsArray.getJSONObject(j);
-                            String stopName = stopObj.getJSONObject("StopName").getString("Zh_tw");
                             double stopLat = stopObj.getJSONObject("StopPosition").getDouble("PositionLat");
                             double stopLon = stopObj.getJSONObject("StopPosition").getDouble("PositionLon");
-                            routeStops.put(new BusStation.LatLng(stopLat, stopLon), stopName);
+                            routeLatLngs.add(new BusStation.LatLng(stopLat, stopLon));
                         }
 
-                        for (BusStation station : nearbyStops) {
-                            if (isNearbyStop(station, routeStops)) {
-                                Map<BusStation.LatLng, String> destinationStopsMap = new HashMap<>();
+                        // 比對起點和終點站牌是否出現在路線的順序中
+                        for (BusStation startStation : nearbyStops) {
+                            Map<BusStation.LatLng, String> destinationStopsMap = new HashMap<>();
 
-                                for (BusStation destinationStation : destinationStops) {
-                                    if (isNearbyStop(destinationStation, routeStops)) {
-                                        destinationStopsMap.put(new BusStation.LatLng(destinationStation.getStopLat(), destinationStation.getStopLon()), destinationStation.getStopName());
-                                    }
+                            for (BusStation endStation : destinationStops) {
+                                if (isRouteValid(routeLatLngs, startStation, endStation)) {
+                                    // 添加目的地站點到目標站點對應的路線
+                                    destinationStopsMap.put(new BusStation.LatLng(endStation.getStopLat(), endStation.getStopLon()), endStation.getStopName());
                                 }
-                                station.addRoute(routeName, destinationStopsMap); // 添加路線到站點
+                            }
+
+                            if (!destinationStopsMap.isEmpty()) {
+                                // 添加這條路線和目標站點到起點站的資料中
+                                startStation.addRoute(routeName, destinationStopsMap);
                             }
                         }
                     }
@@ -443,9 +448,30 @@ public class BusStationFinderHelper {
         });
     }
 
+
+    private boolean isRouteValid(List<BusStation.LatLng> routeLatLngs, BusStation startStation, BusStation endStation) {
+        int startIndex = -1;
+        int endIndex = -1;
+
+        // 找出起點站和終點站在路線站牌序列中的位置
+        for (int i = 0; i < routeLatLngs.size(); i++) {
+            BusStation.LatLng latLng = routeLatLngs.get(i);
+            if (Math.abs(latLng.getLat() - startStation.getStopLat()) < 0.00001 && Math.abs(latLng.getLon() - startStation.getStopLon()) < 0.0001) {
+                startIndex = i;
+            }
+            if (Math.abs(latLng.getLat() - endStation.getStopLat()) < 0.00001 && Math.abs(latLng.getLon() - endStation.getStopLon()) < 0.00001) {
+                endIndex = i;
+            }
+        }
+
+        // 如果起點站在終點站之前出現，則為有效路線
+        return startIndex != -1 && endIndex != -1 && startIndex < endIndex;
+    }
+
+
     // 判斷站牌是否位於指定路線的站點中
     private boolean isNearbyStop(BusStation station, Map<BusStation.LatLng, String> routeStops) {
-        double epsilon = 0.00001; // 設定允許的經緯度誤差
+        double epsilon = 0.0001; // 設定允許的經緯度誤差
         for (Map.Entry<BusStation.LatLng, String> entry : routeStops.entrySet()) {
             BusStation.LatLng latLng = entry.getKey();
             if (Math.abs(station.getStopLat() - latLng.getLat()) < epsilon && Math.abs(station.getStopLon() - latLng.getLon()) < epsilon) {

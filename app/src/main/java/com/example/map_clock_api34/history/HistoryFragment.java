@@ -41,7 +41,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.history.HistoryListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.HistoryTable;
 import com.example.map_clock_api34.home.HomeFragment;
