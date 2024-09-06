@@ -38,7 +38,7 @@
             app:strokeWidth="2dp">
 
             <TextView
-                android:id="@+id/locatetionTitle"
+                android:id="@+id/locationTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
@@ -61,7 +61,7 @@
                 android:layout_marginTop="80dp"
                 android:text=""
                 android:textColor="@color/black"
-                app:layout_constraintTop_toBottomOf="@+id/locatetionTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/locationTitle" />
 
             <LinearLayout
                 android:layout_width="match_parent"

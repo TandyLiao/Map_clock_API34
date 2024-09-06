@@ -1,15 +1,11 @@
 package com.example.map_clock_api34.home;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
 
@@ -22,11 +18,8 @@ import android.annotation.SuppressLint;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Vibrator;
-import android.text.Spannable;
+import android.os.Handler;
 import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,14 +38,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.StyleSpan;
+
 import android.content.Intent;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import java.util.Arrays;
 
 public class StartMapping extends Fragment {
 
@@ -80,7 +71,7 @@ public class StartMapping extends Fragment {
 
     PopupWindow popupWindow;
     TextView txtTime;
-    TextView locatetionTitle;
+    TextView locationTitle;
     View rootView;
     View overlayView;
     Button btnPre, btnNext;
@@ -102,6 +93,13 @@ public class StartMapping extends Fragment {
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
+        userLocation = locationManager.getLastKnownLocation(commandstr);
+        if (userLocation == null){
+            Toast.makeText(getActivity(),"無法取得當前位置，請查看您的GPS設備",Toast.LENGTH_SHORT).show();
+            getActivity().getSupportFragmentManager().popBackStack();
+            return null;
+        }
+
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
@@ -118,7 +116,7 @@ public class StartMapping extends Fragment {
         }
 
         txtTime = rootView.findViewById(R.id.txtTime);
-        locatetionTitle=rootView.findViewById(R.id.locatetionTitle);
+        locationTitle =rootView.findViewById(R.id.locationTitle);
 
         setupButton();
         //開始背景執行
@@ -155,7 +153,7 @@ public class StartMapping extends Fragment {
             //第一次粗略估算到達目的地所需時間
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0], userLocation.getLatitude(), userLocation.getLongitude())/1000;
             double time = Math.round(trip_distance/4*60);
-            locatetionTitle.setText("地點:"+destinationName[0]);
+            locationTitle.setText("地點:"+destinationName[0]);
             txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
         }
@@ -246,7 +244,7 @@ public class StartMapping extends Fragment {
                 userLocation = locationManager.getLastKnownLocation(commandstr);
                 double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
                 double time = Math.round(trip_distance/4*60);
-                locatetionTitle.setText("地點:"+destinationName[nowIndex]);
+                locationTitle.setText("地點:"+destinationName[nowIndex]);
                 txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
                 mMap.clear();
@@ -277,7 +275,7 @@ public class StartMapping extends Fragment {
                 userLocation = locationManager.getLastKnownLocation(commandstr);
                 double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
                 double time = Math.round(trip_distance/4*60);
-                locatetionTitle.setText("地點:"+destinationName[nowIndex]);
+                locationTitle.setText("地點:"+destinationName[nowIndex]);
                 txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
 
                 mMap.clear();
@@ -326,7 +324,7 @@ public class StartMapping extends Fragment {
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
             double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[desNextIndex],longitude[desNextIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
             double time = Math.round(trip_distance/4*60);
-            locatetionTitle.setText("地點:"+destinationName[desNextIndex]);
+            locationTitle.setText("地點:"+destinationName[desNextIndex]);
             txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
         }
     }
@@ -382,6 +380,9 @@ public class StartMapping extends Fragment {
                     mMap.clear();
                     moveCameraAndCalculateTime(destinationIndex);
                 }
+                if (intent.hasExtra("GPSisGone")){
+                    Toast.makeText(getActivity(),"GPS訊號遺失", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     };
@@ -423,10 +424,13 @@ public class StartMapping extends Fragment {
                 new IntentFilter("DESTINATION_UPDATE"));
 
     }
-    @Override
-    public void onPause() {
-        super.onPause();
+    public void makeToast(String message, int durationInMillis) {
+        // 創建 Toast
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.show();
 
+        // 使用 Handler 來控制顯示時長
+        new Handler().postDelayed(toast::cancel, durationInMillis);
     }
 }
 
