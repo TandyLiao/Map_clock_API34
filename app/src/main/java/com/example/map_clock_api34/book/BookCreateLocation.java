@@ -381,7 +381,7 @@ public class BookCreateLocation extends Fragment {
 
         // 添加書籤圖標
         ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.addbookmark);
+        bookmark.setImageResource(R.drawable.routeadd);
         bookmark.setPadding(10, 10, 5, 10); // 設置圖標邊距
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
         params.setMarginStart(10); // 設置左邊距

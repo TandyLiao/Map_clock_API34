@@ -463,7 +463,7 @@ public class EditCreateLocation extends Fragment {
 
         // 添加書籤圖標
         ImageView bookmark = new ImageView(requireContext());
-        bookmark.setImageResource(R.drawable.bookmark2);
+        bookmark.setImageResource(R.drawable.route_change);
         bookmark.setPadding(10, 10, 5, 10); // 設置圖標邊距
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
         params.setMarginStart(10); // 設置左邊距
