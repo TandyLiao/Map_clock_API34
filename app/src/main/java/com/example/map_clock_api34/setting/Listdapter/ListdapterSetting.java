@@ -98,6 +98,32 @@ public class ListdapterSetting extends RecyclerView.Adapter<ListdapterSetting.Vi
         layoutParams.height = 150;
         holder.itemView.setLayoutParams(layoutParams);
 
+        // 使用 getTag() 檢查是否已經有動態添加的 TextView
+        TextView itemNumberTextView = (TextView) holder.itemView.getTag();
+
+        if (itemNumberTextView == null) {
+            // 如果沒有，動態添加一個 TextView
+            itemNumberTextView = new TextView(holder.itemView.getContext());
+            itemNumberTextView.setTextSize(16);
+            itemNumberTextView.setTextColor(holder.itemView.getContext().getResources().getColor(android.R.color.black));
+
+            // 設置 TextView 的佈局參數，並設定 layout_marginStart 來將其向右移動
+            ViewGroup.MarginLayoutParams numberLayoutParams = new ViewGroup.MarginLayoutParams(
+                    100, ViewGroup.LayoutParams.WRAP_CONTENT);
+            numberLayoutParams.setMargins(50, 0, 0, 0); // 設定左邊距 50px，這樣編號會向右移動
+            itemNumberTextView.setLayoutParams(numberLayoutParams);
+
+            // 將 TextView 添加到佈局
+            ViewGroup parent = (ViewGroup) holder.LocateionName.getParent();
+            parent.addView(itemNumberTextView, 0); // 添加到第一個位置（左邊）
+
+            // 使用 setTag 來記住已經創建的 TextView
+            holder.itemView.setTag(itemNumberTextView);
+        }
+
+        // 設置編號
+        itemNumberTextView.setText(String.valueOf(position + 1));
+
         // 根據是否震動、鈴聲和通知來設置拖動圖標
         boolean vibrate = sharedViewModel.getVibrate(position);
         boolean ringtone = sharedViewModel.getRingtone(position);

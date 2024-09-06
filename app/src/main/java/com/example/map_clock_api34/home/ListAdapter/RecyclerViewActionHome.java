@@ -63,11 +63,16 @@ public class RecyclerViewActionHome {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();  // 取得滑動的項目位置
                 arrayList.remove(position);         // 從 arrayList 中移除該項目
+
                 sharedViewModel.delet(position);    // 通知 ViewModel 刪除該項目
+
                 listAdapterRoute.notifyItemRemoved(position);  // 通知 Adapter 項目已被移除
+
+                listAdapterRoute.notifyItemRangeChanged(position, arrayList.size()); // 通知 Adapter 更新剩餘項目的編號，防止刪除後編號錯誤
 
                 // 更新 Reset 按鈕的狀態
                 updateResetButtonState(sharedViewModel, context, btnReset);
+
             }
 
             // 自定義項目滑動過程中的裝飾效果（例如滑動時的背景顏色和圖標）
@@ -80,6 +85,15 @@ public class RecyclerViewActionHome {
                         .create()
                         .decorate();  // 套用裝飾
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+
+            // 在拖動結束後，刷新整個 RecyclerView 以確保編號更新
+            @Override
+            public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+
+                // 拖動結束後，通知 Adapter 刷新所有項目以更新編號
+                listAdapterRoute.notifyDataSetChanged();
             }
         };
 

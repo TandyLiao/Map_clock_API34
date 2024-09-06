@@ -76,9 +76,6 @@
 
         </activity>
 
-        <!-- 設定界面的活動 -->
-        <activity android:name=".setting.SettingRemind" />
-
     </application>
 
 </manifest>
