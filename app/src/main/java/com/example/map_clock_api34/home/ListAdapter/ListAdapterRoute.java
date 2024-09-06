@@ -139,9 +139,9 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
             } else {
                 String note = sharedViewModel.getNote(position);
                 if (note != null && !note.isEmpty()) {
-                    holder.dragHandle.setImageResource(R.drawable.note_yellow); // 有備註的圖標
+                    holder.dragHandle.setImageResource(R.drawable.note_red); // 有備註的圖標
                 } else {
-                    holder.dragHandle.setImageResource(R.drawable.note_red); // 沒有備註的圖標
+                    holder.dragHandle.setImageResource(R.drawable.note); // 沒有備註的圖標
                 }
             }
         } else {
