@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -103,7 +104,7 @@ public class BookCreateLocation extends Fragment {
             } else {
                 // 如果沒有同意權限，請求使用者開啟位置權限
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
+                makeToast("請開啟定位權限",1000);
             }
         });
 
@@ -116,13 +117,13 @@ public class BookCreateLocation extends Fragment {
         btnMapping.setOnClickListener(v -> {
             if (sharedViewModel.getLocationCount() >= 0) { // 確認已選擇地點
                 if (bookNameInput.getText().toString().equals("")) { // 檢查書名是否輸入
-                    Toast.makeText(getActivity(), "你沒有輸入書籤名稱!", Toast.LENGTH_SHORT).show();
+                    makeToast("沒有輸入書籤名稱喔",1000);
                     return;
                 }
 
                 // 書籤名稱長度限制
                 if (bookNameInput.getText().toString().length() > 10) {
-                    Toast.makeText(getActivity(), "書籤名稱的長度必須小於10個字", Toast.LENGTH_SHORT).show();
+                    makeToast("書籤名稱必須小於10個字",1000);
                 } else {
                     // 保存至資料庫並返回上一頁
                     saveInLocationDB();
@@ -131,7 +132,7 @@ public class BookCreateLocation extends Fragment {
                     getActivity().getSupportFragmentManager().popBackStack();
                 }
             } else {
-                Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
+                makeToast("你還沒有選擇地點喔",1000);
             }
         });
 
@@ -139,7 +140,7 @@ public class BookCreateLocation extends Fragment {
         ImageView noteView = rootView.findViewById(R.id.bookcreate_imageView);
         noteView.setOnClickListener(v -> {
             if (arrayList.isEmpty()) {
-                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                makeToast("還沒有選擇地點喔",1000);
                 return;
             }
             Note notesFragment = new Note(); // 打開記事頁面
@@ -153,7 +154,7 @@ public class BookCreateLocation extends Fragment {
         ImageView bookSetting = rootView.findViewById(R.id.bookset_imageView);
         bookSetting.setOnClickListener(v -> {
             if (arrayList.isEmpty()) {
-                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                makeToast("還沒有選擇地點喔",1000);
                 return;
             }
             CreatLocation_setting creatLocation_setting = new CreatLocation_setting(); // 打開設定頁面
@@ -440,6 +441,15 @@ public class BookCreateLocation extends Fragment {
             arrayList.clear(); // 清空列表
             getActivity().getSupportFragmentManager().popBackStack(); // 回到上一頁
         });
+    }
+
+    public void makeToast(String message, int durationInMillis) {
+        // 創建 Toast
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.show();
+
+        // 使用 Handler 來控制顯示時長
+        new Handler().postDelayed(toast::cancel, durationInMillis);
     }
 
     // 當片段顯示時，重置 RecyclerView 並重新顯示 ActionBar

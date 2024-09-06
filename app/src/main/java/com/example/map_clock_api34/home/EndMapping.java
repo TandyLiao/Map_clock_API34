@@ -18,7 +18,7 @@ import com.example.map_clock_api34.SharedViewModel;
 
 public class EndMapping extends Fragment {
     private View rootView;
-    SharedViewModel sharedViewModel;
+    private SharedViewModel sharedViewModel;
 
     @Nullable
     @Override

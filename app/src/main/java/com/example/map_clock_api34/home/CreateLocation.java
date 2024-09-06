@@ -2,6 +2,7 @@ package com.example.map_clock_api34.home;
 
 import static android.content.Context.MODE_PRIVATE;
 
+// 引入必要的 Android 和其他庫
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -63,73 +65,81 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-
 public class CreateLocation extends Fragment {
 
+    // 權限相關常量
+    private static final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 101;
+
+    // 檢查權限請求的邏輯
+    private static final String PREFS_NAME = "PermissionPrefs";
+    private static final String LOCATION_DENY_COUNT = "locationDenyCount";
+    private static final String NOTIFICATION_DENY_COUNT = "notificationDenyCount";
+    private static final int MAX_DENY_COUNT = 2; // 當拒絕權限達到兩次時跳轉到設置頁面
+
+    // 定義資料庫輔助類
     private HistoryDatabaseHelper dbHistoryHelper;
 
-    String Historynames;
-
-    String uniqueID;
-
-    ActionBar actionBar;
+    // ActionBar 相關
+    private ActionBar actionBar;
     private Toolbar toolbar;
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawerLayout;
 
-    private static final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 101;
     private AlertDialog permissionDialog;
-    View rootView;
-    View overlayView;
-    RecyclerView recyclerViewRoute;
-    RecyclerView recyclerViewTool;
-    RecyclerViewActionHome recyclerViewActionHome;
-    ListAdapterRoute listAdapterRoute;
-    //獨立出來是因為要設置不可點擊狀態
-    Button btnReset;
-    SharedViewModel sharedViewModel;
-    WeatherService weatherService = new WeatherService();
+    private View rootView;
+    private View overlayView;
+    private Button btnReset;
 
-    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+    // RecyclerView 和 Adapter 相關
+    private RecyclerView recyclerViewRoute;
+    private ListAdapterRoute listAdapterRoute;
+    private SharedViewModel sharedViewModel;
 
+    private final WeatherService weatherService = new WeatherService();
+
+    private String Historynames;    // 路線名稱
+    private String uniqueID;        // 唯一的 ID
+
+    // 存放路線資料的 ArrayList
+    private final ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+
+    // onCreateView 用來初始化畫面和資料
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.home_fragment_creatlocation, container, false);
 
         dbHistoryHelper = new HistoryDatabaseHelper(requireContext());
-
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+        // 檢查是否需要顯示教學頁面
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("CreateLogin", false);
 
         Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
-        if(isLoggedIn==false)
-        {
-
+        if (!isLoggedIn) {
+            // 如果第一次進入，顯示教學頁面
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage",0);
-            //可以改變出現的值 True為已教學過
-            editor.putBoolean("CreateLogin",true);
+            editor.putInt("WhichPage", 0);
+            editor.putBoolean("CreateLogin", true);
             editor.apply();
+
             tutorial tutorialFragment = new tutorial();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.hide(currentFragment);
             transaction.add(R.id.fl_container, tutorialFragment);
             transaction.addToBackStack(null);
             transaction.commit();
-
         }
 
-        //初始化ActionBar
+        // 初始化 ActionBar
         setupActionBar();
-        //初始化漢堡選單
+        // 初始化側邊選單
         setupNavigationDrawer();
-        //初始化按鈕
+        // 初始化按鈕
         setupButtons();
-        //初始化路線表和功能表
+        // 初始化 RecyclerView
         setupRecyclerViews();
 
-        //換頁回來再召喚漢堡選單
+        // 換頁回來再次設置側邊選單
         if (getActivity() != null) {
             drawerLayout = getActivity().findViewById(R.id.drawerLayout);
             toolbar = requireActivity().findViewById(R.id.toolbar);
@@ -137,41 +147,40 @@ public class CreateLocation extends Fragment {
         return rootView;
     }
 
-    //初始化按鈕(包含定位請求)
+    // 初始化按鈕和其點擊事件
     private void setupButtons() {
-        //新增地點按鈕初始化
+        // 新增地點按鈕，當地點數量少於 6 個時允許新增
         Button btnAddItem = rootView.findViewById(R.id.btn_addItem);
         btnAddItem.setOnClickListener(v -> {
             if (sharedViewModel.getLocationCount() < 6) {
-                openSelectPlaceFragment();
+                openSelectPlaceFragment();  // 打開選擇地點頁面
+            }else{
+                makeToast("地點最多只能7個喔",1000);
             }
         });
-        //重置按鈕初始化
-        btnReset = rootView.findViewById(R.id.btn_reset);
-        btnReset.setOnClickListener(v -> ShowPopupWindow());
 
+        // 重置按鈕
+        btnReset = rootView.findViewById(R.id.btn_reset);
+        btnReset.setOnClickListener(v -> ShowPopupWindow());  // 顯示重置的 PopupWindow
+
+        // 確認按鈕，當有選擇地點時進行導航
         Button btnMapping = rootView.findViewById(R.id.btn_sure);
         btnMapping.setOnClickListener(v -> {
-            //如有選擇地點就導航，沒有就跳提醒，加上匯入資料庫的程式
             if (sharedViewModel.getLocationCount() >= 0) {
-                openStartMappingFragment();
+                openStartMappingFragment();  // 打開導航頁面
 
+                // 設置路線名稱並儲存到資料庫
                 Historynames = sharedViewModel.getDestinationName(0) + "->" + sharedViewModel.getDestinationName(sharedViewModel.getLocationCount());
-                saveInDB();
-                saveInHistoryDB();
+                saveInDB();  // 儲存地點資料到資料庫
+                saveInHistoryDB();  // 儲存歷史資料到資料庫
 
             } else {
-                Toast.makeText(getActivity(), "你還沒有選擇地點", Toast.LENGTH_SHORT).show();
+                makeToast("還沒有選擇地點喔",1000);
             }
         });
     }
 
-    //檢查權限請求
-    private static final String PREFS_NAME = "PermissionPrefs";
-    private static final String LOCATION_DENY_COUNT = "locationDenyCount";
-    private static final String NOTIFICATION_DENY_COUNT = "notificationDenyCount";
-    private static final int MAX_DENY_COUNT = 2; // 兩次拒絕後跳轉到設置頁面
-    // 檢查權限請求
+    // 檢查和請求權限
     private void checkAndRequestPermissions() {
         SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         int locationDenyCount = prefs.getInt(LOCATION_DENY_COUNT, 0);
@@ -181,44 +190,40 @@ public class CreateLocation extends Fragment {
 
         // 檢查定位權限
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (locationDenyCount < MAX_DENY_COUNT) { // 兩次拒絕前繼續請求
+            if (locationDenyCount < MAX_DENY_COUNT) {  // 如果拒絕次數未超過兩次，繼續請求
                 permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
             }
-        }else {
-            // 如果權限已授予，重置拒絕次數
-            prefs.edit().putInt(LOCATION_DENY_COUNT, 0).apply();
+        } else {
+            prefs.edit().putInt(LOCATION_DENY_COUNT, 0).apply();  // 如果權限已授予，重置拒絕次數
         }
 
-        // 檢查通知權限（僅在Android 13及以上版本需要）
+        // 檢查通知權限（Android 13 及以上版本需要）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                if (notificationDenyCount < MAX_DENY_COUNT) { // 兩次拒絕前繼續請求
+                if (notificationDenyCount < MAX_DENY_COUNT) {
                     permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
                 }
-            }else {
-                // 如果權限已授予，重置拒絕次數
-                prefs.edit().putInt(NOTIFICATION_DENY_COUNT, 0).apply();
+            } else {
+                prefs.edit().putInt(NOTIFICATION_DENY_COUNT, 0).apply();  // 如果權限已授予，重置拒絕次數
             }
         }
 
-        // 如果拒絕次數達到上限，顯示設定頁面提示，這應該放在最前面
+        // 如果拒絕次數超過上限，顯示提示並跳轉到設置頁面
         if (locationDenyCount >= MAX_DENY_COUNT || notificationDenyCount >= MAX_DENY_COUNT) {
             showPermissionDeniedDialog(locationDenyCount, notificationDenyCount);
-            return; // 已經達到拒絕次數上限，直接返回
+            return;
         }
 
-        // 如果所有權限都已授予，則不進行任何請求或顯示Dialog
+        // 如果沒有需要請求的權限，直接返回
         if (permissionsNeeded.isEmpty()) {
-            return; // 所有權限都已授予，直接返回
+            return;
         }
 
-        // 如果有需要請求的權限，則進行請求
+        // 請求權限
         requestPermissions(permissionsNeeded.toArray(new String[0]), MULTIPLE_PERMISSIONS_REQUEST_CODE);
-
-
     }
 
-    // 請求權限的結果處理
+    // 處理請求權限的結果
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -235,19 +240,18 @@ public class CreateLocation extends Fragment {
                 if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
                     locationPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
                     if (!locationPermissionGranted) {
-                        incrementDenyCount(prefs, editor, LOCATION_DENY_COUNT);
+                        incrementDenyCount(prefs, editor, LOCATION_DENY_COUNT);  // 如果拒絕，增加拒絕次數
                     }
                 } else if (permissions[i].equals(Manifest.permission.POST_NOTIFICATIONS)) {
                     notificationsPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
                     if (!notificationsPermissionGranted) {
-                        incrementDenyCount(prefs, editor, NOTIFICATION_DENY_COUNT);
+                        incrementDenyCount(prefs, editor, NOTIFICATION_DENY_COUNT); // 如果拒絕，增加拒絕次數
                     }
                 }
             }
 
-            // 當所有權限都已處理後，再來做檢查
+            // 如果權限未授予，顯示提示並關閉應用
             if (!locationPermissionGranted || !notificationsPermissionGranted) {
-                // 檢查未授予的權限並顯示一次Toast
                 StringBuilder message = new StringBuilder("需要");
                 if (!locationPermissionGranted) {
                     message.append(" 定位");
@@ -256,8 +260,8 @@ public class CreateLocation extends Fragment {
                     message.append(" 通知");
                 }
                 message.append(" 權限才能正常運行");
-                Toast.makeText(getActivity(), message.toString(), Toast.LENGTH_LONG).show();
-                getActivity().finish();  // 關閉當前Activity，退出APP
+                makeToast(message.toString(),1000);
+                getActivity().finish();  // 關閉當前 Activity
             }
         }
         editor.apply();
@@ -265,13 +269,12 @@ public class CreateLocation extends Fragment {
 
     // 增加拒絕次數
     private void incrementDenyCount(SharedPreferences prefs, SharedPreferences.Editor editor, String key) {
-
         int count = prefs.getInt(key, 0);
         editor.putInt(key, count + 1);
         editor.commit();  // 保存更新
     }
 
-    // 顯示Dialog並跳轉到設置頁面
+    // 顯示權限被拒的對話框並提供跳轉到設置頁面的選項
     private void showPermissionDeniedDialog(int locationDenyCount, int notificationDenyCount) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         permissionDialog = builder.create();
@@ -286,7 +289,7 @@ public class CreateLocation extends Fragment {
         }
         message.append("請在設置中手動打開這些權限");
 
-        // 套用自訂佈局
+        // 套用自訂佈局顯示對話框
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View customView = inflater.inflate(R.layout.dialog_deltebook, null);
 
@@ -295,27 +298,19 @@ public class CreateLocation extends Fragment {
         TextView showTitle = customView.findViewById(R.id.txtNote);
 
         positiveButton.setText("打開設置");
-        //設置對話框裡確認按鈕的點擊監聽器
-        positiveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 跳轉到應用設置頁面
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
-                intent.setData(uri);
-                startActivity(intent);
-                permissionDialog.cancel(); // 關閉對話框
-            }
+        // 設置跳轉到設置頁面的按鈕
+        positiveButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
+            permissionDialog.cancel();  // 關閉對話框
         });
 
-        //設置對話框裡取消按鈕的點擊監聽器
-        negativeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().finish();
-                permissionDialog.cancel(); // 關閉對話框
-            }
-
+        // 設置取消按鈕
+        negativeButton.setOnClickListener(v -> {
+            getActivity().finish();
+            permissionDialog.cancel();  // 關閉對話框
         });
 
         showTitle.setText(message);
@@ -323,31 +318,32 @@ public class CreateLocation extends Fragment {
 
         permissionDialog.setView(customView);
         permissionDialog.setCanceledOnTouchOutside(false);
-        permissionDialog.show(); // 顯示對話框
+        permissionDialog.show();  // 顯示對話框
     }
 
+    // 儲存歷史資料到資料庫
     private void saveInHistoryDB() {
         try {
             SQLiteDatabase writeDB = dbHistoryHelper.getWritableDatabase();
             SQLiteDatabase readDB = dbHistoryHelper.getReadableDatabase();
 
+            // 查詢地點 ID
             Cursor cursor = readDB.rawQuery("SELECT location_id FROM location WHERE alarm_name=?", new String[]{uniqueID});
 
             long currentTimeMillis = System.currentTimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String formattedDate = sdf.format(new Date(currentTimeMillis));
 
-            //此變數要讓History的每筆路線都從0開始存入
+            // 用來讓每筆歷史路線從 0 開始
             int arranged_id_local = 0;
 
+            // 將資料插入到歷史資料表中
             while (cursor.moveToNext()) {
                 if (Historynames != null) {
                     ContentValues values = new ContentValues();
                     values.put(HistoryTable.COLUMN_START_TIME, formattedDate);
                     values.put(HistoryTable.COLUMN_ALARM_NAME, Historynames);
                     values.put(HistoryTable.COLUMN_LOCATION_ID, cursor.getString(0));
-
-                    //arranged_id_local存入History表後再+1
                     values.put(HistoryTable.COLUMN_ARRANGED_ID, arranged_id_local++);
                     writeDB.insert(HistoryTable.TABLE_NAME, null, values);
                 }
@@ -360,10 +356,9 @@ public class CreateLocation extends Fragment {
         }
     }
 
+    // 儲存地點資料到資料庫
     private void saveInDB() {
-        //產生一組獨一無二的ID存入區域變數內(重複機率近乎為0)
-        //用這ID去做Location_id和History做配對
-        uniqueID = UUID.randomUUID().toString();
+        uniqueID = UUID.randomUUID().toString();  // 產生一個唯一的 ID
 
         SQLiteDatabase db = dbHistoryHelper.getWritableDatabase();
 
@@ -374,11 +369,11 @@ public class CreateLocation extends Fragment {
             String CityName = sharedViewModel.getCapital(i);
             String AreaName = sharedViewModel.getArea(i);
             String Note = sharedViewModel.getNote(i);
-            //設定
-            boolean vibrate=sharedViewModel.getVibrate(i);
-            boolean ringtone=sharedViewModel.getRingtone(i);
-            int notificationTime=sharedViewModel.getNotification(i);
+            boolean vibrate = sharedViewModel.getVibrate(i);
+            boolean ringtone = sharedViewModel.getRingtone(i);
+            int notificationTime = sharedViewModel.getNotification(i);
 
+            // 將地點資料插入資料庫
             if (name != null) {
                 ContentValues values = new ContentValues();
                 values.put(LocationTable.COLUMN_PLACE_NAME, name);
@@ -388,10 +383,9 @@ public class CreateLocation extends Fragment {
                 values.put(LocationTable.COLUMN_CITY_NAME, CityName);
                 values.put(LocationTable.COLUMN_AREA_NAME, AreaName);
                 values.put(LocationTable.COLUMN_NOTE_INFO, Note);
-                //設定
                 values.put(LocationTable.COLUMN_VIBRATE, vibrate);
                 values.put(LocationTable.COLUMN_RINGTONE, ringtone);
-                values.put(LocationTable.COLUMN_notificationTime, notificationTime);
+                values.put(LocationTable.COLUMN_NOTIFICATION_TIME, notificationTime);
 
                 db.insert(LocationTable.TABLE_NAME, null, values);
             }
@@ -399,7 +393,7 @@ public class CreateLocation extends Fragment {
         db.close();
     }
 
-    //打開選地點頁面
+    // 打開選擇地點頁面
     private void openSelectPlaceFragment() {
         SelectPlace mapFragment = new SelectPlace();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -408,7 +402,7 @@ public class CreateLocation extends Fragment {
         transaction.commit();
     }
 
-    //打開導航頁面
+    // 打開導航頁面
     private void openStartMappingFragment() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         StartMapping startMappingFragment = (StartMapping) fragmentManager.findFragmentByTag("StartMapping");
@@ -416,11 +410,11 @@ public class CreateLocation extends Fragment {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         if (startMappingFragment == null) {
-            // 如果 fragment 為 null，則創建一個新的並添加
+            // 如果 fragment 不存在，則創建一個新的
             startMappingFragment = new StartMapping();
             transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
         } else {
-            // 如果 fragment 已經存在，則顯示它
+            // 如果 fragment 已存在，則顯示它
             transaction.show(startMappingFragment);
         }
 
@@ -428,8 +422,7 @@ public class CreateLocation extends Fragment {
         transaction.commit();
     }
 
-
-    //初始化漢堡選單
+    // 初始化側邊選單
     private void setupNavigationDrawer() {
         drawerLayout = requireActivity().findViewById(R.id.drawerLayout);
         toolbar = requireActivity().findViewById(R.id.toolbar);
@@ -440,7 +433,7 @@ public class CreateLocation extends Fragment {
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
     }
 
-    //ActionBar初始設定
+    // 初始化 ActionBar
     private void setupActionBar() {
         actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -452,36 +445,38 @@ public class CreateLocation extends Fragment {
                 ActionBar.LayoutParams.MATCH_PARENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewtitle.setBackground(drawable);
-        //建立LinearLayout在CardView等等放圖案和文字
+        // 建立 LinearLayout 放置圖示和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        //設置右上角的小圖示
+        // 設置右上角的小圖示
         ImageView bookmark = new ImageView(requireContext());
         bookmark.setImageResource(R.drawable.route);
-        bookmark.setPadding(10, 10, 5, 10);//設定icon邊界
+        bookmark.setPadding(10, 10, 5, 10);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                100, // 設置寬度為 100 像素
+                100  // 設置高度為 100 像素
         );
-        params.setMarginStart(10); // 设置左边距
+        params.setMarginStart(10);  // 設置左邊距
         bookmark.setLayoutParams(params);
-        // 創建右上角的名字
+
+        // 創建標題文字
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("路線規劃");
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 30, 10); // 设置内边距
+        bookTitle.setTextColor(getResources().getColor(R.color.green));
+        bookTitle.setPadding(10, 10, 30, 10);
         linearLayout.addView(bookmark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
-        // 將cardview新增到actionBar
+
+        // 將 CardView 添加到 ActionBar
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的標題
+            actionBar.setDisplayShowTitleEnabled(false);  // 隱藏原有標題
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(cardViewtitle, new ActionBar.LayoutParams(
                     ActionBar.LayoutParams.WRAP_CONTENT,
@@ -491,93 +486,89 @@ public class CreateLocation extends Fragment {
         }
     }
 
-    //初始化設定表和功能表
+    // 初始化 RecyclerView
     private void setupRecyclerViews() {
-        // 初始化路線的表
+        // 初始化路線列表
         recyclerViewRoute = rootView.findViewById(R.id.recycleViewRouteBook);
         recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, true); // 啟用拖動功能
+        listAdapterRoute = new ListAdapterRoute(arrayList, sharedViewModel, true);  // 啟用拖動功能
         recyclerViewRoute.setAdapter(listAdapterRoute);
 
-        // 讓路線表可以交換、刪除...等動作
-        recyclerViewActionHome = new RecyclerViewActionHome();
+        // 設置路線表可以進行拖動和刪除操作
+        RecyclerViewActionHome recyclerViewActionHome = new RecyclerViewActionHome();
         recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
 
-        // 初始化下面工具列的表
-        recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
+        // 初始化工具列表
+        RecyclerView recyclerViewTool = rootView.findViewById(R.id.recycleViewTool);
         recyclerViewTool.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        // 由於ListAdapter獨立出去了，所以要創建換頁的動作並傳給他
+
+        // 創建 ListAdapterTool 並傳入 FragmentTransaction
         FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
         ListAdapterTool listAdapterTool = new ListAdapterTool(fragmentTransaction, sharedViewModel, weatherService, getActivity());
         recyclerViewTool.setAdapter(listAdapterTool);
     }
 
-    //每次回到路線規劃都會重製路線表，不然會疊加
+    // 重置路線列表，防止列表內容疊加
     private void RecycleViewReset() {
-        //清除原本的表
-        arrayList.clear();
+        arrayList.clear();  // 清除原列表
         String shortLocationName;
         if (sharedViewModel.getLocationCount() != -1) {
             for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
                 shortLocationName = sharedViewModel.getDestinationName(j);
-                //如果地名大於20字，後面都用...代替
+                // 如果地名超過 20 字，使用 "..." 代替
                 if (shortLocationName.length() > 20) {
                     hashMap.put("data", shortLocationName.substring(0, 20) + "...");
                 } else {
                     hashMap.put("data", shortLocationName);
                 }
-                //重新加回路線表
                 arrayList.add(hashMap);
             }
         }
-        //套用更新
-        listAdapterRoute.notifyDataSetChanged();
-        //設置重置按鈕的顏色和觸及狀態
-        updateResetButtonState();
+        listAdapterRoute.notifyDataSetChanged();  // 通知 Adapter 更新列表
+        updateResetButtonState();  // 更新重置按鈕狀態
     }
 
-    //按重置紐後PopupWindow跳出來的設定
+    // 顯示重置按鈕的 PopupWindow
     private void ShowPopupWindow() {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setWidth(700);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
-        //讓PopupWindow顯示出來的關鍵句
+
+        // 顯示 PopupWindow
         popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
-        //疊加View在底下，讓她不會按到底層就跳掉
+        // 疊加防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
-        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        Button BTNPopup = view.findViewById(R.id.PopupCancel);
         BTNPopup.setOnClickListener(v -> {
             popupWindow.dismiss();
-            //移除疊加在底下防止點擊其他區域的View
-            removeOverlayView();
+            removeOverlayView();  // 移除疊加的防點擊區域
         });
-        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+
+        Button btnsure = view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
             while (sharedViewModel.getLocationCount() >= 0) {
                 arrayList.clear();
                 sharedViewModel.clearAll();
             }
             recyclerViewRoute.setAdapter(listAdapterRoute);
-            //改變重置按鈕狀態
-            updateResetButtonState();
-            //移除疊加在底下防止點擊其他區域的View
-            removeOverlayView();
+            updateResetButtonState();  // 更新重置按鈕狀態
+            removeOverlayView();  // 移除防點擊區域
             popupWindow.dismiss();
         });
     }
 
-    //把疊加在底層的View刪掉
+    // 移除疊加的防點擊區域
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {
             ((ViewGroup) overlayView.getParent()).removeView(overlayView);
@@ -585,14 +576,51 @@ public class CreateLocation extends Fragment {
         }
     }
 
-    //Fragment生命週期相關
+    // 更新重置按鈕的狀態
+    private void updateResetButtonState() {
+        if (sharedViewModel.getLocationCount() >= 0) {
+            // 按鈕可點擊
+            btnReset.setEnabled(true);
+            // 改變按鈕文字顏色
+            btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.green));
+            // 設定啟用狀態的背景
+            btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
+        } else {
+            // 按鈕不可點擊
+            btnReset.setEnabled(false);
+            // 改變按鈕文字顏色
+            btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
+            // 設定禁用狀態的背景
+            btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
+        }
+
+        // 顯示提示
+        TextView notification = rootView.findViewById(R.id.textView6);
+        if (sharedViewModel.getLocationCount() != -1) {
+            notification.setText("");
+        } else {
+            notification.setText("請按「新增」添加地點");
+        }
+    }
+
+    public void makeToast(String message, int durationInMillis) {
+        // 創建 Toast
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.show();
+
+        // 使用 Handler 來控制顯示時長
+        new Handler().postDelayed(toast::cancel, durationInMillis);
+    }
+
+    // Fragment 生命週期相關
     @Override
     public void onResume() {
         super.onResume();
-        //重新更新RecycleView
+        // 重置 RecyclerView
         RecycleViewReset();
-        checkAndRequestPermissions();
-        // 如果權限已經授予，並且 Dialog 還在顯示，則將其關閉
+        checkAndRequestPermissions();  // 檢查和請求權限
+
+        // 如果權限已授予且 Dialog 顯示，則關閉 Dialog
         if (permissionDialog != null && permissionDialog.isShowing()) {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                     && (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -600,12 +628,11 @@ public class CreateLocation extends Fragment {
                 permissionDialog.dismiss();
             }
         }
-        //換頁回來再召喚漢堡選單
+
+        // 重新設置側邊選單
         setupNavigationDrawer();
         if (actionBar != null) {
-            // Ensure drawerLayout is not null
             if (drawerLayout != null) {
-                // Set up ActionBarDrawerToggle
                 if (toggle == null) {
                     toggle = new ActionBarDrawerToggle(
                             requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
@@ -614,37 +641,6 @@ public class CreateLocation extends Fragment {
                 }
                 toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
             }
-        }
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
-    }
-    // 更新重置按鈕的狀態
-    private void updateResetButtonState() {
-        if (sharedViewModel.getLocationCount() >= 0) {
-            //設置可點擊狀態
-            btnReset.setEnabled(true);
-            //改變按鈕文字顏色
-            btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.green));
-            //改變按鈕的Drawable
-            btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem)); // 設定啟用時的背景顏色
-        } else {
-            //設置不可點擊狀態
-            btnReset.setEnabled(false);
-            //改變按鈕文字顏色
-            btnReset.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-            //改變按鈕的Drawable
-            btnReset.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable)); // 設定禁用時的背景顏色
-        }
-
-        if(sharedViewModel.getLocationCount()!=-1){
-            TextView notification = rootView.findViewById(R.id.textView6);
-            notification.setText("");
-        }else{
-            TextView notification = rootView.findViewById(R.id.textView6);
-            notification.setText("請按「新增」添加地點");
         }
     }
 

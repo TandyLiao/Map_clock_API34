@@ -1,89 +1,90 @@
 package com.example.map_clock_api34.home.ListAdapter;
 
-
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-
 import java.util.ArrayList;
-
 import java.util.HashMap;
 
-
+/**
+ * 自訂的 RecyclerView 適配器，負責顯示路線資訊，並支援項目點擊和拖曳功能。
+ */
 public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.ViewHolder> {
 
-    private ArrayList<HashMap<String, String>> arrayList;
-    private SharedViewModel sharedViewModel;
-    private ItemTouchHelper itemTouchHelper;
-    private int selectedPosition = RecyclerView.NO_POSITION; // 用於跟踪選擇的項目
-    private boolean enableDrag; // 是否啟用拖動功能
-    private OnItemClickListener onItemClickListener;
+    private ArrayList<HashMap<String, String>> arrayList; // 儲存路線資料的列表
+    private SharedViewModel sharedViewModel; // 與 ViewModel 共享的資料
+    private ItemTouchHelper itemTouchHelper; // 負責處理拖曳功能
+    private OnItemClickListener onItemClickListener; // 項目點擊的監聽器
 
+    private int selectedPosition = RecyclerView.NO_POSITION; // 用來跟踪目前選擇的項目
+    private boolean enableDrag; // 用來控制是否允許拖動
+
+    //項目點擊的回調介面
     public interface OnItemClickListener {
-        void onItemClick(int position);
+        void onItemClick(int position); // 點擊時調用
     }
+
+    // 設置項目點擊監聽器
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
+
     public ListAdapterRoute(ArrayList<HashMap<String, String>> arrayList, SharedViewModel sharedViewModel, boolean enableDrag) {
         this.arrayList = arrayList;
         this.sharedViewModel = sharedViewModel;
         this.enableDrag = enableDrag;
     }
 
+    // 設置 ItemTouchHelper，用於處理拖動操作
     public void setItemTouchHelper(ItemTouchHelper itemTouchHelper) {
         this.itemTouchHelper = itemTouchHelper;
     }
 
+    // 自訂的 ViewHolder 類別，負責顯示每個路線項目的資料
     class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView LocateionName;
-        private ImageView dragHandle;
+        private TextView LocateionName; // 顯示路線名稱的 TextView
+        private ImageView dragHandle;   // 拖曳圖標
 
+        @SuppressLint("ClickableViewAccessibility")
         public ViewHolder(View itemView) {
             super(itemView);
             LocateionName = itemView.findViewById(R.id.textVLocateionName);
             dragHandle = itemView.findViewById(R.id.dragHandle);
 
-            // 處理圖片點擊事件
+            // 處理拖曳圖標的點擊事件，進行選擇操作或拖動
             dragHandle.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
-
-                    if (!enableDrag) { // 如果禁用拖動，則進行選擇操作
+                    if (!enableDrag) { // 如果拖曳禁用，進行選擇操作
                         int previousSelectedPosition = selectedPosition;
                         if (selectedPosition == getAdapterPosition()) {
                             selectedPosition = RecyclerView.NO_POSITION; // 取消選擇
                         } else {
-                            selectedPosition = getAdapterPosition();
+                            selectedPosition = getAdapterPosition(); // 設置新選擇項目
                         }
-                        notifyItemChanged(previousSelectedPosition);
-                        notifyItemChanged(selectedPosition);
+                        notifyItemChanged(previousSelectedPosition); // 通知 UI 更新舊選擇項目
+                        notifyItemChanged(selectedPosition); // 通知 UI 更新新選擇項目
                     }
                     if (onItemClickListener != null) {
-                        onItemClickListener.onItemClick(getAdapterPosition());
+                        onItemClickListener.onItemClick(getAdapterPosition()); // 回調點擊事件
                     }
                 }
             });
 
-            // 讓拖曳的圖標可以動作
+            // 處理拖曳事件
             dragHandle.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        if (itemTouchHelper != null && enableDrag) {
-                            itemTouchHelper.startDrag(ViewHolder.this);
-                        }
+                    if (event.getAction() == MotionEvent.ACTION_DOWN && itemTouchHelper != null && enableDrag) {
+                        itemTouchHelper.startDrag(ViewHolder.this); // 開始拖曳
                     }
                     return false;
                 }
@@ -93,43 +94,36 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycleviewitem_route, parent, false);
-        return new ViewHolder(view);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycleviewitem_route, parent, false);
+        return new ViewHolder(view); // 創建並返回自訂的 ViewHolder
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.LocateionName.setText(arrayList.get(position).get("data"));
+        holder.LocateionName.setText(arrayList.get(position).get("data")); // 設置路線名稱
         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
-        layoutParams.height = 150;
+        layoutParams.height = 150; // 設置每個項目的高度
         holder.itemView.setLayoutParams(layoutParams);
-        
+
+        // 根據拖動狀態和選擇狀態設定圖標
         if (!enableDrag) {
-            // 設置選擇狀態的背景顏色和圖標變化
             if (position == selectedPosition) {
                 holder.dragHandle.setImageResource(R.drawable.route); // 選擇後的圖標
             } else {
                 String note = sharedViewModel.getNote(position);
-                if (note != null && !note.isEmpty()){
-                    holder.dragHandle.setImageResource(R.drawable.note_yellow);
-                }
-
-                else {
-                    holder.dragHandle.setImageResource(R.drawable.note_red); // 未選擇的圖標}
+                if (note != null && !note.isEmpty()) {
+                    holder.dragHandle.setImageResource(R.drawable.note_yellow); // 有備註的圖標
+                } else {
+                    holder.dragHandle.setImageResource(R.drawable.note_red); // 沒有備註的圖標
                 }
             }
+        } else {
+            holder.dragHandle.setImageResource(R.drawable.equals_sign); // 拖動時顯示的圖標
         }
-            else {
-            holder.dragHandle.setImageResource(R.drawable.equals_sign); // 拖動時的圖標
-        }
-
     }
 
     @Override
     public int getItemCount() {
-        return arrayList.size();
+        return arrayList.size(); // 返回項目的總數
     }
 }
-
-

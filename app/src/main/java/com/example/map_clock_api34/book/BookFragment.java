@@ -12,6 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -67,7 +68,6 @@ public class BookFragment extends Fragment {
     private View rootView;
 
     private Toolbar toolbar;                // 定義工具列
-    private ImageView editbook_imageView;   // 編輯書籍按鈕的圖片
     private ActionBarDrawerToggle toggle;   // 側邊選單的開關
     private DrawerLayout drawerLayout;      // 抽屜佈局
 
@@ -106,13 +106,11 @@ public class BookFragment extends Fragment {
     // 設置按鈕的行為
     private void setButton() {
 
-        editbook_imageView = rootView.findViewById(R.id.bookset_imageView);
-
-        // 禁用 setbook_imageView，直到選擇了一個項目
-        editbook_imageView.setEnabled(false);
-
+        // 編輯書籍按鈕的圖片
+        ImageView editbook_imageView = rootView.findViewById(R.id.bookset_imageView);
         // 創建書籍按鈕的圖片
         ImageView createbook_imageView = rootView.findViewById(R.id.bookcreate_imageView);
+
         // 設置創建書籍按鈕的點擊監聽器
         createbook_imageView.setOnClickListener(v -> {
             sharedViewModel.clearAll(); // 清空共享數據
@@ -128,7 +126,7 @@ public class BookFragment extends Fragment {
         editbook_imageView.setOnClickListener(v -> {
             HashMap<String, String> selectedItem = listAdapterBook.getSelectedItem(); // 獲取使用者選中的項目
 
-            if (selectedItem != null) {
+            if (selectedItem!=null) {
 
                 sharedViewModel.clearAll(); // 清空共享數據
 
@@ -187,6 +185,8 @@ public class BookFragment extends Fragment {
                 transaction.replace(R.id.fl_container, editCreateLocation);
                 transaction.addToBackStack(null);
                 transaction.commit();
+            }else{
+                makeToast("請選擇要修改的路線",1000);
             }
         });
 
@@ -194,25 +194,22 @@ public class BookFragment extends Fragment {
         Button user_sure = rootView.findViewById(R.id.book_usesure);
         // 設置使用者確認按鈕的點擊監聽器
         user_sure.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) { //檢查是否授予位置權限
+            HashMap<String, String> selectedItem = listAdapterBook.getSelectedItem(); // 獲取使用者選中的項目
+            if (selectedItem != null) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) { //檢查是否授予位置權限
 
-                saveInShareviewModel(); // 保存至SharedViewModel
-            } else {
+                    saveInShareviewModel(); // 保存至SharedViewModel
+                } else {
 
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE); // 請求位置權限
-                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show(); // 顯示權限提示
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE); // 請求位置權限
+                    makeToast("請開啟定位權限",1000);
+                }
+            }else{
+                makeToast("請選擇要套用的路線",1000);
             }
-        });
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        setupActionBar();   // 設置工具列
-        setupNavigationDrawer();    // 設置側邊欄
-        RecycleViewReset();         // 重置 RecyclerView
-        changeNotification();       // 更新UI
+        });
     }
 
     // 重置 RecyclerView 的數據
@@ -292,14 +289,6 @@ public class BookFragment extends Fragment {
         recyclerViewBook.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         listAdapterBook = new ListAdapterHistory(arrayList);
 
-        // 設置選項選擇監聽器
-        listAdapterBook.setOnItemSelectedListener(new ListAdapterHistory.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected() {
-                // 當選擇了項目時啟用 setbook_imageView
-                editbook_imageView.setEnabled(listAdapterBook.getSelectedPosition() != RecyclerView.NO_POSITION);
-            }
-        });
         recyclerViewBook.setAdapter(listAdapterBook); // 設置適配器
 
         // 添加左滑刪除功能
@@ -503,7 +492,7 @@ public class BookFragment extends Fragment {
                             sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
                             Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
                         } else {
-                            Toast.makeText(requireContext(), "無法取得現在位置", Toast.LENGTH_LONG).show();
+                            makeToast("無法取得現在位置",1000);
                         }
                     }
                 });
@@ -518,6 +507,24 @@ public class BookFragment extends Fragment {
             TextView notification = rootView.findViewById(R.id.textView7);
             notification.setText("");
         }
+    }
+
+    public void makeToast(String message, int durationInMillis) {
+        // 創建 Toast
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.show();
+
+        // 使用 Handler 來控制顯示時長
+        new Handler().postDelayed(toast::cancel, durationInMillis);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupActionBar();   // 設置工具列
+        setupNavigationDrawer();    // 設置側邊欄
+        RecycleViewReset();         // 重置 RecyclerView
+        changeNotification();       // 更新UI
     }
 
     @Override

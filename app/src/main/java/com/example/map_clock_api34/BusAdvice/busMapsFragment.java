@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -86,8 +87,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
                 busMapsFragment.this.googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
             } else {
-                // 如果無法取得位置資訊，顯示提示訊息
-                Toast.makeText(getContext(), "無法取得目前位置訊息，請查看您的GPS設備", Toast.LENGTH_SHORT).show();
+                makeToast("無法取得目前位置訊息，請查看您的GPS設備",1000);
             }
 
             // 設定目的地位置
@@ -105,7 +105,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             busMapsFragment.this.googleMap.setOnMarkerClickListener(marker -> {
                 if(marker.equals(destination)) {
                     // 如果點擊的是目的地，顯示提示訊息
-                    Toast.makeText(getActivity(), "這是你的目的地", Toast.LENGTH_SHORT).show();
+                    makeToast("您的目的地",1000);
                 }
                 else if (nearbyMarkers.contains(marker)) {
                     // 如果點擊的是附近站牌，查找可搭乘的公車路線
@@ -283,6 +283,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             View itemView = inflater.inflate(R.layout.dialog_bus_item, routesContainer, false); // 載入每條路線的佈局
             TextView routeTextView = itemView.findViewById(R.id.routeTextView);
             routeTextView.setText(detail); // 設定路線資訊
+
             routeTextView.setOnClickListener(v -> {
                 int which = routeDetails.indexOf(detail); // 取得點擊的路線索引
                 String selectedRoute = routeNames.get(which); // 取得點擊的路線名稱
@@ -297,8 +298,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         dialog = builder.create(); // 建立對話框
         dialog.setCanceledOnTouchOutside(false); // 禁止點擊對話框外部時關閉對話框
 
-        Button cancelBTN = customView.findViewById(R.id.PopupCancel); // 取消按鈕
-        cancelBTN.setOnClickListener(v -> dialog.dismiss()); // 點擊取消按鈕時關閉對話框
+        Button btnCancel = customView.findViewById(R.id.PopupCancel); // 取消按鈕
+        btnCancel.setOnClickListener(v -> dialog.dismiss()); // 點擊取消按鈕時關閉對話框
 
         dialog.show(); // 顯示對話框
     }
@@ -311,13 +312,15 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         destinationMarkers.clear(); // 清空集合
     }
 
-    // 高亮顯示某條路線的目的地
+    // hightLight 顯示某條路線的目的地
     private void highlightRouteDestinations(Map<BusStationFinderHelper.BusStation.LatLng, String> destinations) {
         resetDestinationMarkers(); // 重置目的地標記
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder(); // 經緯度邊界建構器
 
         for (Map.Entry<BusStationFinderHelper.BusStation.LatLng, String> entry : destinations.entrySet()) {
+
             Log.d("highlightRouteDestinations", "Destination stop: " + entry.getValue() + " at " + entry.getKey().getLat() + ", " + entry.getKey().getLon());
+
             LatLng position = new LatLng(entry.getKey().getLat(), entry.getKey().getLon()); // 取得目的地位置
             Bitmap customMarker = createCustomMarker(getContext(), R.drawable.custom_destination_near_marker, entry.getValue().toString(), false); // 建立自訂目的地標記
             Marker marker = googleMap.addMarker(new MarkerOptions()
@@ -343,17 +346,6 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         if (googleMap != null) {
             displayBusStopsOnMap(secondNearByStop, BitmapDescriptorFactory.HUE_BLUE, nearbyMarkers); // 顯示附近站點在地圖上
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        stationFinder.stopSearching(); // 停止查找站點
     }
 
     // 顯示彈出視窗，詢問是否將該站點加入行程
@@ -395,10 +387,10 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
                 // 將站點加入目的地
                 sharedViewModel.setFirstDestination("公車站：" + stopName, busArea, busCity, stopLatLng.latitude, stopLatLng.longitude);
-                Toast.makeText(getActivity(), "已加入路線", Toast.LENGTH_SHORT).show();
+                makeToast("已加入路線",1000);
             } else {
                 // 如果行程已滿，顯示提示
-                Toast.makeText(getActivity(), "路線已滿，請刪除後再試", Toast.LENGTH_SHORT).show();
+                makeToast("路線已滿，請刪除後再試",1000);
             }
             removeOverlayView(); // 移除透明遮罩
             popupWindow.dismiss(); // 關閉彈窗
@@ -412,6 +404,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         } else {
             notification.setText("發生錯誤，請關閉再開");
         }
+
     }
 
     // 移除疊加在底層的透明遮罩
@@ -420,5 +413,21 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             ((ViewGroup) overlayView.getParent()).removeView(overlayView);
             overlayView = null;
         }
+    }
+
+    public void makeToast(String message, int durationInMillis) {
+        // 創建 Toast
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.show();
+
+        // 使用 Handler 來控制顯示時長
+        new Handler().postDelayed(toast::cancel, durationInMillis);
+    }
+
+    // 離開頁面後，停止網路查找
+    @Override
+    public void onPause() {
+        super.onPause();
+        stationFinder.stopSearching(); // 停止查找站點
     }
 }

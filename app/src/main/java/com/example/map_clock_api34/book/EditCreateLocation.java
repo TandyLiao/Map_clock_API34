@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -58,17 +59,15 @@ public class EditCreateLocation extends Fragment {
     private ActionBar actionBar;
     private Button btnReset;        // 重置按鈕
     private EditText bookNameInput; // 獲取書名的輸入框
-    private ImageView noteView;     //記事的圖片
 
     private SharedViewModel sharedViewModel; // 共享的 ViewModel，用來在Fragment之間共享資料
 
     private View rootView;
     private View overlayView; // 用來覆蓋畫面的遮罩
     private RecyclerView recyclerViewRoute; // 用來顯示路線的 RecyclerView
-    private RecyclerViewActionHome recyclerViewActionHome; // RecyclerView 的行為控制類
     private ListAdapterRoute listAdapterRoute; // 路線的適配器
 
-    private ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 用來儲存路線的列表
+    private final ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 用來儲存路線的列表
 
     private BookDatabaseHelper dbBookHelper;
     private String uniqueID;
@@ -105,8 +104,7 @@ public class EditCreateLocation extends Fragment {
                 } else {
                     String inputText = editText.getText().toString();
                     if (inputText.length() > 10) {
-                        // 文字長度大於10時顯示訊息，並將文字恢復到之前的狀態
-                        Toast.makeText(getActivity(), "書籤名稱的長度必須小於10個字", Toast.LENGTH_SHORT).show();
+                        makeToast("書籤名稱必須小於10個字",1000);
                         editText.setText(previousText); // 恢復之前的文字
                     } else {
                         // 當失去焦點時，更新共享的路線名稱
@@ -131,7 +129,7 @@ public class EditCreateLocation extends Fragment {
             } else {
                 // 如果沒有同意權限，請求使用者開啟位置權限
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-                Toast.makeText(getActivity(), "請開啟定位權限", Toast.LENGTH_SHORT).show();
+                makeToast("請開啟定位權限",1000);
             }
         });
 
@@ -144,7 +142,7 @@ public class EditCreateLocation extends Fragment {
         btnMapping.setOnClickListener(v -> {
             if (sharedViewModel.getLocationCount() >= 0) { // 確認已選擇地點
                 if (bookNameInput.getText().toString().equals("")) { // 檢查書名是否輸入
-                    Toast.makeText(getActivity(), "你沒有輸入書籤名稱!", Toast.LENGTH_SHORT).show();
+                    makeToast("沒有輸入書籤名稱喔",1000);
                     return;
                 }
 
@@ -160,10 +158,11 @@ public class EditCreateLocation extends Fragment {
             }
         });
 
-        noteView = rootView.findViewById(R.id.bookcreate_imageView);
+        //記事的圖片
+        ImageView noteView = rootView.findViewById(R.id.bookcreate_imageView);
         noteView.setOnClickListener(v -> {
             if (arrayList.isEmpty()) {
-                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                makeToast("還沒有選擇地點喔",1000);
                 return;
             }
             // 打開記事頁面
@@ -177,7 +176,7 @@ public class EditCreateLocation extends Fragment {
         ImageView bookset = rootView.findViewById(R.id.bookset_imageView);
         bookset.setOnClickListener(v -> {
             if (arrayList.isEmpty()) {
-                Toast.makeText(getContext(), "你還沒有選擇地點喔", Toast.LENGTH_SHORT).show();
+                makeToast("還沒有選擇地點喔",1000);
                 return;
             }
             //打開地點設定頁面
@@ -340,7 +339,8 @@ public class EditCreateLocation extends Fragment {
         recyclerViewRoute.setAdapter(listAdapterRoute);
 
         // 控制 RecyclerView 的行為，如交換、刪除等
-        recyclerViewActionHome = new RecyclerViewActionHome();
+        // RecyclerView 的行為控制類
+        RecyclerViewActionHome recyclerViewActionHome = new RecyclerViewActionHome();
         recyclerViewActionHome.attachToRecyclerView(recyclerViewRoute, arrayList, listAdapterRoute, sharedViewModel, getActivity(), btnReset);
     }
 
@@ -523,6 +523,15 @@ public class EditCreateLocation extends Fragment {
             arrayList.clear(); // 清空列表
             getActivity().getSupportFragmentManager().popBackStack(); // 回到上一頁
         });
+    }
+
+    public void makeToast(String message, int durationInMillis) {
+        // 創建 Toast
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        toast.show();
+
+        // 使用 Handler 來控制顯示時長
+        new Handler().postDelayed(toast::cancel, durationInMillis);
     }
 
     @Override

@@ -198,6 +198,7 @@ public class StartMapping extends Fragment {
         });
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
+            sendBroadcastWithDestinationIndex(5,0,-1);
             if(destinationIndex==sharedViewModel.getLocationCount()){
                 sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
                 EndMapping enfFragment = new EndMapping();
@@ -228,6 +229,7 @@ public class StartMapping extends Fragment {
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
+            sendBroadcastWithDestinationIndex(5,0,-1);
             EndMapping endMapping = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, endMapping);
@@ -399,6 +401,9 @@ public class StartMapping extends Fragment {
                 break;
             case 4:
                 intent.putExtra("startVibrateAndRing", destinationIndex);
+                break;
+            case 5:
+                intent.putExtra("destroy notification",0);
                 break;
         }
 

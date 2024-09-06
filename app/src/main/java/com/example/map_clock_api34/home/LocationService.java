@@ -312,6 +312,9 @@ public class LocationService extends Service {
                     }
 
                 }
+                if (intent.hasExtra("destroy notification")) {
+                    cancelNotification();
+                }
             }
 
         }
@@ -416,6 +419,11 @@ public class LocationService extends Service {
 
     public void resetNotificationSent() {
         notificationSent = false;
+    }
+
+    private void cancelNotification() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+        notificationManager.cancelAll();  // 取消所有的通知
     }
 
     private void startVibrate() {

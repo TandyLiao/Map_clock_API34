@@ -1,7 +1,7 @@
 package com.example.map_clock_api34.BusAdvice;
 
 public class CityInEnglishHelper {
-
+    // 城市名中文轉換成英文
     public String getCityInEnglish(String city){
 
         if(city.compareTo("宜蘭縣")==0)    return "F-D0047-001";
