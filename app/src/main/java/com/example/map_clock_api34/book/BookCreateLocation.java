@@ -2,7 +2,6 @@ package com.example.map_clock_api34.book;
 
 import android.Manifest;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,7 +14,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,8 +41,8 @@ import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.ListAdapter.RecyclerViewActionHome;
+import com.example.map_clock_api34.home.HomeListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.home.HomeListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.home.SelectPlace;
 import com.example.map_clock_api34.note.Note;
 import com.example.map_clock_api34.setting.CreatLocation_setting;

@@ -1,6 +1,5 @@
 package com.example.map_clock_api34.note;
 
-import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -30,8 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.home.CreateLocation;
-import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.SelectPlace;
+import com.example.map_clock_api34.home.HomeListAdapter.ListAdapterRoute;
 
 import java.util.ArrayList;
 import java.util.HashMap;

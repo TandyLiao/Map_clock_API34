@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.history.ListAdapter;
+package com.example.map_clock_api34.history.HistoryListAdapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

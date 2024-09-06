@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.home.ListAdapter;
+package com.example.map_clock_api34.home.HomeListAdapter;
 
 // 引入所需的 Android 和其他庫
 import static android.app.PendingIntent.getActivity;

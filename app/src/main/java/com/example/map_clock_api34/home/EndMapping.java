@@ -1,5 +1,6 @@
 package com.example.map_clock_api34.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,12 @@ public class EndMapping extends Fragment {
         btnBack.setOnClickListener(v -> {
             // 清空 ViewModel 中的数据
             sharedViewModel.clearAll();
+
+            // 發送 Intent 來停止鈴聲和震動
+            Intent stopIntent = new Intent(getContext(), LocationService.class);
+            stopIntent.setAction("STOP_VIBRATION"); // 這個 action 是用來告訴 LocationService 停止震動和鈴聲
+            requireContext().startService(stopIntent);
+
             getActivity().getSupportFragmentManager().popBackStack();
             getActivity().getSupportFragmentManager().popBackStack();
         });

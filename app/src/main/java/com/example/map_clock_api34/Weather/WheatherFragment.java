@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.Weather.ListAdapter.ListAdapterWeather;
+import com.example.map_clock_api34.Weather.WeatherListAdapter.ListAdapterWeather;
 
 import java.util.ArrayList;
 import java.util.HashMap;

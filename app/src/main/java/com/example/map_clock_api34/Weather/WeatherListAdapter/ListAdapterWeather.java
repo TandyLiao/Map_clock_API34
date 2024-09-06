@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.Weather.ListAdapter;
+package com.example.map_clock_api34.Weather.WeatherListAdapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

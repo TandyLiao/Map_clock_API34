@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.home.ListAdapter;
+package com.example.map_clock_api34.home.HomeListAdapter;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
