@@ -2,6 +2,7 @@ package com.example.map_clock_api34.Weather;
 
 public class WeatherLocationAreaHelper {
 
+    // 縣市轉換成 天氣API 所要求的代碼
     public String getWeatherLocationArea(String city){
 
         if(city.compareTo("宜蘭縣")==0)    return "F-D0047-001";

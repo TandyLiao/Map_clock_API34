@@ -27,44 +27,46 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
-public class NoteEnterContent extends Fragment {
+public class ChangeNote extends Fragment {
 
-    View rootView;
+    private View rootView;
+
     private SharedViewModel sharedViewModel;
+
     private EditText detailTextView;
-    private TextView title;
-    private TextView counttextview;
+    private TextView countTextView;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.note_note_enter_content, container, false);
 
-        detailTextView = rootView.findViewById(R.id.textView3);//benson
-        title = rootView.findViewById(R.id.textView4);
+        detailTextView = rootView.findViewById(R.id.textView3);
+        TextView title = rootView.findViewById(R.id.textView4);
         //改尺寸
         title.setTextColor(getResources().getColor(R.color.black)); // 更改文字颜色
-        counttextview=rootView.findViewById(R.id.textcount);
-
+        countTextView =rootView.findViewById(R.id.textcount);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        setupActionBar();
+
         title.setText(sharedViewModel.getDestinationName(sharedViewModel.getPosition()));
         Button verify = rootView.findViewById(R.id.verifyButton);
         verify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!detailTextView.getText().toString().isEmpty()) {
-                    // 如果不為空，更新 ViewModel
+                    // 如果不為空，更新 ShareViewModel
                     sharedViewModel.setNote(detailTextView.getText().toString(), sharedViewModel.getPosition());
                 }
                 getActivity().getSupportFragmentManager().popBackStack();
-                hideKeyboard();
 
             }
         });
+
         detailTextView.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(100)
         });
+
         detailTextView.addTextChangedListener(new LineLimitWatcher(20, detailTextView));
+
         // 設置 TextWatcher 來監聽輸入變化
         detailTextView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -76,7 +78,7 @@ public class NoteEnterContent extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // 當輸入內容改變時
                 int length = s.length();
-                counttextview.setText(length + "/100"); // 更新字數顯示
+                countTextView.setText(length + "/100"); // 更新字數顯示
             }
 
             @Override
@@ -85,8 +87,11 @@ public class NoteEnterContent extends Fragment {
             }
         });
 
+        setupActionBar();
+
         return rootView;
     }
+
     private void setupActionBar() {
         CardView cardViewtitle = new CardView(requireContext());
         cardViewtitle.setLayoutParams(new CardView.LayoutParams(
@@ -126,7 +131,7 @@ public class NoteEnterContent extends Fragment {
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
 
-        // 创建自定义返回按钮
+        // 創造返回按钮
         ImageView returnButton = new ImageView(requireContext());
         returnButton.setImageResource(R.drawable.back);
         LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(
@@ -144,7 +149,7 @@ public class NoteEnterContent extends Fragment {
         actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
         actionBarLayout.setWeightSum(1.0f);
 
-        // 子LinearLayout用于返回按钮
+        // 子LinearLayout用於返回按钮
         LinearLayout leftLayout = new LinearLayout(requireContext());
         leftLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -155,7 +160,7 @@ public class NoteEnterContent extends Fragment {
         leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         leftLayout.addView(returnButton);
 
-        // 子LinearLayout用于cardViewtitle
+        // 子LinearLayout用於cardViewtitle
         LinearLayout rightLayout = new LinearLayout(requireContext());
         rightLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -166,21 +171,21 @@ public class NoteEnterContent extends Fragment {
         rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         rightLayout.addView(cardViewtitle);
 
-        // 将子LinearLayout添加到父LinearLayout
+        // 將子LinearLayout添加到父LinearLayout
         actionBarLayout.addView(leftLayout);
         actionBarLayout.addView(rightLayout);
 
         androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
 
-        // 获取ActionBar
+        // 獲取ActionBar
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
+            actionBar.setDisplayShowTitleEnabled(false); // 隱藏原有標題
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(actionBarLayout, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.MATCH_PARENT, // 宽度设置为 MATCH_PARENT
-                    ActionBar.LayoutParams.MATCH_PARENT // 高度设置为 MATCH_PARENT
+                    ActionBar.LayoutParams.MATCH_PARENT,    // 寬度設置為 MATCH_PARENT
+                    ActionBar.LayoutParams.MATCH_PARENT     // 高度設置為 MATCH_PARENT
             ));
             actionBar.show();
         }
@@ -194,15 +199,7 @@ public class NoteEnterContent extends Fragment {
 
 
     }
-    private void hideKeyboard() {
-        View view = getActivity().getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-            }
-        }
-    }
+
     @Override
     public void onResume() {
         super.onResume();

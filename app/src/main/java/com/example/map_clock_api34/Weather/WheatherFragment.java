@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,39 +25,37 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.ListAdapter.ListAdapterWeather;
-import com.example.map_clock_api34.home.CreateLocation;
-import com.example.map_clock_api34.home.ListAdapter.ListAdapterRoute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class WheatherFragment extends Fragment {
+
     View rootView;
 
-    SharedViewModel sharedViewModel;
-    RecyclerView recyclerViewWeather;
-    ListAdapterWeather listAdapterWeather;
+    private SharedViewModel sharedViewModel;  // 用來管理共用數據的 ViewModel
 
-    WeatherService weatherService = new WeatherService();
-    private TextView weatherInfoTextView;
+    private final WeatherService weatherService = new WeatherService();  // 用來獲取天氣資料的服務類
 
-    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+    private ListAdapterWeather listAdapterWeather;  // RecyclerView 的 Adapter，負責展示天氣數據
+    private final ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();  // 用來存放天氣資訊的 ArrayList
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.weather_fragment_weather, container, false);
-        weatherInfoTextView = rootView.findViewById(R.id.text_wheather);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        //初始化ActionBar
+        // 初始化 ActionBar 和 RecyclerView
         setupActionBar();
         setupRecyclerViews();
+
         return rootView;
     }
 
+    // 設定 ActionBar，並且自訂標題和返回按鈕
     private void setupActionBar() {
         CardView cardViewtitle = new CardView(requireContext());
         cardViewtitle.setLayoutParams(new CardView.LayoutParams(
@@ -67,7 +64,7 @@ public class WheatherFragment extends Fragment {
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewtitle.setBackground(drawable);
 
-        // 建立LinearLayout在CardView等等放圖案和文字
+        // 建立 LinearLayout 用來放置圖案和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -75,38 +72,38 @@ public class WheatherFragment extends Fragment {
         ));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        // ImageView放置圖案
+        // ImageView 放置圖案
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.weather);
+        mark.setImageResource(R.drawable.weather);  // 使用自訂的天氣圖案
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                100, // 設定寬度
+                100  // 設定高度
         );
-        params.setMarginStart(10); // 设置左边距
+        params.setMarginStart(10);  // 設定左邊距
         mark.setLayoutParams(params);
 
-        // 創建TextView
+        // 創建 TextView 顯示標題 "天氣"
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("天氣");
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 10, 10); // 设置内边距
+        bookTitle.setTextColor(getResources().getColor(R.color.green));  // 設定文字顏色
+        bookTitle.setPadding(10, 10, 10, 10);  // 設定內邊距
 
-        // 將ImageView和TextView添加到LinearLayout
+        // 將 ImageView 和 TextView 添加到 LinearLayout
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
         cardViewtitle.addView(linearLayout);
 
-        // 创建自定义返回按钮
+        // 建立返回按鈕的 ImageView
         ImageView returnButton = new ImageView(requireContext());
-        returnButton.setImageResource(R.drawable.back);
+        returnButton.setImageResource(R.drawable.back);  // 使用自訂的返回圖案
         LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                100,  // 設定寬度
+                100   // 設定高度
         );
         returnButton.setLayoutParams(returnButtonParams);
 
-        // 建立ActionBar的父LinearLayout
+        // 建立 ActionBar 的父 LinearLayout
         LinearLayout actionBarLayout = new LinearLayout(requireContext());
         actionBarLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -115,7 +112,7 @@ public class WheatherFragment extends Fragment {
         actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
         actionBarLayout.setWeightSum(1.0f);
 
-        // 子LinearLayout用于返回按钮
+        // 子 LinearLayout 用來放返回按鈕
         LinearLayout leftLayout = new LinearLayout(requireContext());
         leftLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -126,7 +123,7 @@ public class WheatherFragment extends Fragment {
         leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         leftLayout.addView(returnButton);
 
-        // 子LinearLayout用于cardViewtitle
+        // 子 LinearLayout 用來放標題
         LinearLayout rightLayout = new LinearLayout(requireContext());
         rightLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -137,25 +134,27 @@ public class WheatherFragment extends Fragment {
         rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         rightLayout.addView(cardViewtitle);
 
-        // 将子LinearLayout添加到父LinearLayout
+        // 將子 LinearLayout 添加到父 LinearLayout
         actionBarLayout.addView(leftLayout);
         actionBarLayout.addView(rightLayout);
 
+        // 設定 ToolBar
         androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(null); // 隐藏漢汉堡菜单
+        toolbar.setNavigationIcon(null);  // 隱藏漢堡選單
 
-        // 获取ActionBar
+        // 獲取 ActionBar，並設定自訂的 View
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
+            actionBar.setDisplayShowTitleEnabled(false);  // 隱藏原有的標題
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(actionBarLayout, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.MATCH_PARENT, // 宽度设置为 MATCH_PARENT
-                    ActionBar.LayoutParams.MATCH_PARENT // 高度设置为 MATCH_PARENT
+                    ActionBar.LayoutParams.MATCH_PARENT,
+                    ActionBar.LayoutParams.MATCH_PARENT
             ));
             actionBar.show();
         }
 
+        // 返回按鈕的點擊事件
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -163,55 +162,60 @@ public class WheatherFragment extends Fragment {
             }
         });
     }
-    public void onPause() {
-        super.onPause();
 
-        // 获取ActionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowCustomEnabled(false);
-            actionBar.setCustomView(null);
-            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
-            actionBar.show();
-        }
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        RecycleViewReset();
-        setupActionBar();
-    }
+    // 重設 RecyclerView 的資料
     private void RecycleViewReset() {
-        //清除原本的表
-        arrayList.clear();
+        arrayList.clear();  // 清除原本的資料
         String shortLocationName;
+
+        // 根據 SharedViewModel 的資料更新 RecyclerView
         if (sharedViewModel.getLocationCount() != -1) {
             for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
                 HashMap<String, String> hashMap = new HashMap<>();
                 shortLocationName = sharedViewModel.getDestinationName(j);
-                //如果地名大於20字，後面都用...代替
+
+                // 如果地名大於 20 字，使用 "..." 來代替超出部分
                 if (shortLocationName.length() > 20) {
                     hashMap.put("data", shortLocationName.substring(0, 20) + "...");
                 } else {
                     hashMap.put("data", shortLocationName);
                 }
-                //重新加回路線表
-                arrayList.add(hashMap);
+                arrayList.add(hashMap);  // 將資料添加到 ArrayList 中
             }
         }
-        //套用更新
-        listAdapterWeather.notifyDataSetChanged();
 
+        listAdapterWeather.notifyDataSetChanged();  // 通知 Adapter 更新資料
     }
-    //初始化設定表和功能表
+
+    // 初始化 RecyclerView 和設定 Adapter
     private void setupRecyclerViews() {
-        // 初始化路線的表
-        recyclerViewWeather = rootView.findViewById(R.id.recycleView_wheather);
-        recyclerViewWeather.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerViewWeather.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdapterWeather = new ListAdapterWeather(arrayList, sharedViewModel, weatherService, getActivity()); // 禁用拖動功能，啟用單選功能
+        // 用來顯示天氣資訊的 RecyclerView
+        RecyclerView recyclerViewWeather = rootView.findViewById(R.id.recycleView_wheather);  // 設定 RecyclerView
+        recyclerViewWeather.setLayoutManager(new LinearLayoutManager(getActivity()));  // 使用 LinearLayoutManager 來顯示列表
+        recyclerViewWeather.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));  // 添加分隔線
+
+        // 初始化 ListAdapterWeather 並設置給 RecyclerView
+        listAdapterWeather = new ListAdapterWeather(arrayList, sharedViewModel, weatherService, getActivity());
         recyclerViewWeather.setAdapter(listAdapterWeather);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        RecycleViewReset();  // 在恢復時刷新 RecyclerView
+        setupActionBar();
+    }
+
+    // 在 Fragment 被暫停時，將 ActionBar 恢復為顯示標題的模式
+    public void onPause() {
+        super.onPause();
+
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowCustomEnabled(false);
+            actionBar.setCustomView(null);
+            actionBar.setDisplayShowTitleEnabled(true);  // 恢復顯示標題
+            actionBar.show();
+        }
     }
 }

@@ -2,24 +2,41 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
 
+    <!-- 使用者權限，指定應用程式運行所需的權限 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+    <!-- 應用需要訪問網路、震動、修改音頻設置等的權限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+
+    <!-- 文件系統存取權限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <!-- 修改系統設置權限 -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 允許應用發送通知的權限 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 啟用前台服務的權限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- 允許忽略電池優化的權限 -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- 前台位置服務的權限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
+    <!-- 應用的主要配置 -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -31,32 +48,35 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="31" >
 
+        <!-- 定義位置服務 -->
         <service
             android:name=".home.LocationService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
 
+        <!-- Google 地圖的 API 密鑰 -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <!-- 主活動，定義應用的啟動入口 -->
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="true"
             android:theme="@style/AppTheme"
             android:launchMode="singleTop">
-            >
+
+            <!-- 定義應用的啟動入口（Launcher） -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
-        <activity android:name=".setting.SettingInterfaceActivity" />
-        <activity android:name=".setting.SettingLanguage" />
+        <!-- 設定界面的活動 -->
         <activity android:name=".setting.SettingRemind" />
 
     </application>

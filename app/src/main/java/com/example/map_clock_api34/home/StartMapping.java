@@ -2,19 +2,15 @@ package com.example.map_clock_api34.home;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-
 import android.annotation.SuppressLint;
-
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -27,7 +23,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
@@ -38,23 +33,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import android.content.Intent;
 import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class StartMapping extends Fragment {
 
-    private static final String CHANNEL_ID = "destination_alert_channel";
-    private boolean notificationSent = false;
-    private Ringtone mRingtone;
-
+    // 位置服務變數
     private LocationManager locationManager;
     private String commandstr = LocationManager.NETWORK_PROVIDER;
-    Location userLocation;
+    private Location userLocation;
 
+    // Google 地圖相關變數
     private GoogleMap mMap;
     private SharedViewModel sharedViewModel;
     private String[] destinationName = new String[7];
@@ -65,17 +56,17 @@ public class StartMapping extends Fragment {
     private boolean[] ringtone = new boolean[7];
     private int[] notification = new int[7];
 
-    LatLngBounds.Builder builder;
-    LatLng destiantion_LatLng;
-    LatLngBounds bounds;
-
-    PopupWindow popupWindow;
-    TextView txtTime;
-    TextView locationTitle;
-    View rootView;
-    View overlayView;
-    Button btnPre, btnNext;
-    int nowIndex=0;
+    // 地圖邊界與相關視圖變數
+    private LatLngBounds.Builder builder;
+    private LatLng destiantion_LatLng;
+    private LatLngBounds bounds;
+    private PopupWindow popupWindow;
+    private TextView txtTime;
+    private TextView locationTitle;
+    private View rootView;
+    private View overlayView;
+    private Button btnPre, btnNext;
+    private int nowIndex = 0;
 
     @SuppressLint("MissingPermission")
     @Nullable
@@ -88,23 +79,27 @@ public class StartMapping extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+        // 初始化地圖片段
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapp);
 
+        // 取得 LocationManager 來定位
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
         userLocation = locationManager.getLastKnownLocation(commandstr);
-        if (userLocation == null){
-            Toast.makeText(getActivity(),"無法取得當前位置，請查看您的GPS設備",Toast.LENGTH_SHORT).show();
+
+        // 檢查是否能取得當前位置，若無法，顯示錯誤訊息
+        if (userLocation == null) {
+            makeToast("無法取得當前位置，請查看您的GPS設備",1000);
             getActivity().getSupportFragmentManager().popBackStack();
             return null;
         }
 
+        // 設定地圖
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
 
-        //把ShareViewModel的資料抓近來，稍後送進背景執行
+        // 從 ShareViewModel 抓取資料
         for (int i = 0; i <= sharedViewModel.getLatitude(i); i++) {
             destinationName[i] = sharedViewModel.getDestinationName(i);
             latitude[i] = sharedViewModel.getLatitude(i);
@@ -115,50 +110,51 @@ public class StartMapping extends Fragment {
             note[i] = sharedViewModel.getNote(i);
         }
 
+        // 設定顯示的時間和位置標題
         txtTime = rootView.findViewById(R.id.txtTime);
-        locationTitle =rootView.findViewById(R.id.locationTitle);
+        locationTitle = rootView.findViewById(R.id.locationTitle);
 
+        // 設定按鈕
         setupButton();
-        //開始背景執行
+
+        // 開始背景執行位置更新
         startLocationUpdates();
 
         return rootView;
     }
 
+    // 地圖準備好後的回呼
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @SuppressLint("MissingPermission")
         public void onMapReady(GoogleMap googleMap) {
-            mMap=googleMap;
+            mMap = googleMap;
 
             mMap.clear();
-            //取得用戶的定位
             userLocation = locationManager.getLastKnownLocation(commandstr);
-            //跑出藍色定位點
             mMap.setMyLocationEnabled(true);
 
+            // 初始化地圖邊界
             builder = new LatLngBounds.Builder();
-            // 添加起點和目的地的位置
             builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
 
-            destiantion_LatLng= new LatLng(latitude[0],longitude[0]);
+            destiantion_LatLng = new LatLng(latitude[0], longitude[0]);
             mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[0]));
 
             builder.include(new LatLng(latitude[0], longitude[0]));
             bounds = builder.build();
-            // 計算將這個邊界框移動到地圖中心所需的偏移量
-            int padding = 300; // 偏移量（以像素為單位）
+            int padding = 300;  // 設置地圖邊界的偏移量
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
 
-            //第一次粗略估算到達目的地所需時間
-            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0],longitude[0], userLocation.getLatitude(), userLocation.getLongitude())/1000;
-            double time = Math.round(trip_distance/4*60);
-            locationTitle.setText("地點:"+destinationName[0]);
-            txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
-
+            // 粗略估算到達目的地所需時間
+            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[0], longitude[0], userLocation.getLatitude(), userLocation.getLongitude()) / 1000;
+            double time = Math.round(trip_distance / 4 * 60);
+            locationTitle.setText("地點:" + destinationName[0]);
+            txtTime.setText("\n剩餘公里為: " + trip_distance + " 公里" + "\n預估走路時間為: " + time + " 分鐘");
         }
     };
 
+    // 顯示 PopupWindow 的方法
     @SuppressLint("MissingPermission")
     private void ShowPopupWindow(int destinationIndex) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
@@ -166,56 +162,58 @@ public class StartMapping extends Fragment {
         popupWindow.setWidth(700);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
-        //讓PopupWindow顯示出來的關鍵句
         popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
-        //疊加View在底下，讓她不會按到底層就跳掉
+        // 在底部加上覆蓋層，防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
+        // 設置 PopupWindow 的標題
         TextView title = view.findViewById(R.id.txtNote);
         title.setTextSize(18);
 
-        SpannableStringBuilder spannableBuilder = new SpannableStringBuilder();
-        if(sharedViewModel.getNote(destinationIndex)==null){
-            title.setText("即將抵達：\n"+destinationName[destinationIndex]);
-        }
-        else{
-            title.setText("即將抵達：\n"+destinationName[destinationIndex]+"\n\n代辦事項：\n"+sharedViewModel.getNote(destinationIndex));
-
+        if (sharedViewModel.getNote(destinationIndex) == null) {
+            title.setText("即將抵達：\n" + destinationName[destinationIndex]);
+        } else {
+            title.setText("即將抵達：\n" + destinationName[destinationIndex] + "\n\n代辦事項：\n" + sharedViewModel.getNote(destinationIndex));
         }
 
-        Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel);
+        // 設定停止震鈴按鈕
+        Button BTNPopup = view.findViewById(R.id.PopupCancel);
         BTNPopup.setText("停止震鈴");
         BTNPopup.setOnClickListener(v -> {
             sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
         });
-        Button btnsure = (Button) view.findViewById(R.id.Popupsure);
+
+        // 確認按鈕處理
+        Button btnsure = view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
-            sendBroadcastWithDestinationIndex(5,0,-1);
-            if(destinationIndex==sharedViewModel.getLocationCount()){
+            sendBroadcastWithDestinationIndex(5, 0, -1);
+            if (destinationIndex == sharedViewModel.getLocationCount()) {
                 sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
+
                 EndMapping enfFragment = new EndMapping();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fl_container, enfFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+
                 removeOverlayView();
                 popupWindow.dismiss();
                 return;
             }
-            //移除疊加在底下防止點擊其他區域的View
-            removeOverlayView();
+            removeOverlayView();  // 移除覆蓋層
             popupWindow.dismiss();
             moveCameraAndCalculateTime(destinationIndex);
             sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
         });
     }
-    //把疊加在底層的View刪掉
+
+    // 移除疊加在底層的View
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {
             ((ViewGroup) overlayView.getParent()).removeView(overlayView);
@@ -223,11 +221,13 @@ public class StartMapping extends Fragment {
         }
     }
 
+    // 設定按鈕的處理邏輯
     @SuppressLint("MissingPermission")
     private void setupButton() {
         Button btnBack = rootView.findViewById(R.id.routeCancel);
         btnBack.setOnClickListener(v -> {
-            sendBroadcastWithDestinationIndex(5,0,-1);
+            sendBroadcastWithDestinationIndex(5, 0, -1);
+
             EndMapping endMapping = new EndMapping();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, endMapping);
@@ -235,101 +235,97 @@ public class StartMapping extends Fragment {
             transaction.commit();
         });
 
+        // 設定上一路線的按紐
         btnPre = rootView.findViewById(R.id.btnPre);
         btnPre.setOnClickListener(v -> {
-            if(nowIndex>0){
+            if (nowIndex > 0) {
                 nowIndex--;
+                sendBroadcastWithDestinationIndex(2, 0, -1);
 
-                sendBroadcastWithDestinationIndex(2, 0,-1);
+                // 在次計算預估時間
                 userLocation = locationManager.getLastKnownLocation(commandstr);
-                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
-                double time = Math.round(trip_distance/4*60);
-                locationTitle.setText("地點:"+destinationName[nowIndex]);
-                txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex], longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude()) / 1000;
+                double time = Math.round(trip_distance / 4 * 60);
+                locationTitle.setText("地點:" + destinationName[nowIndex]);
+                txtTime.setText("\n剩餘公里為: " + trip_distance + " 公里" + "\n預估走路時間為: " + time + " 分鐘");
 
+                // 重新移動Map視角
                 mMap.clear();
                 builder = new LatLngBounds.Builder();
-                // 添加起點和目的地的位置
                 builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
-
-                destiantion_LatLng= new LatLng(latitude[nowIndex],longitude[nowIndex]);
+                destiantion_LatLng = new LatLng(latitude[nowIndex], longitude[nowIndex]);
+                //加入新地點的地標
                 mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[nowIndex]));
-
                 builder.include(new LatLng(latitude[nowIndex], longitude[nowIndex]));
                 bounds = builder.build();
-                // 計算將這個邊界框移動到地圖中心所需的偏移量
-                int padding = 300; // 偏移量（以像素為單位）
+                int padding = 300;
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
             }
-            if(nowIndex==0){
-                Toast.makeText(getActivity(),"這是第一個地點囉",Toast.LENGTH_SHORT).show();
+            if (nowIndex == 0) {
+                makeToast("這是第一個地點囉",1000);
             }
         });
 
+        // 設定下一地點的按紐
         btnNext = rootView.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(v -> {
-            if(nowIndex<sharedViewModel.getLocationCount()){
+            if (nowIndex < sharedViewModel.getLocationCount()) {
                 nowIndex++;
+                sendBroadcastWithDestinationIndex(2, 0, 1);
 
-                sendBroadcastWithDestinationIndex(2, 0,1);
+                //重新預估時間
                 userLocation = locationManager.getLastKnownLocation(commandstr);
-                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex],longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
-                double time = Math.round(trip_distance/4*60);
-                locationTitle.setText("地點:"+destinationName[nowIndex]);
-                txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+                double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[nowIndex], longitude[nowIndex], userLocation.getLatitude(), userLocation.getLongitude()) / 1000;
+                double time = Math.round(trip_distance / 4 * 60);
+                locationTitle.setText("地點:" + destinationName[nowIndex]);
+                txtTime.setText("\n剩餘公里為: " + trip_distance + " 公里" + "\n預估走路時間為: " + time + " 分鐘");
 
+                // 重新移動Map視角
                 mMap.clear();
                 builder = new LatLngBounds.Builder();
-                // 添加起點和目的地的位置
                 builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
-
-                destiantion_LatLng= new LatLng(latitude[nowIndex],longitude[nowIndex]);
+                destiantion_LatLng = new LatLng(latitude[nowIndex], longitude[nowIndex]);
+                //加入新地點的地標
                 mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[nowIndex]));
-
                 builder.include(new LatLng(latitude[nowIndex], longitude[nowIndex]));
                 bounds = builder.build();
-                // 計算將這個邊界框移動到地圖中心所需的偏移量
-                int padding = 300; // 偏移量（以像素為單位）
+                int padding = 300;
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
             }
-            if(nowIndex==sharedViewModel.getLocationCount()){
-                Toast.makeText(getActivity(),"這是最後一個地點囉",Toast.LENGTH_SHORT).show();
+            if (nowIndex == sharedViewModel.getLocationCount()) {
+                makeToast("這是最後一個地點囉",1000);
             }
         });
-
     }
 
+    // 更新地圖並計算到達時間
     @SuppressLint("MissingPermission")
-    private void moveCameraAndCalculateTime(int destinationIndex){
-        if(destinationIndex < sharedViewModel.getLocationCount() && nowIndex==destinationIndex){
-            //尋找下個地點
+    private void moveCameraAndCalculateTime(int destinationIndex) {
+        if (destinationIndex < sharedViewModel.getLocationCount() && nowIndex == destinationIndex) {
             mMap.clear();
-            int desNextIndex=destinationIndex+1;
-            //傳回LocationService讓她換下個地點
-            sendBroadcastWithDestinationIndex(1, desNextIndex,0);
+            int desNextIndex = destinationIndex + 1;
 
+            // 移動Map視角
+            sendBroadcastWithDestinationIndex(1, desNextIndex, 0);
             userLocation = locationManager.getLastKnownLocation(commandstr);
-
             builder = new LatLngBounds.Builder();
-            // 添加起點和目的地的位置
             builder.include(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
-
-            destiantion_LatLng= new LatLng(latitude[desNextIndex],longitude[desNextIndex]);
+            destiantion_LatLng = new LatLng(latitude[desNextIndex], longitude[desNextIndex]);
             mMap.addMarker(new MarkerOptions().position(destiantion_LatLng).title(destinationName[desNextIndex]));
-
             builder.include(new LatLng(latitude[desNextIndex], longitude[desNextIndex]));
             bounds = builder.build();
-            // 計算將這個邊界框移動到地圖中心所需的偏移量
-            int padding = 300; // 偏移量（以像素為單位）
+            int padding = 300;
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
-            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[desNextIndex],longitude[desNextIndex], userLocation.getLatitude(), userLocation.getLongitude())/1000;
-            double time = Math.round(trip_distance/4*60);
-            locationTitle.setText("地點:"+destinationName[desNextIndex]);
-            txtTime.setText("\n剩餘公里為: "+trip_distance+" 公里"+"\n預估走路時間為: "+time+" 分鐘");
+
+            // 更新預估時間
+            double trip_distance = Distance.getDistanceBetweenPointsNew(latitude[desNextIndex], longitude[desNextIndex], userLocation.getLatitude(), userLocation.getLongitude()) / 1000;
+            double time = Math.round(trip_distance / 4 * 60);
+            locationTitle.setText("地點:" + destinationName[desNextIndex]);
+            txtTime.setText("\n剩餘公里為: " + trip_distance + " 公里" + "\n預估時間為: " + time + " 分鐘");
         }
     }
 
-    //背景執行
+    // 開始背景位置更新
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         Intent serviceIntent = new Intent(getActivity(), LocationService.class);
@@ -338,18 +334,18 @@ public class StartMapping extends Fragment {
         serviceIntent.putExtra("destinationName", destinationName);
         serviceIntent.putExtra("notification", notification);
         serviceIntent.putExtra("vibrate", vibrate);
-        serviceIntent.putExtra("ringtone",ringtone);
+        serviceIntent.putExtra("ringtone", ringtone);
         serviceIntent.putExtra("note", note);
         ContextCompat.startForegroundService(getActivity(), serviceIntent);
-
     }
 
-    //停止背景執行的方法
+    // 停止位置更新服務
     private void stopLocationUpdates() {
         Intent serviceIntent = new Intent(getActivity(), LocationService.class);
         getActivity().stopService(serviceIntent);
     }
-    //收LocationService傳的資料
+
+    // 接收來自 LocationService 的廣播
     private BroadcastReceiver destinationUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -358,7 +354,6 @@ public class StartMapping extends Fragment {
                 if (intent.hasExtra("destinationIndex")) {
                     int destinationIndex = intent.getIntExtra("destinationIndex", 0);
                     if (popupWindow != null && popupWindow.isShowing()) {
-                        // 如果已經顯示，關閉它
                         sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
                         popupWindow.dismiss();
                         removeOverlayView();
@@ -373,20 +368,18 @@ public class StartMapping extends Fragment {
                 }
 
                 if (intent.hasExtra("nowIndex")) {
-                    nowIndex = intent.getIntExtra("nowIndex",0);
+                    nowIndex = intent.getIntExtra("nowIndex", 0);
                 }
-                if (intent.hasExtra("nextDestination")){
-                    int destinationIndex = intent.getIntExtra("nextDestination", 0)-1;
+                if (intent.hasExtra("nextDestination")) {
+                    int destinationIndex = intent.getIntExtra("nextDestination", 0) - 1;
                     mMap.clear();
                     moveCameraAndCalculateTime(destinationIndex);
-                }
-                if (intent.hasExtra("GPSisGone")){
-                    Toast.makeText(getActivity(),"GPS訊號遺失", Toast.LENGTH_SHORT).show();
                 }
             }
         }
     };
-    //送資料給LocationService
+
+    // 廣播資料到 LocationService
     private void sendBroadcastWithDestinationIndex(int dataType, int destinationIndex, int change) {
         Intent intent = new Intent("DESTINATIONINDEX_UPDATE");
 
@@ -404,33 +397,33 @@ public class StartMapping extends Fragment {
                 intent.putExtra("startVibrateAndRing", destinationIndex);
                 break;
             case 5:
-                intent.putExtra("destroy notification",0);
+                intent.putExtra("destroy notification", 0);
                 break;
         }
 
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
-    //切換Fragment才會觸發
+
+    // 當 Fragment 被銷毀時觸發
     @Override
     public void onDestroy() {
         super.onDestroy();
         stopLocationUpdates();
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(destinationUpdateReceiver);
     }
+
+    // 當 Fragment 重回前景時觸發
     @Override
     public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(destinationUpdateReceiver,
                 new IntentFilter("DESTINATION_UPDATE"));
-
     }
+
+    // 顯示自定義的 Toast
     public void makeToast(String message, int durationInMillis) {
-        // 創建 Toast
         Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
         toast.show();
-
-        // 使用 Handler 來控制顯示時長
         new Handler().postDelayed(toast::cancel, durationInMillis);
     }
 }
-

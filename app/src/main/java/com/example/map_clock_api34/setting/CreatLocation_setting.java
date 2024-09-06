@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
 import com.example.map_clock_api34.setting.Listdapter.ListdapterSetting;
 
 import java.util.ArrayList;
@@ -33,11 +32,13 @@ import java.util.HashMap;
 
 public class CreatLocation_setting extends Fragment {
     View rootView;
-    SharedViewModel sharedViewModel;
-    RecyclerView recyclerViewRoute;
-    ListdapterSetting listAdapterSetting; // 只保留一个变量
 
-    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+    SharedViewModel sharedViewModel;
+
+    RecyclerView recyclerViewRoute;         // 用於顯示地點設定的 RecyclerView
+    ListdapterSetting listAdapterSetting;   // 用於管理 RecyclerView 項目的適配器
+
+    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 存儲地點的數據
 
     @Nullable
     @Override
@@ -47,71 +48,72 @@ public class CreatLocation_setting extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        // 初始化 ActionBar
+        // 初始化 ActionBar 和 RecyclerView
         setupActionBar();
         setupRecyclerViews();
+
         return rootView;
     }
 
+    // 初始化自定義 ActionBar
     private void setupActionBar() {
         CardView cardViewtitle = new CardView(requireContext());
         cardViewtitle.setLayoutParams(new CardView.LayoutParams(
                 ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewtitle.setBackground(drawable);
+        cardViewtitle.setBackground(drawable); // 設置背景為自定義形狀
 
-        // 建立 LinearLayout 在 CardView 放图案和文字
+        // 創建 LinearLayout 用於存放圖標和文字
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL); // 設置水平排列
 
-        // ImageView 放置图案
+        // 設置圖標 ImageView
         ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.vibrate);
+        mark.setImageResource(R.drawable.vibrate); // 使用自定義圖標
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                80, // 设置宽度为 100 像素
-                80 // 设置高度为 100 像素
+                80, // 寬度
+                80 // 高度
         );
-        // 设置边距
-        params.setMargins(30,10,0,10);
-        mark.setPadding(10,10,10,10);
+        params.setMargins(30, 10, 0, 10); // 設置外邊距
+        mark.setPadding(10, 10, 10, 10); // 設置內邊距
         mark.setLayoutParams(params);
 
-        // 创建 TextView
+        // 創建標題 TextView
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("地點設定");
+        bookTitle.setText("地點設定"); // 設置標題
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 更改文字颜色
-        bookTitle.setPadding(10, 10, 30, 10); // 设置内边距
+        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 設置文字顏色
+        bookTitle.setPadding(10, 10, 30, 10); // 設置內邊距
 
-        // 将 ImageView 和 TextView 添加到 LinearLayout
+        // 將圖標和標題添加到 LinearLayout 中
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
-        cardViewtitle.addView(linearLayout);
+        cardViewtitle.addView(linearLayout); // 將 LinearLayout 添加到 CardView 中
 
-        // 创建自定义返回按钮
+        // 創建自定義返回按鈕
         ImageView returnButton = new ImageView(requireContext());
-        returnButton.setImageResource(R.drawable.back);
+        returnButton.setImageResource(R.drawable.back); // 返回按鈕圖標
         LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(
-                100, // 设置宽度为 100 像素
-                100 // 设置高度为 100 像素
+                100, // 寬度
+                100 // 高度
         );
         returnButton.setLayoutParams(returnButtonParams);
 
-        // 建立 ActionBar 的父 LinearLayout
+        // 創建 ActionBar 的父容器 LinearLayout
         LinearLayout actionBarLayout = new LinearLayout(requireContext());
         actionBarLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
-        actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
-        actionBarLayout.setWeightSum(1.0f);
+        actionBarLayout.setOrientation(LinearLayout.HORIZONTAL); // 水平排列
+        actionBarLayout.setWeightSum(1.0f); // 設置權重總和
 
-        // 子 LinearLayout 用于返回按钮
+        // 創建左側 LinearLayout 用於返回按鈕
         LinearLayout leftLayout = new LinearLayout(requireContext());
         leftLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -119,10 +121,10 @@ public class CreatLocation_setting extends Fragment {
                 0.1f
         ));
         leftLayout.setOrientation(LinearLayout.HORIZONTAL);
-        leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL); // 設置對齊方式
         leftLayout.addView(returnButton);
 
-        // 子 LinearLayout 用于 cardViewtitle
+        // 創建右側 LinearLayout 用於標題
         LinearLayout rightLayout = new LinearLayout(requireContext());
         rightLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -130,47 +132,78 @@ public class CreatLocation_setting extends Fragment {
                 0.9f
         ));
         rightLayout.setOrientation(LinearLayout.HORIZONTAL);
-        rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL); // 設置對齊方式
         rightLayout.addView(cardViewtitle);
 
-        // 将子 LinearLayout 添加到父 LinearLayout
+        // 將左右側的 LinearLayout 添加到父容器中
         actionBarLayout.addView(leftLayout);
         actionBarLayout.addView(rightLayout);
 
-        androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(null); // 隐藏汉堡菜单
+        // 設置 ActionBar
+        androidx.appcompat.widget.Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(null); // 隱藏漢堡菜單
 
-        // 获取 ActionBar
+        // 獲取並自定義 ActionBar
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隐藏原有的标题
-            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false); // 隱藏原有標題
+            actionBar.setDisplayShowCustomEnabled(true); // 啟用自定義視圖
             actionBar.setCustomView(actionBarLayout, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.MATCH_PARENT, // 宽度设置为 MATCH_PARENT
-                    ActionBar.LayoutParams.MATCH_PARENT // 高度设置为 MATCH_PARENT
+                    ActionBar.LayoutParams.MATCH_PARENT,
+                    ActionBar.LayoutParams.MATCH_PARENT
             ));
-            actionBar.show();
+            actionBar.show(); // 顯示 ActionBar
         }
 
-        // 设置返回按钮点击事件
-        returnButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().getSupportFragmentManager().popBackStack();
+        // 設置返回按鈕的點擊事件
+        returnButton.setOnClickListener(v -> getActivity().getSupportFragmentManager().popBackStack());
+    }
+
+    // 重置 RecyclerView 的數據
+    private void RecycleViewReset() {
+        arrayList.clear(); // 清空列表
+
+        // ShareViewModel 取得數據並添加到 arrayList
+        String shortLocationName;
+        if (sharedViewModel.getLocationCount() != -1) {
+            for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
+                HashMap<String, String> hashMap = new HashMap<>();
+                shortLocationName = sharedViewModel.getDestinationName(j);
+
+                // 如果地名超過 20 個字，則顯示前 20 個字並加上 "..."
+                if (shortLocationName.length() > 20) {
+                    hashMap.put("data", shortLocationName.substring(0, 20) + "...");
+                } else {
+                    hashMap.put("data", shortLocationName);
+                }
+                arrayList.add(hashMap); // 添加路線資料
             }
-        });
+        }
+        // 更新適配器
+        if (listAdapterSetting != null) {
+            listAdapterSetting.notifyDataSetChanged();
+        }
+    }
+
+    // 初始化 RecyclerView 和相關設置
+    private void setupRecyclerViews() {
+        recyclerViewRoute = rootView.findViewById(R.id.recycleViewset); // 找到 RecyclerView
+        recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity())); // 設置布局管理器
+        recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL)); // 添加分隔線
+        listAdapterSetting = new ListdapterSetting(requireContext(), arrayList, sharedViewModel, false); // 創建適配器
+        recyclerViewRoute.setAdapter(listAdapterSetting); // 設置適配器
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        // 获取 ActionBar
+        // 獲取並恢復原有 ActionBar 樣式
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowCustomEnabled(false);
+            actionBar.setDisplayShowCustomEnabled(false); // 取消自定義視圖
             actionBar.setCustomView(null);
-            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
+            actionBar.setDisplayShowTitleEnabled(true); // 恢復標題
             actionBar.show();
         }
     }
@@ -178,41 +211,8 @@ public class CreatLocation_setting extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        RecycleViewReset();
-        setupActionBar();
+        RecycleViewReset(); // 重置 RecyclerView 的數據
+        setupActionBar();   // 重新設置 ActionBar
     }
 
-    private void RecycleViewReset() {
-        // 清除原本的表
-        arrayList.clear();
-        String shortLocationName;
-        if (sharedViewModel.getLocationCount() != -1) {
-            for (int j = 0; j <= sharedViewModel.getLocationCount(); j++) {
-                HashMap<String, String> hashMap = new HashMap<>();
-                shortLocationName = sharedViewModel.getDestinationName(j);
-                // 如果地名大于 20 字，后面都用 ... 代替
-                if (shortLocationName.length() > 20) {
-                    hashMap.put("data", shortLocationName.substring(0, 20) + "...");
-                } else {
-                    hashMap.put("data", shortLocationName);
-                }
-                // 重新加回路线表
-                arrayList.add(hashMap);
-            }
-        }
-        // 套用更新
-        if (listAdapterSetting != null) {
-            listAdapterSetting.notifyDataSetChanged();
-        }
-    }
-
-    // 初始化设置表和功能表
-    private void setupRecyclerViews() {
-        // 初始化路线的表
-        recyclerViewRoute = rootView.findViewById(R.id.recycleViewset);
-        recyclerViewRoute.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerViewRoute.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        listAdapterSetting = new ListdapterSetting(requireContext(), arrayList, sharedViewModel, false); // 禁用拖动功能，启用单选功能
-        recyclerViewRoute.setAdapter(listAdapterSetting);
-    }
 }

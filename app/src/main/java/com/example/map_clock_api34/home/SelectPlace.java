@@ -255,7 +255,7 @@ public class SelectPlace extends Fragment {
                 sharedViewModel.setCapital(cityName);
                 sharedViewModel.setArea(areaName);
 
-                sharedViewModel.setnowLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
+                sharedViewModel.setNowLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
 
                 getActivity().getSupportFragmentManager().popBackStack();  // 返回上一個 Fragment
             }

@@ -71,7 +71,7 @@ public class BookFragment extends Fragment {
     private ActionBarDrawerToggle toggle;   // 側邊選單的開關
     private DrawerLayout drawerLayout;      // 抽屜佈局
 
-    private SharedViewModel sharedViewModel; // ViewModel 用來在Fragment間共享數據
+    private SharedViewModel sharedViewModel;
 
     private final ArrayList<HashMap<String, String>> arrayList = new ArrayList<>(); // 用來儲存書籍資料的列表
     private RecyclerView recyclerViewBook; // RecyclerView 用來顯示書籍項目
@@ -489,7 +489,7 @@ public class BookFragment extends Fragment {
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-                            sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
+                            sharedViewModel.setNowLocation(location.getLatitude(), location.getLongitude());
                             Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
                         } else {
                             makeToast("無法取得現在位置",1000);

@@ -39,123 +39,131 @@ import com.example.map_clock_api34.setting.SettingRemind;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Toolbar toolbar;
+
+    // 宣告 Fragment 變數，存儲各個頁面的實例
     private HomeFragment homeFragment;
     private BookFragment bookFragment;
     private HistoryFragment historyFragment;
+
     private SettingRemind settingRemind;
-    private DrawerLayout drawerLayout;
+
+    private DrawerLayout drawerLayout; // 用於控制側邊菜單的開關
     private NavigationView navigation_view;
-    private Toolbar toolbar;
-    private CardView cardView;
-    private StartMapping startMapping;
-    private boolean wasStartMapping = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);//漢堡選單icon部會因深色模式改色
 
+        // 禁用夜間模式，強制使用亮色模式
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
+        // 初始化 DrawerLayout 和 NavigationView，並設置 Toolbar
         drawerLayout = findViewById(R.id.drawerLayout);
         navigation_view = findViewById(R.id.navigation_view);
         toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar); // 設置 Toolbar 作為 ActionBar
 
-        setSupportActionBar(toolbar);
-
-        // 觸發器召喚漢堡選單
+        // 設置漢堡選單（側邊欄開關）的觸發器
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green)); // 設置箭頭顏色
 
-        updateMenuIcons();
+        updateMenuIcons(); // 更新菜單圖標顏色
 
-
-        Intent intent = getIntent();
-        if (intent != null) {
-            if (intent.hasExtra("show_start_mapping")) {
-                boolean showStartMapping = intent.getBooleanExtra("show_start_mapping", false);
-                if (showStartMapping) {
-                    Log.d("MainActivity", "onCreate: Intent contains show_start_mapping, calling showStartMappingFragment.");
-                    showStartMappingFragment();
-                }
+        // 修改側邊選單的圖標顏色
+        Menu menu = navigation_view.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem menuItem = menu.getItem(i);
+            if (menuItem.getIcon() != null) {
+                menuItem.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
             }
-
-            
         }
-        // 初始化地圖(第一個頁面是MAP)
+
+        // 處理從 Intent 傳來的數據
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("show_start_mapping")) {
+            boolean showStartMapping = intent.getBooleanExtra("show_start_mapping", false);
+            if (showStartMapping) {
+                Log.d("MainActivity", "onCreate: 顯示 StartMapping Fragment");
+                showStartMappingFragment(); // 顯示 StartMapping Fragment
+            }
+        }
+
+        // 頁面首次加載時初始化並顯示 HomeFragment（地圖頁面）
         if (homeFragment == null) {
             homeFragment = new HomeFragment();
         }
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fl_container, homeFragment, "map").commit();
 
+        // 檢查是否有保存的狀態，若無則加載 HomeFragment
         if (savedInstanceState == null) {
             homeFragment = new HomeFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fl_container, homeFragment, "map")
-                    .commit();
+                    .add(R.id.fl_container, homeFragment, "map").commit();
         }
 
-        // 選單點擊
+        // 設置導航菜單的點擊事件
         navigation_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                // 點選時收起選單
+                // 點擊菜單項目時關閉側邊菜單
                 drawerLayout.closeDrawer(GravityCompat.START);
 
-                // 取得選項id
+                // 根據選單項目的 ID 來決定切換到哪個 Fragment
                 int id = item.getItemId();
 
-                // 依照id判斷點了哪個項目並做相應事件
                 if (id == R.id.action_home) {
+                    // 切換到 HomeFragment
                     homeFragment = new HomeFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, homeFragment, "map").commit();
                     return true;
 
                 } else if (id == R.id.action_book) {
+                    // 切換到 BookFragment
                     bookFragment = new BookFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, bookFragment, "com/example/map_clock_api34/book").commit();
                     return true;
 
                 } else if (id == R.id.action_history) {
+                    // 切換到 HistoryFragment
                     historyFragment = new HistoryFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, historyFragment, "com/example/map_clock_api34/history").commit();
                     return true;
 
                 } else if (id == R.id.action_setting) {
+                    // 切換到 SettingRemind
                     settingRemind = new SettingRemind();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, settingRemind, "com/example/map_clock_api34/setting").commit();
                     return true;
-                }
 
+                }
                 return false;
             }
         });
     }
 
+    // 處理返回按鍵事件
     @Override
     public void onBackPressed() {
-        // 鎖定返回鍵，現在所有頁面按返回都不會有反應
-        super.onBackPressed();
+        super.onBackPressed(); // 默認的返回行為
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        invalidateOptionsMenu();
-    }
-
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);  // 替換成你的菜單資源 ID
+        // 加載主選單
+        getMenuInflater().inflate(R.menu.menu, menu);
 
-        // 在這裡設置圖標顏色
+        // 設置選單圖標顏色
         MenuItem menuItem1 = menu.findItem(R.id.action_home);
         menuItem1.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
         MenuItem menuItem2 = menu.findItem(R.id.action_book);
@@ -165,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         MenuItem menuItem4 = menu.findItem(R.id.action_setting);
         menuItem4.getIcon().setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
 
+        // 隱藏菜單項目
         menuItem1.setVisible(false);
         menuItem2.setVisible(false);
         menuItem3.setVisible(false);
@@ -172,13 +181,14 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+
+    // 更新選單圖標顏色
     private void updateMenuIcons() {
-        // 确保菜单已经创建后再更新图标颜色
         if (toolbar != null) {
             toolbar.post(new Runnable() {
                 @Override
                 public void run() {
-                    invalidateOptionsMenu(); // 触发菜单更新
+                    invalidateOptionsMenu(); // 強制更新菜單圖標
                 }
             });
         }
@@ -187,71 +197,75 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        updateMenuIcons(); // 确保在创建后设置图标颜色
+        updateMenuIcons(); // 在創建後更新圖標
     }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        setIntent(intent);
+        setIntent(intent); // 設置新的 Intent
+
+        // 檢查新的 Intent 是否包含 show_start_mapping 標記
         if (intent.hasExtra("show_start_mapping")) {
             boolean showStartMapping = intent.getBooleanExtra("show_start_mapping", false);
             if (showStartMapping) {
-                Log.d("MainActivity", "onNewIntent: New Intent contains show_start_mapping, calling showStartMappingFragment.");
+                Log.d("MainActivity", "onNewIntent: 顯示 StartMapping Fragment");
                 if (intent.hasExtra("triggerSendBroadcast")) {
-
-                    sendBroadcastToLocationService();
+                    sendBroadcastToLocationService(); // 發送廣播
                 }
-                showStartMappingFragment();
+                showStartMappingFragment(); // 顯示 StartMapping Fragment
             }
-        } else if (intent.hasExtra("show_end_map")) {
-
         }
+    }
 
-}
-
+    // 顯示 StartMapping Fragment
     private void showStartMappingFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
+        // 檢查是否已存在 StartMapping Fragment
         StartMapping startMappingFragment = (StartMapping) fragmentManager.findFragmentByTag("StartMapping");
         if (startMappingFragment == null) {
+            // 若無，則新增 StartMapping Fragment
             startMappingFragment = new StartMapping();
             transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
-            Log.d("MainActivity", "Adding new StartMapping fragment");
+            Log.d("MainActivity", "新增 StartMapping Fragment");
             transaction.addToBackStack(null);
-
         } else {
+            // 若已存在，則顯示它
             transaction.show(startMappingFragment);
-            Log.d("MainActivity", "Showing existing StartMapping fragment");
+            Log.d("MainActivity", "顯示已存在的 StartMapping Fragment");
         }
         transaction.commit();
     }
-    private void sendBroadcastToLocationService() {
 
+    // 發送廣播通知位置服務
+    private void sendBroadcastToLocationService() {
         Intent broadcastIntent = new Intent("DESTINATIONINDEX_UPDATE");
         broadcastIntent.putExtra("triggerSendBroadcast", true);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent); // 發送廣播
     }
 
+    // 可以按小鍵盤以外的地方取消鍵盤
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        View view = getCurrentFocus(); // 取得當前焦點
 
-        View view = getCurrentFocus();
         if (view != null && ev.getAction() == MotionEvent.ACTION_DOWN) {
-
             if (view instanceof EditText) {
+                // 當點擊到 EditText 以外的區域時隱藏鍵盤
                 Rect outRect = new Rect();
                 view.getGlobalVisibleRect(outRect);
                 if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
-                    // 點擊到 EditText 以外的區域
-                    view.clearFocus();
-                    hideKeyboard(view);  // 傳遞 view
+                    view.clearFocus(); // 取消 EditText 焦點
+                    hideKeyboard(view); // 隱藏鍵盤
                 }
             }
         }
         return super.dispatchTouchEvent(ev);
     }
 
+    // 隱藏鍵盤
     private void hideKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null && view != null) {
@@ -259,5 +273,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        invalidateOptionsMenu(); // 更新選單狀態
+    }
 }

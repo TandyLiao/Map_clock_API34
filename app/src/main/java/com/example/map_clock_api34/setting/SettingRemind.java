@@ -28,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,246 +36,147 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
-import com.example.map_clock_api34.MainActivity;
 import com.example.map_clock_api34.R;
 
 import java.util.Locale;
 
 public class SettingRemind extends Fragment {
 
-    private MediaPlayer mMediaPlayer;
-    private Handler mHandler = new Handler();
-    private Ringtone mRingtone;
-    private AudioManager mAudioManager;
-    private static final int PERMISSION_REQUEST_CODE = 1001;
     private static final int RINGTONE_PICKER_REQUEST_CODE = 1002;
-    private Button chooseButton;
-    private Button ringTest;
-    private Button vibrateTest;
-    private Switch switchRing;
-    private Switch switchVibrate;
-    private TextView ring;
-    private TextView vibrate;
-    private TextView texttt;
+
+    View rootView;
+
+    private Ringtone mRingtone; // 用於播放系統鈴聲
+    private AudioManager mAudioManager; // 用於管理音頻的 AudioManager
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.setting_remind, container, false);
-        mAudioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
+        rootView = inflater.inflate(R.layout.setting_remind, container, false); // 加載佈局
 
-        chooseButton = view.findViewById(R.id.choose_setting);
-        //ringTest = view.findViewById(R.id.ring_test);
-        vibrateTest = view.findViewById(R.id.vibrate_testt);
-        switchRing = view.findViewById(R.id.switch_Ring);
-        switchVibrate = view.findViewById(R.id.switch_VIBRATE);
-        ring = view.findViewById(R.id.text_RING);
-        vibrate = view.findViewById(R.id.text_VIBRATE);
-        texttt = view.findViewById(R.id.texttt);
+        mAudioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE); // 初始化音頻管理器
 
-        loadLocale();
+        // 鈴聲選擇按鈕
+        Button chooseButton = rootView.findViewById(R.id.choose_setting);
+        // 震動測試按鈕
+        Button vibrateTest = rootView.findViewById(R.id.vibrate_testt);
 
-        switchRing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    playRingtone();
-                    if (isSilentMode()) {
-                        Toast.makeText(requireContext(), "現在您是靜音模式，請打開才可聽到鈴聲", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    stopRingtone();
+        // 鈴聲開關
+        Switch switchRing = rootView.findViewById(R.id.switch_Ring);
+        // 鈴聲開關的事件處理
+        switchRing.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                playRingtone(); // 播放鈴聲
+                if (isSilentMode()) {
+                    Toast.makeText(requireContext(), "現在您是靜音模式，請打開才可聽到鈴聲", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                stopRingtone(); // 停止鈴聲
             }
         });
 
-        chooseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "選擇鈴聲");
-                startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
+        // 鈴聲選擇按鈕的事件處理
+        chooseButton.setOnClickListener(v -> {
+            Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "選擇鈴聲");
+            startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE); // 開啟系統鈴聲選擇器
+        });
+
+        // 震動測試按鈕的事件處理
+        vibrateTest.setOnClickListener(v -> {
+            Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE); // 取得震動服務
+            if (vibrator == null || !vibrator.hasVibrator()) {
+                Toast.makeText(requireContext(), "設備不支持震動功能", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000}; // 震動模式
+            vibrator.vibrate(vibrationPattern, -1); // 開始震動
+        });
+
+        // 震動開關
+        Switch switchVibrate = rootView.findViewById(R.id.switch_VIBRATE);
+        // 震動開關的事件處理
+        switchVibrate.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                startVibrate(); // 開啟震動
+            } else {
+                stopVibrate(); // 停止震動
             }
         });
 
-       /*ringTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playRingtoneWithIncreasingVolume();
-            }
-        });*/
+        setupActionBar(); // 設置自定義 ActionBar
+        updateButtonLabels(); // 更新按鈕標籤
 
-        vibrateTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
-
-                if (vibrator == null || !vibrator.hasVibrator()) {
-                    Toast.makeText(requireContext(), "設備不支持震動功能", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000};
-                vibrator.vibrate(vibrationPattern, -1);
-
-
-            }
-        });
-
-        switchVibrate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    startVibrate();
-                } else {
-                    stopVibrate();
-                }
-            }
-        });
-        setupActionBar();
-        updateButtonLabels();
-
-        return view;
+        return rootView;
     }
 
+    // 播放鈴聲的方法
     private void playRingtone() {
-        Uri ringtoneUri = loadRingtoneUri();
-
+        Uri ringtoneUri = loadRingtoneUri(); // 取得已選鈴聲的 URI
 
         if (ringtoneUri != null) {
-            mRingtone = RingtoneManager.getRingtone(requireContext(), ringtoneUri);
+            mRingtone = RingtoneManager.getRingtone(requireContext(), ringtoneUri); // 取得 Ringtone
             if (mRingtone != null) {
-                mRingtone.play();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        stopRingtone();
-                    }
-                }, 3000);
+                mRingtone.play(); // 播放鈴聲
+                new Handler().postDelayed(() -> stopRingtone(), 3000); // 設置 3 秒後停止鈴聲
             }
         } else {
             Toast.makeText(requireContext(), "請先選擇鈴聲", Toast.LENGTH_SHORT).show();
         }
     }
 
+    // 從偏好設定中載入鈴聲 URI
     private Uri loadRingtoneUri() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         String uriString = preferences.getString("ringtone_uri", null);
         return uriString != null ? Uri.parse(uriString) : null;
     }
 
-    private void playRingtoneWithIncreasingVolume() {
-        Uri ringtoneUri = loadRingtoneUri();
-        final int totalDuration = 10000;
-        final int intervals = 3;
-        final int duration = totalDuration / intervals;
-        final float volumeIncrement = 1.0f / intervals;
-
-        mMediaPlayer = MediaPlayer.create(requireContext(), ringtoneUri);
-
-        if (mMediaPlayer == null) {
-            return;
-        }
-        mMediaPlayer.setLooping(false);
-        Handler mHandler = new Handler(Looper.getMainLooper());
-
-        for (int i = 0; i < intervals; i++) {
-            final int iteration = i;
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    float newVolume = volumeIncrement * (iteration + 1);
-                    mMediaPlayer.setVolume(newVolume, newVolume);
-                    if (!mMediaPlayer.isPlaying()) {
-                        mMediaPlayer.start();
-                    }
-                }
-            }, i * duration);
-        }
-
-        // 設置在播放完成後停止並釋放 MediaPlayer
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mMediaPlayer != null) {
-                    mMediaPlayer.stop();
-                    mMediaPlayer.release();
-                    mMediaPlayer = null;
-                }
-            }
-        }, totalDuration);
-    }
-
-
-    private void selectRingtone() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.System.canWrite(requireContext())) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:" + requireActivity().getPackageName()));
-                startActivityForResult(intent, PERMISSION_REQUEST_CODE);
-            } else {
-                proceedToRingtoneSelection();
-            }
-        } else {
-            proceedToRingtoneSelection();
-        }
-    }
-
-    private void proceedToRingtoneSelection() {
-        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "選擇鈴聲");
-        startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
-    }
-
+    // 停止鈴聲的方法
     private void stopRingtone() {
         if (mRingtone != null && mRingtone.isPlaying()) {
-            mRingtone.stop();
+            mRingtone.stop(); // 停止鈴聲
         }
     }
 
+    // 開始震動的方法
     private void startVibrate() {
         Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
-            vibrator.vibrate(1000);
+            vibrator.vibrate(1000); // 震動 1 秒
         }
     }
 
+    // 停止震動的方法
     private void stopVibrate() {
         Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null) {
-            vibrator.cancel();
+            vibrator.cancel(); // 停止震動
         }
     }
 
+    // 判斷當前是否為靜音模式
     private boolean isSilentMode() {
         int ringerMode = mAudioManager.getRingerMode();
         return ringerMode == AudioManager.RINGER_MODE_SILENT || ringerMode == AudioManager.RINGER_MODE_VIBRATE;
     }
 
+    // 在選擇鈴聲後處理結果
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == getActivity().RESULT_OK && requestCode == RINGTONE_PICKER_REQUEST_CODE) {
-            Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI); // 取得選擇的鈴聲 URI
             if (uri != null) {
-                saveRingtoneUri(uri);
-                mRingtone = RingtoneManager.getRingtone(requireContext(), uri);
-            }
-        } else if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (Settings.System.canWrite(requireContext())) {
-                    proceedToRingtoneSelection();
-                } else {
-                    Toast.makeText(requireContext(), "沒有允許設置系統的權限", Toast.LENGTH_SHORT).show();
-                }
+                saveRingtoneUri(uri); // 保存 URI 到偏好設定
+                mRingtone = RingtoneManager.getRingtone(requireContext(), uri); // 更新 Ringtone
             }
         }
     }
 
+    // 保存鈴聲 URI
     private void saveRingtoneUri(Uri uri) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         SharedPreferences.Editor editor = preferences.edit();
@@ -284,68 +184,39 @@ public class SettingRemind extends Fragment {
         editor.apply();
     }
 
-    private void loadLocale() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        String language = prefs.getString("My_Lang", "");
-        setLocale(language);
-    }
-
-    private void setLocale(String lang) {
-        Locale locale = new Locale(lang);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        requireContext().getResources().updateConfiguration(config, requireContext().getResources().getDisplayMetrics());
-
-        // Update text views or any UI components if needed
-        updateButtonLabels();
-    }
-
+    // 更新按鈕標籤
     private void updateButtonLabels() {
+        TextView ring = rootView.findViewById(R.id.text_RING); // 鈴聲文本
         ring.setText("鈴聲");
+
+        TextView vibrate; // 震動文本
+        vibrate = rootView.findViewById(R.id.text_VIBRATE);
         vibrate.setText("震動");
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateButtonLabels();
-        setupActionBar();
-    }
-
-    public void onPause() {
-        super.onPause();
-
-        // 获取ActionBar
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowCustomEnabled(false);
-            actionBar.setCustomView(null);
-            actionBar.setDisplayShowTitleEnabled(true); // 恢复显示标题
-            actionBar.show();
-        }
-
-    }
-
+    // 設置自定義 ActionBar
     private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.hide();
+            actionBar.hide(); // 隱藏原有的 ActionBar
             actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
         }
 
+        // 創建自定義的 ActionBar 視圖
         CardView cardViewTitle = new CardView(requireContext());
         cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
         cardViewTitle.setBackground(drawable);
 
+        // 創建 LinearLayout 用於存放圖標和標題
         LinearLayout linearLayout = new LinearLayout(requireContext());
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL); // 設置水平排列
 
+        // 設置圖標
         ImageView mark = new ImageView(requireContext());
         mark.setImageResource(R.drawable.setting1);
         mark.setPadding(10, 10, 5, 10);
@@ -356,26 +227,50 @@ public class SettingRemind extends Fragment {
         params.setMarginStart(10);
         mark.setLayoutParams(params);
 
+        // 設置標題
         TextView bookTitle = new TextView(requireContext());
         bookTitle.setText("設定");
         bookTitle.setTextSize(15);
         bookTitle.setTextColor(getResources().getColor(R.color.green));
         bookTitle.setPadding(10, 10, 30, 10);
 
+        // 將圖標和標題添加到 LinearLayout 中
         linearLayout.addView(mark);
         linearLayout.addView(bookTitle);
         cardViewTitle.addView(linearLayout);
 
+        // 設置自定義的 ActionBar
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowTitleEnabled(false); // 隱藏原有標題
             actionBar.setDisplayShowCustomEnabled(true);
             actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
                     ActionBar.LayoutParams.WRAP_CONTENT,
                     ActionBar.LayoutParams.WRAP_CONTENT,
-                    Gravity.END));
-            actionBar.show();
+                    Gravity.END
+            ));
+            actionBar.show(); // 顯示 ActionBar
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateButtonLabels();
+        setupActionBar(); // 設置自定義 ActionBar
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // 恢復 ActionBar 的原始狀態
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowCustomEnabled(false);
+            actionBar.setCustomView(null);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.show();
+        }
+    }
 }

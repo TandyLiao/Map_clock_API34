@@ -1,5 +1,6 @@
 package com.example.map_clock_api34;
 public class Distance {
+
     //輸入起始點的經緯度，計算出直線距離in公里
     private static final double EARTH_RADIUS_KM = 6371.0;
     public static double getDistanceBetweenPointsNew(double latitude1, double longitude1, double latitude2, double longitude2) {

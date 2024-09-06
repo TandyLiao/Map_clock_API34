@@ -432,7 +432,7 @@ public class HistoryFragment extends Fragment {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
-                    sharedViewModel.setnowLocation(location.getLatitude(), location.getLongitude());
+                    sharedViewModel.setNowLocation(location.getLatitude(), location.getLongitude());
                     Log.d("Location", "Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
                 } else {
                     makeToast("找不到當前位置",1000);
