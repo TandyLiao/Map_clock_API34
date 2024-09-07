@@ -16,6 +16,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 public class WheatherFragment extends Fragment {
 
     View rootView;
+    private DrawerLayout drawerLayout;
 
     private SharedViewModel sharedViewModel;  // 用來管理共用數據的 ViewModel
 
@@ -45,6 +47,11 @@ public class WheatherFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.weather_fragment_weather, container, false);
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -216,6 +223,16 @@ public class WheatherFragment extends Fragment {
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true);  // 恢復顯示標題
             actionBar.show();
+        }
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         }
     }
 }

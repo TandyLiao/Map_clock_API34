@@ -7,10 +7,13 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.drawable.ColorDrawable;
 
+import androidx.cardview.widget.CardView;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import android.annotation.SuppressLint;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -20,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import com.example.map_clock_api34.Distance;
@@ -66,6 +70,8 @@ public class StartMappingFragment extends Fragment {
     private View overlayView;
     private Button btnPre, btnNext;
     private int nowIndex = 0;
+
+    private DrawerLayout drawerLayout;
 
     @SuppressLint("MissingPermission")
     @Nullable
@@ -119,6 +125,11 @@ public class StartMappingFragment extends Fragment {
         // 開始背景執行位置更新
         startLocationUpdates();
 
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
         return rootView;
     }
 
@@ -156,34 +167,52 @@ public class StartMappingFragment extends Fragment {
     // 顯示 PopupWindow 的方法
     @SuppressLint("MissingPermission")
     private void ShowPopupWindow(int destinationIndex) {
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_startmapping_remind, null, false);
         popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setWidth(700);
+        popupWindow.setWidth(900);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
         popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
+        CardView cardView = new CardView(getContext());
+        cardView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewnote_shape);
+        cardView.setBackground(drawable);
+        cardView.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.lightyellow));
+        cardView.setContentPadding(0, 5, 0, 0);
+
+        TextView noteTextView = new TextView(getContext());
+        noteTextView.setTextSize(15);
+        noteTextView.setLetterSpacing(0.1f);
+        noteTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        noteTextView.setPadding(30,10,10,10);
+
         // 在底部加上覆蓋層，防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.transparent_black));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
         // 設置 PopupWindow 的標題
         TextView title = view.findViewById(R.id.txtNote);
-        title.setTextSize(18);
+        title.setTextSize(20);
 
-        if (sharedViewModel.getNote(destinationIndex) == null) {
+        title.setText("即將抵達：\n" + destinationName[destinationIndex]);
+        if (sharedViewModel.getNote(destinationIndex) != null) {
             title.setText("即將抵達：\n" + destinationName[destinationIndex]);
-        } else {
-            title.setText("即將抵達：\n" + destinationName[destinationIndex] + "\n\n代辦事項：\n" + sharedViewModel.getNote(destinationIndex));
+            //title.setText("即將抵達：\n" + destinationName[destinationIndex] + "\n\n代辦事項：\n" + sharedViewModel.getNote(destinationIndex));
+            noteTextView.setText("記事內容：\n" + sharedViewModel.getNote(destinationIndex));
+            cardView.addView(noteTextView);
         }
+        LinearLayout layout = view.findViewById(R.id.LinearLayout2); // 在布局文件中應有的 LinearLayout 容器
+        layout.addView(cardView);
 
         // 設定停止震鈴按鈕
         Button BTNPopup = view.findViewById(R.id.PopupCancel);
-        BTNPopup.setText("停止震鈴");
+        BTNPopup.setText("停止看記事");
         BTNPopup.setOnClickListener(v -> {
             sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
         });
@@ -424,5 +453,13 @@ public class StartMappingFragment extends Fragment {
         Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
         toast.show();
         new Handler().postDelayed(toast::cancel, durationInMillis);
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
     }
 }

@@ -112,7 +112,7 @@ public class ListAdapterRoute extends RecyclerView.Adapter<ListAdapterRoute.View
         if (itemNumberTextView == null) {
             // 如果沒有，動態添加一個 TextView
             itemNumberTextView = new TextView(holder.itemView.getContext());
-            itemNumberTextView.setTextSize(16);
+            itemNumberTextView.setTextSize(20);
             itemNumberTextView.setTextColor(holder.itemView.getContext().getResources().getColor(android.R.color.black));
 
             // 設置 TextView 的佈局參數，並設定 layout_marginStart 來將其向右移動

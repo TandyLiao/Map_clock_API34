@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -64,6 +65,7 @@ public class EditCreateLocation extends Fragment {
 
     private View rootView;
     private View overlayView; // 用來覆蓋畫面的遮罩
+    private DrawerLayout drawerLayout;
     private RecyclerView recyclerViewRoute; // 用來顯示路線的 RecyclerView
     private ListAdapterRoute listAdapterRoute; // 路線的適配器
 
@@ -78,6 +80,11 @@ public class EditCreateLocation extends Fragment {
         dbBookHelper = new BookDatabaseHelper(requireContext());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         bookNameInput = rootView.findViewById(R.id.BookName);
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
         setupActionBar();       // 初始化 ActionBar
         setupButtons();         // 初始化按鈕
@@ -542,6 +549,16 @@ public class EditCreateLocation extends Fragment {
 
         if (actionBar != null) {
             setupActionBar(); // 重新顯示 ActionBar
+        }
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         }
     }
 }

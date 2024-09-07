@@ -534,7 +534,7 @@ public class CreateLocationFragment extends Fragment {
     private void ShowPopupWindow() {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setWidth(700);
+        popupWindow.setWidth(800);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
 
@@ -545,7 +545,7 @@ public class CreateLocationFragment extends Fragment {
         // 疊加防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent_black));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 

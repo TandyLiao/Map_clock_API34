@@ -27,19 +27,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_bookname1"
+            android:layout_width="300dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            app:cardBackgroundColor="@color/darkyellow"
+            app:cardCornerRadius="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/returnpage"
+            app:layout_constraintTop_toTopOf="parent">
         <TextView
             android:id="@+id/textinfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="正在找尋路線中"
-            android:textColor="@color/black"
-            android:textSize="25sp"
+            android:text="正在找尋路線中..."
+            android:textColor="@color/green"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_gravity="center"
             app:layout_constraintBottom_toTopOf="@+id/map"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/returnpage"
             app:layout_constraintTop_toTopOf="parent" />
-
+        </com.google.android.material.card.MaterialCardView>
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"

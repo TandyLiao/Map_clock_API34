@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -53,6 +54,7 @@ public class SelectPlaceFragment extends Fragment {
 
     private View overlayView;
     private PopupWindow popupWindow;  // 用於顯示地點資訊的彈出窗口
+    private DrawerLayout drawerLayout;
 
     private AutocompleteSupportFragment start_autocompleteSupportFragment;  // Google 自動完成片段
     private Geocoder geocoder;  // 用於反向地理編碼的 Geocoder
@@ -120,6 +122,11 @@ public class SelectPlaceFragment extends Fragment {
         // 獲取 Google 地圖片段
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
         // 初始化 FusedLocationProviderClient
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -353,5 +360,15 @@ public class SelectPlaceFragment extends Fragment {
 
         // 使用 Handler 來控制顯示時長
         new Handler().postDelayed(toast::cancel, durationInMillis);
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
     }
 }

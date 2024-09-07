@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="300dp"
-    android:layout_height="wrap_content"
+    android:layout_width="350dp"
+    android:layout_height="150dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:andoird="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:background="@drawable/popupborder"
-    android:id="@+id/popup_layout">
+    android:background="@drawable/popupborder">
 
     <View
         android:layout_width="100dp"
-        android:layout_height="10dp" />
+        android:layout_height="10dp"/>
 
     <TextView
         android:id="@+id/txtNote"
@@ -17,26 +17,22 @@
         android:layout_height="wrap_content"
         android:text=""
         android:maxLines="2"
+        android:lines="2"
+        android:layout_marginTop="10dp"
         android:textColor="@color/green"
         android:textSize="20sp"
-        android:layout_gravity="center" />
-
+        android:layout_gravity="center"/>
     <View
         android:layout_width="5dp"
         android:layout_height="20dp" />
 
     <LinearLayout
-        android:id="@+id/routes_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal" />
-    <View
-        android:layout_width="5dp"
-        android:layout_height="20dp" />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:orientation="horizontal"
         android:gravity="center_horizontal">
 
@@ -45,15 +41,33 @@
             android:layout_width="80dp"
             android:layout_height="35dp"
             android:background="@drawable/btn_additem"
-            android:padding="0dp"
             android:text="取消"
+            android:padding="0dp"
+            android:textSize="15dp"
             android:textColor="@color/green"
             app:backgroundTint="@null"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"/>
+        <View
+            android:layout_width="30dp"
+            android:layout_height="50dp"/>
+
+        <Button
+            android:id="@+id/Popupsure"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
+            android:background="@drawable/btn_additem"
+            android:text="確認"
+            android:padding="0dp"
+            android:textSize="15dp"
+            android:textColor="@color/green"
+            app:backgroundTint="@null"
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="20dp" />
+
+
 </LinearLayout>

@@ -19,6 +19,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -38,6 +39,7 @@ public class NoteFragment extends Fragment {
 
     View rootView;
     View overlayView;
+    private DrawerLayout drawerLayout;
 
     SharedViewModel sharedViewModel; // 用於共享數據的 ViewModel
     RecyclerView recyclerViewRoute; // 顯示路線的 RecyclerView
@@ -67,6 +69,11 @@ public class NoteFragment extends Fragment {
             transaction.commit();
         });
 
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         updateResetButtonState(); // 更新重置按鈕狀態
@@ -116,7 +123,7 @@ public class NoteFragment extends Fragment {
         // 在底部添加覆蓋層，防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent_black));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
@@ -330,6 +337,16 @@ public class NoteFragment extends Fragment {
             actionBar.setCustomView(null);
             actionBar.setDisplayShowTitleEnabled(true); // 恢復標題
             actionBar.show();
+        }
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         }
     }
 }
