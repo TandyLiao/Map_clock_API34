@@ -3,12 +3,15 @@ package com.example.map_clock_api34;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -36,6 +39,11 @@ public class TutorialFragment extends Fragment {
             }
         }
 
+        ImageView btnBack = rootView.findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            getActivity().getSupportFragmentManager().popBackStack();
+        });
+
         // 讀取 SharedPreferences，檢查應該顯示哪個教學頁面
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         int page = sharedPreferences.getInt("WhichPage", -1); // 獲取頁面號，預設為 -1（表示無效）
@@ -49,16 +57,29 @@ public class TutorialFragment extends Fragment {
 
         // 根據 SharedPreferences 中的頁面資訊設定要顯示的圖片集
         switch (page) {
+            // 0 為路線規劃
             case 0:
-                drawablename = "joking"; // "joking" 教學圖片集
+                drawablename = "route_";
                 getImage(); // 載入圖片
                 break;
+                // 1 為歷史頁面
             case 1:
-                drawablename = "tandy"; // "tandy" 教學圖片集
+                drawablename = "history_";
                 getImage(); // 載入圖片
                 break;
+                // 2 為收藏路線
             case 2:
-                drawablename = "rain"; // "rain" 教學圖片集
+                drawablename = "markroute_";
+                getImage(); // 載入圖片
+                break;
+                // 3 為路線設定
+            case 3:
+                drawablename = "locatesetting_";
+                getImage(); // 載入圖片
+                break;
+                // 4 為記事頁面
+            case 4:
+                drawablename = "note_";
                 getImage(); // 載入圖片
                 break;
             default:
@@ -82,8 +103,23 @@ public class TutorialFragment extends Fragment {
             getActivity().getSupportFragmentManager().popBackStack();
         } else {
             // 否則，設定 ImageView 顯示該圖片
-            imageView.setImageResource(id);
+            // 設定圖片
+            Drawable imageDrawable = getResources().getDrawable(id);
+
+            // 加載邊框 drawable
+            Drawable borderDrawable = getResources().getDrawable(R.drawable.border_image);
+
+            // 創建 LayerDrawable，疊加圖片和邊框
+            Drawable[] layers = new Drawable[2];
+            layers[0] = imageDrawable; // 底層是圖片
+            layers[1] = borderDrawable; // 上層是邊框
+
+            // 設置 LayerDrawable 給 ImageView
+            LayerDrawable layerDrawable = new LayerDrawable(layers);
+            imageView.setImageDrawable(layerDrawable);
+
         }
+
     }
 
     // 當 Fragment 被銷毀時，恢復 ActionBar

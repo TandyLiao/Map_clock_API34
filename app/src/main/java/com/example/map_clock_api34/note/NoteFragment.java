@@ -1,5 +1,8 @@
 package com.example.map_clock_api34.note;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -30,6 +33,7 @@ import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.CreateLocation.CreateLocationFragment;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.TutorialFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +56,27 @@ public class NoteFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.note_fragment_note, container, false); // 加載布局
+
+        // 檢查使用者是否已經造訪過，未造訪則跳轉到教學頁面
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("noteLogin", false);
+
+        Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
+        if(isLoggedIn==false)
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("WhichPage",4);
+            //editor.putBoolean("noteLogin",true);
+            editor.apply();
+
+            TutorialFragment tutorialFragment = new TutorialFragment();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.hide(currentFragment);
+            transaction.add(R.id.fl_container, tutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+
 
         // 初始化按鈕並設置點擊事件
         btnreset = rootView.findViewById(R.id.btn_reset);

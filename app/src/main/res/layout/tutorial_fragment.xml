@@ -8,14 +8,16 @@
 
     <ImageView
         android:id="@+id/TutoImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="88dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/anya062516"
+        app:layout_constraintBottom_toTopOf="@+id/nextpage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
     <Button
         android:id="@+id/nextpage"
@@ -23,25 +25,25 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="291dp"
         android:layout_marginEnd="30dp"
-        android:layout_marginBottom="42dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/btn_additem"
         android:text="下一頁"
+        android:textColor="@color/green"
+        app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="174dp"
-        android:layout_marginEnd="195dp"
-        android:layout_marginBottom="104dp"
-        android:text="第一頁"
-        android:textSize="34sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.333"
-        app:layout_constraintStart_toStartOf="parent" />
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="38dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/wrong_black" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

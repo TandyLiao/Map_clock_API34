@@ -1,7 +1,11 @@
 package com.example.map_clock_api34.setting;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.TutorialFragment;
 import com.example.map_clock_api34.setting.SettingListdapter.ListdapterSetting;
 
 import java.util.ArrayList;
@@ -46,6 +52,31 @@ public class CreatLocation_setting extends Fragment {
         rootView = inflater.inflate(R.layout.setting_creatlocation, container, false);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        // 檢查是否需要顯示教學頁面
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("settingLogin", false);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("WhichPage", 3);
+        editor.putBoolean("settingLogin", false);
+        editor.apply();
+
+        Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
+        if (!isLoggedIn) {
+            // 如果第一次進入，顯示教學頁面
+            /*SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("WhichPage", 3);
+            //editor.putBoolean("settingLogin", true);
+            editor.apply();*/
+
+            TutorialFragment tutorialFragment = new TutorialFragment();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.hide(currentFragment);
+            transaction.add(R.id.fl_container, tutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
 
         // 初始化 ActionBar 和 RecyclerView
         setupActionBar();

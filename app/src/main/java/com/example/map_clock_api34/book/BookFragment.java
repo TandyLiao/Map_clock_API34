@@ -1,8 +1,11 @@
 package com.example.map_clock_api34.book;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -43,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.TutorialFragment;
 import com.example.map_clock_api34.book.RecycleViewActionBook.SwipeToDeleteCallback;
 import com.example.map_clock_api34.history.HistoryListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
@@ -88,6 +92,27 @@ public class BookFragment extends Fragment {
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         dbHelper = new BookDatabaseHelper(requireContext()); // 初始化資料庫輔助類
+
+        // 檢查是否需要顯示教學頁面
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("BookLogin", false);
+
+        Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
+        if (!isLoggedIn) {
+            // 如果第一次進入，顯示教學頁面
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("WhichPage", 2);
+            //editor.putBoolean("BookLogin", true);
+            editor.apply();
+
+            TutorialFragment tutorialFragment = new TutorialFragment();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.hide(currentFragment);
+            transaction.add(R.id.fl_container, tutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+
 
         setupRecyclerViews(); // 設置 RecyclerView
         addItemFromDB(); // 從資料庫中讀取數據

@@ -92,7 +92,7 @@ public class HistoryFragment extends Fragment {
         {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",1);
-            editor.putBoolean("HistoryLogin",true);
+            //editor.putBoolean("HistoryLogin",true);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();
