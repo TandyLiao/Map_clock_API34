@@ -43,7 +43,7 @@ import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.RecyclerViewActionHome;
-import com.example.map_clock_api34.CreateLocation.SelectPlace;
+import com.example.map_clock_api34.CreateLocation.SelectPlaceFragment;
 import com.example.map_clock_api34.note.NoteFragment;
 import com.example.map_clock_api34.setting.CreatLocation_setting;
 
@@ -244,7 +244,7 @@ public class BookCreateLocation extends Fragment {
 
     // 打開選擇地點的頁面
     private void openSelectPlaceFragment() {
-        SelectPlace mapFragment = new SelectPlace();
+        SelectPlaceFragment mapFragment = new SelectPlaceFragment();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_container, mapFragment);
         transaction.addToBackStack(null);

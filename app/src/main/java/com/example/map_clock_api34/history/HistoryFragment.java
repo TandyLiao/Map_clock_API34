@@ -40,11 +40,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.history.HistoryListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.history.HistoryDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.history.HistoryDatabaseHelper.HistoryTable;
-import com.example.map_clock_api34.CreateLocation.CreateLocation;
-import com.example.map_clock_api34.tutorial;
+import com.example.map_clock_api34.CreateLocation.CreateLocationFragment;
+import com.example.map_clock_api34.TutorialFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -95,7 +95,7 @@ public class HistoryFragment extends Fragment {
             editor.putBoolean("HistoryLogin",true);
             editor.apply();
 
-            tutorial tutorialFragment = new tutorial();
+            TutorialFragment tutorialFragment = new TutorialFragment();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.hide(currentFragment);
             transaction.add(R.id.fl_container, tutorialFragment);
@@ -442,7 +442,7 @@ public class HistoryFragment extends Fragment {
 
     // 打開路線規劃頁面
     private void openCreaLocationFragment() {
-        CreateLocation createLocationFragment = new CreateLocation();
+        CreateLocationFragment createLocationFragment = new CreateLocationFragment();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_container, createLocationFragment);
         transaction.addToBackStack(null);

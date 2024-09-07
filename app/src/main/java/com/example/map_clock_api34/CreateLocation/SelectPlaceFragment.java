@@ -49,7 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class SelectPlace extends Fragment {
+public class SelectPlaceFragment extends Fragment {
 
     private View overlayView;
     private PopupWindow popupWindow;  // 用於顯示地點資訊的彈出窗口

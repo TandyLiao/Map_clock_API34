@@ -37,7 +37,7 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-public class StartMapping extends Fragment {
+public class StartMappingFragment extends Fragment {
 
     // 位置服務變數
     private LocationManager locationManager;
@@ -195,7 +195,7 @@ public class StartMapping extends Fragment {
             if (destinationIndex == sharedViewModel.getLocationCount()) {
                 sendBroadcastWithDestinationIndex(3, destinationIndex, 0);
 
-                EndMapping enfFragment = new EndMapping();
+                EndMappingFragment enfFragment = new EndMappingFragment();
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fl_container, enfFragment);
                 transaction.addToBackStack(null);
@@ -227,9 +227,9 @@ public class StartMapping extends Fragment {
         btnBack.setOnClickListener(v -> {
             sendBroadcastWithDestinationIndex(5, 0, -1);
 
-            EndMapping endMapping = new EndMapping();
+            EndMappingFragment endMappingFragment = new EndMappingFragment();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, endMapping);
+            transaction.replace(R.id.fl_container, endMappingFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });

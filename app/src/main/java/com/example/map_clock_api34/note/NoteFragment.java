@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.CreateLocation.CreateLocation;
+import com.example.map_clock_api34.CreateLocation.CreateLocationFragment;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
 
 import java.util.ArrayList;
@@ -61,9 +61,9 @@ public class NoteFragment extends Fragment {
 
         btnsure = rootView.findViewById(R.id.btn_sure);
         btnsure.setOnClickListener(v -> {
-            CreateLocation createLocation = new CreateLocation(); // 點擊確認後跳轉到 CreateLocation
+            CreateLocationFragment createLocationFragment = new CreateLocationFragment(); // 點擊確認後跳轉到 CreateLocation
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fl_container, createLocation);
+            transaction.replace(R.id.fl_container, createLocationFragment);
             transaction.commit();
         });
 
@@ -289,9 +289,9 @@ public class NoteFragment extends Fragment {
 
     // 開啟 NoteEnterContent Fragment，用於編輯備註
     private void openWritingFragment() {
-        ChangeNote changeNote = new ChangeNote();
+        ChangeNoteFragment changeNoteFragment = new ChangeNoteFragment();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fl_container, changeNote);
+        transaction.replace(R.id.fl_container, changeNoteFragment);
         transaction.addToBackStack(null); // 支援返回操作
         transaction.commit();
     }

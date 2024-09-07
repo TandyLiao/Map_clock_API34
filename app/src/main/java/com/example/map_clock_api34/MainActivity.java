@@ -29,8 +29,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.map_clock_api34.book.BookFragment;
 import com.example.map_clock_api34.history.HistoryFragment;
-import com.example.map_clock_api34.CreateLocation.CreateLocation;
-import com.example.map_clock_api34.CreateLocation.StartMapping;
+import com.example.map_clock_api34.CreateLocation.CreateLocationFragment;
+import com.example.map_clock_api34.CreateLocation.StartMappingFragment;
 import com.example.map_clock_api34.setting.SettingRemind;
 import com.google.android.material.navigation.NavigationView;
 
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
 
     // 宣告 Fragment 變數，存儲各個頁面的實例
-    private CreateLocation createLocationFragment;
+    private CreateLocationFragment createLocationFragment;
     private BookFragment bookFragment;
     private HistoryFragment historyFragment;
 
@@ -92,14 +92,14 @@ public class MainActivity extends AppCompatActivity {
 
         // 頁面首次加載時初始化並顯示 HomeFragment（地圖頁面）
         if (createLocationFragment == null) {
-            createLocationFragment = new CreateLocation();
+            createLocationFragment = new CreateLocationFragment();
         }
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fl_container, createLocationFragment, "map").commit();
 
         // 檢查是否有保存的狀態，若無則加載 HomeFragment
         if (savedInstanceState == null) {
-            createLocationFragment = new CreateLocation();
+            createLocationFragment = new CreateLocationFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fl_container, createLocationFragment, "map").commit();
         }
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (id == R.id.action_home) {
                     // 切換到 HomeFragment
-                    createLocationFragment = new CreateLocation();
+                    createLocationFragment = new CreateLocationFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fl_container, createLocationFragment, "map").commit();
                     return true;
@@ -220,10 +220,10 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         // 檢查是否已存在 StartMapping Fragment
-        StartMapping startMappingFragment = (StartMapping) fragmentManager.findFragmentByTag("StartMapping");
+        StartMappingFragment startMappingFragment = (StartMappingFragment) fragmentManager.findFragmentByTag("StartMapping");
         if (startMappingFragment == null) {
             // 若無，則新增 StartMapping Fragment
-            startMappingFragment = new StartMapping();
+            startMappingFragment = new StartMappingFragment();
             transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
             Log.d("MainActivity", "新增 StartMapping Fragment");
             transaction.addToBackStack(null);

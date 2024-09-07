@@ -56,7 +56,7 @@ import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterTool;
 import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.RecyclerViewActionHome;
-import com.example.map_clock_api34.tutorial;
+import com.example.map_clock_api34.TutorialFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class CreateLocation extends Fragment {
+public class CreateLocationFragment extends Fragment {
 
     // 權限相關常量
     private static final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 101;
@@ -122,7 +122,7 @@ public class CreateLocation extends Fragment {
             editor.putBoolean("CreateLogin", true);
             editor.apply();
 
-            tutorial tutorialFragment = new tutorial();
+            TutorialFragment tutorialFragment = new TutorialFragment();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.hide(currentFragment);
             transaction.add(R.id.fl_container, tutorialFragment);
@@ -395,7 +395,7 @@ public class CreateLocation extends Fragment {
 
     // 打開選擇地點頁面
     private void openSelectPlaceFragment() {
-        SelectPlace mapFragment = new SelectPlace();
+        SelectPlaceFragment mapFragment = new SelectPlaceFragment();
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_container, mapFragment);
         transaction.addToBackStack(null);
@@ -405,13 +405,13 @@ public class CreateLocation extends Fragment {
     // 打開導航頁面
     private void openStartMappingFragment() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        StartMapping startMappingFragment = (StartMapping) fragmentManager.findFragmentByTag("StartMapping");
+        StartMappingFragment startMappingFragment = (StartMappingFragment) fragmentManager.findFragmentByTag("StartMapping");
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         if (startMappingFragment == null) {
             // 如果 fragment 不存在，則創建一個新的
-            startMappingFragment = new StartMapping();
+            startMappingFragment = new StartMappingFragment();
             transaction.add(R.id.fl_container, startMappingFragment, "StartMapping");
         } else {
             // 如果 fragment 已存在，則顯示它

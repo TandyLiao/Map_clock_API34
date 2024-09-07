@@ -16,7 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-public class tutorial extends Fragment {
+public class TutorialFragment extends Fragment {
 
     View rootView;
     public int count = 1; // 記錄當前頁數，初始為第一頁

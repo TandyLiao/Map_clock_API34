@@ -1,6 +1,5 @@
 package com.example.map_clock_api34.note;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,7 +9,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -27,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
-public class ChangeNote extends Fragment {
+public class ChangeNoteFragment extends Fragment {
 
     private View rootView;
 

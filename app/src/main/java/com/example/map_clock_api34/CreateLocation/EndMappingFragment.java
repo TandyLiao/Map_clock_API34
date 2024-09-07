@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 
-public class EndMapping extends Fragment {
+public class EndMappingFragment extends Fragment {
     private View rootView;
     private SharedViewModel sharedViewModel;
 

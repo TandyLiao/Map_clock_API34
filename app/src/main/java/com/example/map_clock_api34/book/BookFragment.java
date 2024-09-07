@@ -44,10 +44,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.book.RecycleViewActionBook.SwipeToDeleteCallback;
-import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
+import com.example.map_clock_api34.history.HistoryListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
 import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
-import com.example.map_clock_api34.CreateLocation.CreateLocation;
+import com.example.map_clock_api34.CreateLocation.CreateLocationFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -468,7 +468,7 @@ public class BookFragment extends Fragment {
             cursor.close(); // 關閉 Cursor
 
             //頁面轉換到創建路線 505-509
-            CreateLocation createLocationFragment = new CreateLocation();
+            CreateLocationFragment createLocationFragment = new CreateLocationFragment();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, createLocationFragment);
             transaction.addToBackStack(null);

@@ -33,7 +33,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.CreateLocation.SelectPlace;
+import com.example.map_clock_api34.CreateLocation.SelectPlaceFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -62,7 +62,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
     private GoogleMap googleMap;
 
-    private SelectPlace selectPlace; // 用來選擇地點的自定類別
+    private SelectPlaceFragment selectPlaceFragment; // 用來選擇地點的自定類別
 
     private BusStationFinderHelper stationFinder; // 公車站點查找的輔助工具
 
@@ -132,7 +132,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
-        selectPlace = new SelectPlace(); // 初始化選擇地點的物件
+        selectPlaceFragment = new SelectPlaceFragment(); // 初始化選擇地點的物件
 
         notification = rootView.findViewById(R.id.textinfo);
 
@@ -382,8 +382,8 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
             // 檢查是否已滿行程
             if(sharedViewModel.getLocationCount()<7){
                 // 取得該站點的地區和城市名稱
-                String busArea = selectPlace.getAreaNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
-                String busCity = selectPlace.getCityNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
+                String busArea = selectPlaceFragment.getAreaNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
+                String busCity = selectPlaceFragment.getCityNameCustom(getContext(), stopLatLng.latitude, stopLatLng.longitude);
 
                 // 將站點加入目的地
                 sharedViewModel.setFirstDestination("公車站：" + stopName, busArea, busCity, stopLatLng.latitude, stopLatLng.longitude);
