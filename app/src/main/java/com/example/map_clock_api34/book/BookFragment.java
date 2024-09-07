@@ -47,8 +47,7 @@ import com.example.map_clock_api34.book.RecycleViewActionBook.SwipeToDeleteCallb
 import com.example.map_clock_api34.history.ListAdapter.ListAdapterHistory;
 import com.example.map_clock_api34.book.BookDatabaseHelper.BookTable;
 import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
-import com.example.map_clock_api34.home.CreateLocation;
-import com.example.map_clock_api34.home.HomeFragment;
+import com.example.map_clock_api34.CreateLocation.CreateLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;

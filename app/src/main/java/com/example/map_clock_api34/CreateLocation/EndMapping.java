@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.home;
+package com.example.map_clock_api34.CreateLocation;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,11 +10,9 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
-import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.SharedViewModel;
 
 public class EndMapping extends Fragment {

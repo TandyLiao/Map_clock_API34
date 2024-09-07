@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.HistoryDatabase;
+package com.example.map_clock_api34.history;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

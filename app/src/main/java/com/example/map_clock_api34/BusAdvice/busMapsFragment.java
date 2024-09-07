@@ -33,7 +33,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.SelectPlace;
+import com.example.map_clock_api34.CreateLocation.SelectPlace;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;

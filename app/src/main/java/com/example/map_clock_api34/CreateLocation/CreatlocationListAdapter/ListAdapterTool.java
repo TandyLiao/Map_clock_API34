@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.home.HomeListAdapter;
+package com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter;
 
 // 引入所需的 Android 和其他庫
 import static android.app.PendingIntent.getActivity;
@@ -37,7 +37,7 @@ import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
 import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
 import com.example.map_clock_api34.book.BookDatabaseHelper;
-import com.example.map_clock_api34.note.Note;
+import com.example.map_clock_api34.note.NoteFragment;
 import com.example.map_clock_api34.setting.CreatLocation_setting;
 
 import java.text.SimpleDateFormat;
@@ -104,7 +104,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 return;
             }
             // 切換到記事的 Fragment
-            Note notesFragment = new Note();
+            NoteFragment notesFragment = new NoteFragment();
             fragmentTransaction.replace(R.id.fl_container, notesFragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();

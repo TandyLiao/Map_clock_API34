@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -22,19 +21,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.map_clock_api34.book.BookFragment;
 import com.example.map_clock_api34.history.HistoryFragment;
-import com.example.map_clock_api34.home.EndMapping;
-import com.example.map_clock_api34.home.HomeFragment;
-import com.example.map_clock_api34.home.StartMapping;
+import com.example.map_clock_api34.CreateLocation.CreateLocation;
+import com.example.map_clock_api34.CreateLocation.StartMapping;
 import com.example.map_clock_api34.setting.SettingRemind;
 import com.google.android.material.navigation.NavigationView;
 
@@ -43,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
 
     // 宣告 Fragment 變數，存儲各個頁面的實例
-    private HomeFragment homeFragment;
+    private CreateLocation createLocationFragment;
     private BookFragment bookFragment;
     private HistoryFragment historyFragment;
 
@@ -95,17 +91,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 頁面首次加載時初始化並顯示 HomeFragment（地圖頁面）
-        if (homeFragment == null) {
-            homeFragment = new HomeFragment();
+        if (createLocationFragment == null) {
+            createLocationFragment = new CreateLocation();
         }
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fl_container, homeFragment, "map").commit();
+                .replace(R.id.fl_container, createLocationFragment, "map").commit();
 
         // 檢查是否有保存的狀態，若無則加載 HomeFragment
         if (savedInstanceState == null) {
-            homeFragment = new HomeFragment();
+            createLocationFragment = new CreateLocation();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fl_container, homeFragment, "map").commit();
+                    .add(R.id.fl_container, createLocationFragment, "map").commit();
         }
 
         // 設置導航菜單的點擊事件
@@ -120,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
 
                 if (id == R.id.action_home) {
                     // 切換到 HomeFragment
-                    homeFragment = new HomeFragment();
+                    createLocationFragment = new CreateLocation();
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fl_container, homeFragment, "map").commit();
+                            .replace(R.id.fl_container, createLocationFragment, "map").commit();
                     return true;
 
                 } else if (id == R.id.action_book) {

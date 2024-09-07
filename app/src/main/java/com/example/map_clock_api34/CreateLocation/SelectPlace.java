@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.home;
+package com.example.map_clock_api34.CreateLocation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,10 +8,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -22,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;

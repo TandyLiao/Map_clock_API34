@@ -50,7 +50,7 @@
 
         <!-- 定義位置服務 -->
         <service
-            android:name=".home.LocationService"
+            android:name=".CreateLocation.LocationService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />

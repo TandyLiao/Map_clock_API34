@@ -28,13 +28,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.CreateLocation;
-import com.example.map_clock_api34.home.HomeListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.CreateLocation.CreateLocation;
+import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Note extends Fragment {
+public class NoteFragment extends Fragment {
 
     View rootView;
     View overlayView;

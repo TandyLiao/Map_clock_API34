@@ -1,4 +1,4 @@
-package com.example.map_clock_api34.home;
+package com.example.map_clock_api34.CreateLocation;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -47,15 +47,15 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper;
-import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.HistoryTable;
-import com.example.map_clock_api34.HistoryDatabase.HistoryDatabaseHelper.LocationTable;
+import com.example.map_clock_api34.history.HistoryDatabaseHelper;
+import com.example.map_clock_api34.history.HistoryDatabaseHelper.HistoryTable;
+import com.example.map_clock_api34.history.HistoryDatabaseHelper.LocationTable;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.Weather.WeatherService;
-import com.example.map_clock_api34.home.HomeListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.HomeListAdapter.ListAdapterTool;
-import com.example.map_clock_api34.home.HomeListAdapter.RecyclerViewActionHome;
+import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterTool;
+import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.RecyclerViewActionHome;
 import com.example.map_clock_api34.tutorial;
 
 import java.text.SimpleDateFormat;

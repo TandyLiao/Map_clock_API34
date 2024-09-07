@@ -41,10 +41,10 @@ import com.example.map_clock_api34.book.BookDatabaseHelper.LocationTable2;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.home.HomeListAdapter.ListAdapterRoute;
-import com.example.map_clock_api34.home.HomeListAdapter.RecyclerViewActionHome;
-import com.example.map_clock_api34.home.SelectPlace;
-import com.example.map_clock_api34.note.Note;
+import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.ListAdapterRoute;
+import com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter.RecyclerViewActionHome;
+import com.example.map_clock_api34.CreateLocation.SelectPlace;
+import com.example.map_clock_api34.note.NoteFragment;
 import com.example.map_clock_api34.setting.CreatLocation_setting;
 
 import java.text.SimpleDateFormat;
@@ -141,7 +141,7 @@ public class BookCreateLocation extends Fragment {
                 makeToast("還沒有選擇地點喔",1000);
                 return;
             }
-            Note notesFragment = new Note(); // 打開記事頁面
+            NoteFragment notesFragment = new NoteFragment(); // 打開記事頁面
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fl_container, notesFragment);
             transaction.addToBackStack(null);

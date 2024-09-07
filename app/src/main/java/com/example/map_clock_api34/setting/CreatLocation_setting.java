@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
-import com.example.map_clock_api34.setting.Listdapter.ListdapterSetting;
+import com.example.map_clock_api34.setting.SettingListdapter.ListdapterSetting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
