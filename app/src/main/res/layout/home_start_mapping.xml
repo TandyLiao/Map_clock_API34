@@ -47,7 +47,7 @@
                 android:layout_marginBottom="150dp"
                 android:text=""
                 android:textColor="@color/green"
-                android:textSize="25dp"
+                android:textSize="25sp"
                 android:maxLines="2"
                 app:layout_constraintBottom_toTopOf="@id/txtTime"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -99,7 +99,7 @@
                     android:layout_marginEnd="5dp"
                     android:layout_marginBottom="10dp"
                     android:background="@drawable/btn_additem"
-                    android:text="取消導航"
+                    android:text="取消路線"
                     android:textColor="@color/green"
                     android:textSize="15sp"
                     app:backgroundTint="@null" />

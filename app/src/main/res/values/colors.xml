@@ -13,6 +13,7 @@
     <color name="darkyellow2">#E7D7C2</color>
     <color name="green">#619B8A</color>
     <color name="transparent">#00E6D4BD</color>
+    <color name="transparent_black">#80000000</color> <!-- 半透明黑色，50%的透明度 -->
 
 
     <color name="selected_item_background">#FFCCCB</color>

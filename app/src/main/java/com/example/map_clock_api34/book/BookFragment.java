@@ -526,7 +526,7 @@ public class BookFragment extends Fragment {
     private void changeNotification() {
         if (arrayList.isEmpty()) {
             TextView notification = rootView.findViewById(R.id.textView7);
-            notification.setText("目前還沒有東西喔");
+            notification.setText("目前還沒有路線喔");
         } else {
             TextView notification = rootView.findViewById(R.id.textView7);
             notification.setText("");

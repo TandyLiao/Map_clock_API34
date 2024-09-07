@@ -20,6 +20,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 
 public class CreatLocation_setting extends Fragment {
     View rootView;
+    private DrawerLayout drawerLayout;
 
     SharedViewModel sharedViewModel;
 
@@ -50,6 +52,11 @@ public class CreatLocation_setting extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.setting_creatlocation, container, false);
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -243,6 +250,16 @@ public class CreatLocation_setting extends Fragment {
         super.onResume();
         RecycleViewReset(); // 重置 RecyclerView 的數據
         setupActionBar();   // 重新設置 ActionBar
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -28,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -57,6 +59,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     private Location lastLocation; // 儲存最後的定位資訊
     private View overlayView; // 疊加在視圖上的透明遮罩，用於防止背景互動
     private View rootView;
+    private DrawerLayout drawerLayout;
     private TextView notification; // 用來顯示通知的文字
     private AlertDialog dialog;
 
@@ -139,6 +142,12 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         stationFinder = new BusStationFinderHelper(getActivity(), sharedViewModel, this); // 初始化公車站點查找器
         stationFinder.setToastCallback(this::onToastShown); // 設定 Toast 回調
         stationFinder.findNearbyStations(rootView); // 查找附近站點
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
@@ -255,7 +264,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         View customView = inflater.inflate(R.layout.dialog_bus_fragment, null);
 
         TextView showTitle = customView.findViewById(R.id.txtNote);
-        showTitle.setText(stopName + "站 - 請選擇可搭路線"); // 顯示站名和提示文字
+        showTitle.setText("  "+stopName + "站 "+"\n"+"  "+"請按下按鈕，選擇可抵達的公車"); // 顯示站名和提示文字
 
         LinearLayout routesContainer = customView.findViewById(R.id.routes_container);
 
@@ -295,7 +304,9 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         }
         builder.setView(customView);
 
+
         dialog = builder.create(); // 建立對話框
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.setCanceledOnTouchOutside(false); // 禁止點擊對話框外部時關閉對話框
 
         Button btnCancel = customView.findViewById(R.id.PopupCancel); // 取消按鈕
@@ -350,9 +361,9 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
 
     // 顯示彈出視窗，詢問是否將該站點加入行程
     private void ShowPopupWindow(String stopName, LatLng stopLatLng) {
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_reset_button, null, false);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_select_busstop, null, false);
         PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setWidth(700);
+        popupWindow.setWidth(800);
         popupWindow.setFocusable(false);
         popupWindow.setOutsideTouchable(false);
 
@@ -363,13 +374,13 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
         // 疊加透明遮罩，防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.transparent_black));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
         TextView showNotification = (TextView) view.findViewById(R.id.txtNote); // 取得彈窗的文字視圖
-        showNotification.setTextSize(15);
-        showNotification.setText(stopName + " - 要加入行程中嗎?"); // 顯示站點名稱和提示
+        showNotification.setTextSize(20);
+        showNotification.setText(stopName + "\n"+"要加入行程中嗎?"); // 顯示站點名稱和提示
 
         Button BTNPopup = (Button) view.findViewById(R.id.PopupCancel); // 取消按鈕
         BTNPopup.setOnClickListener(v -> {
@@ -400,7 +411,7 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onToastShown(String message) {
         // 更新通知文字
         if (notification != null && message.equals("路線已更新")) {
-            notification.setText("請選擇下列紅色地標");
+            notification.setText("請選擇下列紅色站牌");
         } else {
             notification.setText("發生錯誤，請關閉再開");
         }
@@ -429,5 +440,15 @@ public class busMapsFragment extends Fragment implements BusStationFinderHelper.
     public void onPause() {
         super.onPause();
         stationFinder.stopSearching(); // 停止查找站點
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
     }
 }

@@ -19,6 +19,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +29,7 @@ import com.example.map_clock_api34.SharedViewModel;
 public class ChangeNoteFragment extends Fragment {
 
     private View rootView;
+    private DrawerLayout drawerLayout;
 
     private SharedViewModel sharedViewModel;
 
@@ -42,6 +44,12 @@ public class ChangeNoteFragment extends Fragment {
         //改尺寸
         title.setTextColor(getResources().getColor(R.color.black)); // 更改文字颜色
         countTextView =rootView.findViewById(R.id.textcount);
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -62,8 +70,10 @@ public class ChangeNoteFragment extends Fragment {
         detailTextView.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(100)
         });
+        // 設置字間距
+        detailTextView.setLetterSpacing(0.1f);
 
-        detailTextView.addTextChangedListener(new LineLimitWatcher(20, detailTextView));
+        detailTextView.addTextChangedListener(new LineLimitWatcher(15, detailTextView));
 
         // 設置 TextWatcher 來監聽輸入變化
         detailTextView.addTextChangedListener(new TextWatcher() {

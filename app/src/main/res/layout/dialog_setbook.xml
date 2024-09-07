@@ -78,12 +78,13 @@
 
         <Button
             android:id="@+id/PopupCancel"
-            android:layout_width="85dp"
-            android:layout_height="40dp"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
             android:layout_marginTop="5dp"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="5dp"
+            android:padding="0dp"
             android:background="@drawable/btn_additem"
             android:text="取消"
             android:textSize="15sp"
@@ -93,12 +94,13 @@
 
         <Button
             android:id="@+id/Popupsure"
-            android:layout_width="85dp"
-            android:layout_height="40dp"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
             android:layout_marginTop="5dp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
             android:layout_marginBottom="5dp"
+            android:padding="0dp"
             android:background="@drawable/btn_additem"
             android:text="確認"
             android:textSize="15sp"
