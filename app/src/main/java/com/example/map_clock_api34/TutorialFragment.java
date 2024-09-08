@@ -54,6 +54,12 @@ public class TutorialFragment extends Fragment {
             count++; // 增加頁數
             getImage(); // 根據當前頁數載入對應的圖片
         });
+        // 設置上一頁按鈕的點擊事件
+        Button pre = rootView.findViewById(R.id.prepage);
+        pre.setOnClickListener(v -> {
+            count--; // 增加頁數
+            getImage(); // 根據當前頁數載入對應的圖片
+        });
 
         // 根據 SharedPreferences 中的頁面資訊設定要顯示的圖片集
         switch (page) {
