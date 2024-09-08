@@ -67,4 +67,12 @@ public class EndMappingFragment extends Fragment {
             getActivity().getSupportFragmentManager().popBackStack();
         });
     }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // 解鎖 Drawer 以便其他頁面正常使用
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
+    }
 }
