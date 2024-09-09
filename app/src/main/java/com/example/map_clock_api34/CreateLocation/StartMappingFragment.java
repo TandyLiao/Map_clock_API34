@@ -2,6 +2,7 @@ package com.example.map_clock_api34.CreateLocation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -12,6 +13,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -26,6 +28,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
 import com.example.map_clock_api34.Distance;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
@@ -36,8 +39,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import android.content.Intent;
 import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -94,7 +99,7 @@ public class StartMappingFragment extends Fragment {
 
         // 檢查是否能取得當前位置，若無法，顯示錯誤訊息
         if (userLocation == null) {
-            makeToast("無法取得當前位置，請查看您的GPS設備",1000);
+            makeToast("無法取得當前位置，請查看您的GPS設備", 1000);
             getActivity().getSupportFragmentManager().popBackStack();
             return null;
         }
@@ -175,24 +180,10 @@ public class StartMappingFragment extends Fragment {
         popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
-        CardView cardView = new CardView(getContext());
-        cardView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewnote_shape);
-        cardView.setBackground(drawable);
-        cardView.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.lightyellow));
-        cardView.setContentPadding(0, 5, 0, 0);
-
-        TextView noteTextView = new TextView(getContext());
-        noteTextView.setTextSize(15);
-        noteTextView.setLetterSpacing(0.1f);
-        noteTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        noteTextView.setPadding(30,10,10,10);
-
         // 在底部加上覆蓋層，防止點擊其他區域
         overlayView = new View(getContext());
         overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.transparent_black));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent_black));
         overlayView.setClickable(true);
         ((ViewGroup) rootView).addView(overlayView);
 
@@ -201,6 +192,23 @@ public class StartMappingFragment extends Fragment {
         title.setTextSize(20);
 
         title.setText("即將抵達：\n" + destinationName[destinationIndex]);
+        //建立記事的cardview
+        CardView cardView = new CardView(getContext());
+        cardView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewnote_shape);
+        cardView.setBackground(drawable);
+        cardView.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.lightyellow));
+        cardView.setContentPadding(0, 5, 0, 0);
+
+        //建立文字顯示記事內容
+        TextView noteTextView = new TextView(getContext());
+        noteTextView.setTextSize(15);
+        noteTextView.setLetterSpacing(0.1f);
+        noteTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        noteTextView.setPadding(30, 10, 10, 10);
+
+        //判斷是否需要記事提醒，需要的話將記事內容放到cardview並顯示
         if (sharedViewModel.getNote(destinationIndex) != null) {
             title.setText("即將抵達：\n" + destinationName[destinationIndex]);
             //title.setText("即將抵達：\n" + destinationName[destinationIndex] + "\n\n代辦事項：\n" + sharedViewModel.getNote(destinationIndex));
@@ -290,7 +298,7 @@ public class StartMappingFragment extends Fragment {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
             }
             if (nowIndex == 0) {
-                makeToast("這是第一個地點囉",1000);
+                makeToast("這是第一個地點囉", 1000);
             }
         });
 
@@ -321,7 +329,7 @@ public class StartMappingFragment extends Fragment {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
             }
             if (nowIndex == sharedViewModel.getLocationCount()) {
-                makeToast("這是最後一個地點囉",1000);
+                makeToast("這是最後一個地點囉", 1000);
             }
         });
     }
@@ -454,12 +462,5 @@ public class StartMappingFragment extends Fragment {
         toast.show();
         new Handler().postDelayed(toast::cancel, durationInMillis);
     }
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        // 解鎖 Drawer 以便其他頁面正常使用
-        if (drawerLayout != null) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        }
-    }
+
 }
