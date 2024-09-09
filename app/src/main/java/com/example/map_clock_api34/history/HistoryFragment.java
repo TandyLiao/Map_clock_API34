@@ -155,6 +155,7 @@ public class HistoryFragment extends Fragment {
                 listAdapterHistory.setEditMode(isEdit, isEdit); // 更新編輯模式
                 if (isDelete) {
                     showPopupWindowForDelete(); // 顯示刪除確認彈窗
+
                 } else {
                     listAdapterHistory.clearSelections(); // 清除選擇
                     updateButtonState(); // 更新按鈕狀態
@@ -526,6 +527,7 @@ public class HistoryFragment extends Fragment {
 
         Button btnsure = (Button) view.findViewById(R.id.Popupsure);
         btnsure.setOnClickListener(v -> {
+            listAdapterHistory.setEditMode(false,false);
             deleteItemFromDB();
             popupWindow.dismiss();
             removeOverlayView();
