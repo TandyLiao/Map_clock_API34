@@ -10,7 +10,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
     // 定義資料庫名稱
     private static final String DATABASE_NAME = "map_clock_book";
     // 定義資料庫版本號，升級資料庫時使用
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 10;
 
     public BookDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -63,7 +63,6 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LOCATION_ID = "location_id";  // 位置 ID
         public static final String COLUMN_ALARM_NAME = "alarm_name";    // 鬧鐘名稱
         public static final String COLUMN_ARRANGED_ID = "arranged_id";  // 安排順序 ID
-        public static final String COLUMN_SETTING_ID = "setting_id";    // 設定 ID
 
         //創建 BookTable 表
         public static final String CREATE_TABLE =
@@ -73,7 +72,6 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_LOCATION_ID + " INTEGER,"  // 位置 ID
                         + COLUMN_ALARM_NAME + " TEXT,"      // 鬧鐘名稱
                         + COLUMN_ARRANGED_ID + " TEXT,"     // 安排順序 ID
-                        + COLUMN_SETTING_ID + " INTEGER,"   // 設定 ID
                         + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable2.TABLE_NAME + "(" + LocationTable2.COLUMN_LOCATION_ID + ") ON DELETE CASCADE"  // 外鍵約束，參考 LocationTable2 表，且設置聯級刪除
                         + ")";
     }

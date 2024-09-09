@@ -12,7 +12,7 @@ public class HistoryDatabaseHelper extends SQLiteOpenHelper {
 
     // 定義資料庫名稱及版本
     private static final String DATABASE_NAME = "map_clock_database";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 15;
 
     // 建構子，初始化資料庫
     public HistoryDatabaseHelper(Context context) {
@@ -79,7 +79,6 @@ public class HistoryDatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_LOCATION_ID = "location_id";  // 位置 ID
         public static final String COLUMN_ALARM_NAME = "alarm_name";    // 鬧鐘名稱
         public static final String COLUMN_ARRANGED_ID = "arranged_id";  // 安排 ID
-        public static final String COLUMN_SETTING_ID = "setting_id";    // 設定 ID
 
         // 創建歷史紀錄表的 SQL 語句
         public static final String CREATE_TABLE =
@@ -89,7 +88,6 @@ public class HistoryDatabaseHelper extends SQLiteOpenHelper {
                         + COLUMN_LOCATION_ID + " INTEGER,"
                         + COLUMN_ALARM_NAME + " TEXT,"
                         + COLUMN_ARRANGED_ID + " TEXT,"
-                        + COLUMN_SETTING_ID + " INTEGER,"
                         + "FOREIGN KEY(" + COLUMN_LOCATION_ID + ") REFERENCES " + LocationTable.TABLE_NAME + "(" + LocationTable.COLUMN_LOCATION_ID + ") ON DELETE CASCADE"
                         + ")";
     }
