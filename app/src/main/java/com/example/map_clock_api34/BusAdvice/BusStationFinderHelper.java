@@ -36,15 +36,15 @@ public class BusStationFinderHelper {
     private final Context context;
     private final SharedViewModel sharedViewModel;
 
-    private final OkHttpClient client; // OkHttp 用來發送 HTTP 請求
-    private final AuthHelper authHelper; // 認證輔助工具
-    private final Handler mainHandler; // 用來在主執行緒執行任務的 Handler
+    private final OkHttpClient client;      // OkHttp 用來發送 HTTP 請求
+    private final AuthHelper authHelper;    // 認證輔助工具
+    private final Handler mainHandler;      // 用來在主執行緒執行任務的 Handler
     private final GoogleDistanceHelper googleDistanceHelper; // Google 距離輔助工具
 
     private CityInEnglishHelper cityTranslate; // 城市名稱翻譯輔助工具
 
-    private List<BusStation> secondNearByStop = new ArrayList<>(); // 附近的站牌
-    private List<BusStation> secondDesStop = new ArrayList<>(); // 目的地站牌
+    private List<BusStation> secondNearByStop = new ArrayList<>();  // 附近的站牌
+    private List<BusStation> secondDesStop = new ArrayList<>();     // 目的地站牌
 
     // 自動更新的 Handler
     private final Handler updateHandler;
@@ -52,8 +52,8 @@ public class BusStationFinderHelper {
     private static final int UPDATE_INTERVAL = 60000; // 自動更新間隔，1分鐘
 
     // 請求速率限制
-    private static final int RATE_LIMIT = 50; // 每秒最多請求次數
-    private static final long TIME_WINDOW = 1000L; // 1 秒為單位
+    private static final int RATE_LIMIT = 50;       // 每秒最多請求次數
+    private static final long TIME_WINDOW = 1000L;  // 1 秒為單位
     private int requestCount = 0;
     private final Handler rateLimitHandler = new Handler(Looper.getMainLooper());
     private static final long REQUEST_DELAY = 2000L; // 請求之間的延遲時間（2秒）
@@ -190,14 +190,14 @@ public class BusStationFinderHelper {
                     String userStopsResponse = response.body().string(); // 取得回應內容
                     Log.d("BusStationFinderHelper", "User Stops Response: " + userStopsResponse);
 
-                    // 解析使用者附近和目的地的站牌
+                    // 由於附近地區和目的地地區是一起送出並回傳的，所以需另外解析並分開使用者附近和目的地的站牌
                     List<BusStation> firstCurrentList = parseStops(userStopsResponse, currentLat, currentLon);
                     List<BusStation> firstDesList = parseStops(userStopsResponse, destLat, destLon);
 
                     secondNearByStop = new ArrayList<>();
                     secondDesStop = new ArrayList<>();
 
-                    // 當篩選完成時的回調
+                    // 當206行執行完後，篩選完成時的回調，再進行路線的查詢
                     Runnable onCompletion = () -> {
                         mainHandler.postDelayed(() -> findRoutes(view, accessToken, cityName, secondNearByStop, secondDesStop), REQUEST_DELAY);
                     };
@@ -415,7 +415,7 @@ public class BusStationFinderHelper {
                             routeLatLngs.add(new BusStation.LatLng(stopLat, stopLon));
                         }
 
-                        // 比對起點和終點站牌是否出現在路線的順序中
+                        // 比對起點和終點站牌是否出現在路線的順序中，只要起點站站續小於終點站站續，就是有效站牌
                         for (BusStation startStation : nearbyStops) {
                             Map<BusStation.LatLng, String> destinationStopsMap = new HashMap<>();
 
@@ -466,19 +466,6 @@ public class BusStationFinderHelper {
 
         // 如果起點站在終點站之前出現，則為有效路線
         return startIndex != -1 && endIndex != -1 && startIndex < endIndex;
-    }
-
-
-    // 判斷站牌是否位於指定路線的站點中
-    private boolean isNearbyStop(BusStation station, Map<BusStation.LatLng, String> routeStops) {
-        double epsilon = 0.0001; // 設定允許的經緯度誤差
-        for (Map.Entry<BusStation.LatLng, String> entry : routeStops.entrySet()) {
-            BusStation.LatLng latLng = entry.getKey();
-            if (Math.abs(station.getStopLat() - latLng.getLat()) < epsilon && Math.abs(station.getStopLon() - latLng.getLon()) < epsilon) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // 查找到站時間
