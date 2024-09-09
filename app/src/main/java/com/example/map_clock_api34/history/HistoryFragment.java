@@ -110,7 +110,7 @@ public class HistoryFragment extends Fragment {
         setupActionBar(); // 設置 ActionBar
         setupButtons(); // 設置按鈕
         setupRecyclerViews(); // 設置 RecyclerView
-
+        updateButtonState();
         return rootView; // 返回主視圖
     }
 
@@ -310,6 +310,8 @@ public class HistoryFragment extends Fragment {
         } else {
             TextView notification = rootView.findViewById(R.id.textView5);
             notification.setText("");
+
+
         }
 
         boolean hasItems = arrayList.isEmpty();
@@ -322,21 +324,19 @@ public class HistoryFragment extends Fragment {
         }
 
         // 根據是否有選擇的項目，更新按鈕的啟用狀態及顏色
-        if (hasItems) {
-            btnEdit.setEnabled(true);
+        if (arrayList.isEmpty()) {
+            btnEdit.setEnabled(false); // 禁用編輯按鈕
+            btnEdit.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
+            btnEdit.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
             btnSelect.setEnabled(false);
             btnClearAll.setEnabled(false);
             btnClearAll.setVisibility(View.INVISIBLE);
-            btnEdit.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-            btnSelect.setTextColor(ContextCompat.getColor(requireContext(), R.color.lightgreen));
-            btnEdit.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
-            btnSelect.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
-            btnClearAll.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_unclickable));
         } else {
-            btnEdit.setEnabled(true);
+            btnEdit.setEnabled(true); // 啟用編輯按鈕
             btnEdit.setTextColor(ContextCompat.getColor(requireContext(), R.color.darkgreen));
             btnEdit.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.btn_additem));
         }
+
 
         if (!isEdit) {
             btnEdit.setText("編輯");

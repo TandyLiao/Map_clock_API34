@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +32,7 @@ public class EndMappingFragment extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+
         // 鎖定不能左滑漢堡選單
         if (drawerLayout != null) {
             Log.d("EndMappingFragment", "DrawerLayout lock mode set to LOCKED_CLOSED");

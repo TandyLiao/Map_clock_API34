@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.drawable.ColorDrawable;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -25,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -129,12 +132,9 @@ public class StartMappingFragment extends Fragment {
 
         // 開始背景執行位置更新
         startLocationUpdates();
+        // 初始化 ActionBar
+        setupActionBar();
 
-        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
-        // 鎖定不能左滑漢堡選單
-        if (drawerLayout != null) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        }
         return rootView;
     }
 
@@ -438,6 +438,73 @@ public class StartMappingFragment extends Fragment {
         }
 
         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+    }
+
+    private void setupActionBar(){
+
+        drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+        // 鎖定不能左滑漢堡選單
+        if (drawerLayout != null) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
+        // 設定 ToolBar
+        androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(null);  // 隱藏漢堡選單
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();  // 隱藏 ActionBar
+            actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
+            actionBar.setDisplayShowTitleEnabled(false);  // 隱藏預設標題
+            actionBar.setDisplayHomeAsUpEnabled(false);   // 隱藏左上角圖示
+            actionBar.setDisplayShowCustomEnabled(true);  // 啟用自定義視圖
+        }
+
+        // 創建自定義的 CardView 作為 ActionBar 標題
+        CardView cardViewTitle = new CardView(requireContext());
+        cardViewTitle.setLayoutParams(new CardView.LayoutParams(
+                ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT
+        ));
+        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
+        cardViewTitle.setBackground(drawable);
+
+        // 創建 LinearLayout 放置圖示和標題
+        LinearLayout linearLayout = new LinearLayout(requireContext());
+        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
+        ));
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        // 設置右上角的小圖示
+        ImageView bookmark = new ImageView(requireContext());
+        bookmark.setImageResource(R.drawable.route);  // 替換為你的圖示資源
+        bookmark.setPadding(10, 10, 5, 10);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                100, 100  // 設置寬度與高度
+        );
+        params.setMarginStart(10);  // 設置左邊距
+        bookmark.setLayoutParams(params);
+
+        // 創建標題文字
+        TextView bookTitle = new TextView(requireContext());
+        bookTitle.setText("路線規劃");  // 設定標題文字
+        bookTitle.setTextSize(15);  // 設定文字大小
+        bookTitle.setTextColor(getResources().getColor(R.color.green));  // 設定文字顏色
+        bookTitle.setPadding(10, 10, 30, 10);  // 設置內邊距
+
+        // 將圖示和標題添加到 LinearLayout
+        linearLayout.addView(bookmark);
+        linearLayout.addView(bookTitle);
+
+        // 將 LinearLayout 添加到 CardView
+        cardViewTitle.addView(linearLayout);
+
+        // 設置自定義視圖到 ActionBar
+        if (actionBar != null) {
+            actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
+                    ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.END
+            ));
+            actionBar.show();  // 顯示 ActionBar
+        }
     }
 
     // 當 Fragment 被銷毀時觸發
