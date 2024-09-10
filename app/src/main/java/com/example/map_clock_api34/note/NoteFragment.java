@@ -68,7 +68,7 @@ public class NoteFragment extends Fragment {
         {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",4);
-            //editor.putBoolean("noteLogin",true);
+            editor.putBoolean("noteLogin",true);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();

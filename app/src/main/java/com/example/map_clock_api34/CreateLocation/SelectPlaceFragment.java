@@ -365,6 +365,15 @@ public class SelectPlaceFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
+        // 停止位置更新，並釋放資源
+        if (fusedLocationProviderClient != null) {
+            fusedLocationProviderClient.flushLocations(); // 或者移除位置更新
+        }
+
+        // 停止使用 Google Places API
+        if (start_autocompleteSupportFragment != null) {
+            start_autocompleteSupportFragment.setOnPlaceSelectedListener(null); // 停止監聽
+        }
         drawerLayout = getActivity().findViewById(R.id.drawerLayout);
         // 解鎖 Drawer 以便其他頁面正常使用
         if (drawerLayout != null) {

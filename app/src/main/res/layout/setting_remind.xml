@@ -176,8 +176,40 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardView3_2"
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginBottom="15dp"
+                            app:cardBackgroundColor="@color/darkyellow2"
+                            app:cardCornerRadius="20dp">
+
+                            <Button
+                                android:id="@+id/vibrate_testt"
+                                android:layout_width="match_parent"
+                                android:layout_height="50dp"
+                                android:layout_marginStart="30dp"
+                                android:layout_marginTop="0dp"
+                                android:background="@android:color/transparent"
+                                android:gravity="start"
+                                android:text="@string/set_remind5"
+                                android:textColor="@color/green"
+                                android:textSize="25dp"
+
+                                app:backgroundTint="@null" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardView3_2"
+                        android:id="@+id/cardView3_3"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
                         android:layout_marginStart="10dp"
@@ -188,14 +220,14 @@
                         app:cardCornerRadius="20dp">
 
                         <Button
-                            android:id="@+id/vibrate_testt"
+                            android:id="@+id/clear_share_preference"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_marginStart="30dp"
                             android:layout_marginTop="0dp"
                             android:background="@android:color/transparent"
                             android:gravity="start"
-                            android:text="@string/set_remind5"
+                            android:text="教學頁面重置"
                             android:textColor="@color/green"
                             android:textSize="25dp"
 

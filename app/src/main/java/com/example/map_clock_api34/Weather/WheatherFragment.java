@@ -1,5 +1,8 @@
 package com.example.map_clock_api34.Weather;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -18,6 +21,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.TutorialFragment;
 import com.example.map_clock_api34.Weather.WeatherListAdapter.ListAdapterWeather;
 
 import java.util.ArrayList;
@@ -47,6 +52,24 @@ public class WheatherFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.weather_fragment_weather, container, false);
+
+        // 檢查是否需要顯示教學頁面
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("WeatherLogin", false);
+
+        if (!isLoggedIn) {
+            // 如果第一次進入，顯示教學頁面
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("WhichPage", 6);
+            editor.putBoolean("WeatherLogin", true);
+            editor.apply();
+            TutorialFragment tutorialFragment = new TutorialFragment();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, tutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+
         drawerLayout = getActivity().findViewById(R.id.drawerLayout);
         // 鎖定不能左滑漢堡選單
         if (drawerLayout != null) {

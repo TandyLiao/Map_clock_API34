@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -587,9 +590,25 @@ public class BusStationFinderHelper {
     }
     // 停止查找和更新
     public void stopSearching() {
-        client.dispatcher().cancelAll(); // 取消所有正在進行的請求
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            try {
+                // 清空連接池和關閉線程池
+                client.dispatcher().cancelAll(); // 取消所有正在進行的請求
+                client.connectionPool().evictAll(); // 清空連接池
+
+                // 關閉線程池並等待其關閉
+                client.dispatcher().executorService().shutdown();
+                if (!client.dispatcher().executorService().awaitTermination(5, TimeUnit.SECONDS)) {
+                    client.dispatcher().executorService().shutdownNow(); // 強制關閉
+                }
+            } catch (Exception e) {
+                Log.e("BusStationFinderHelper", "Error while shutting down: " + e.getMessage());
+            }
+        });
         stopUpdating(); // 停止自動更新
     }
+
 
     // 顯示 Toast 訊息
     private void showToast(String message) {

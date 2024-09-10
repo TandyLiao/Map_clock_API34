@@ -114,19 +114,15 @@ public class CreateLocationFragment extends Fragment {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("CreateLogin", false);
 
-
-        Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
         if (!isLoggedIn) {
             // 如果第一次進入，顯示教學頁面
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage", 0);
-            //editor.putBoolean("CreateLogin", true);
+            editor.putInt("WhichPage", 5);
+            editor.putBoolean("CreateLogin", true);
             editor.apply();
-
             TutorialFragment tutorialFragment = new TutorialFragment();
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.hide(currentFragment);
-            transaction.add(R.id.fl_container, tutorialFragment);
+            transaction.replace(R.id.fl_container, tutorialFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         }

@@ -89,11 +89,10 @@ public class HistoryFragment extends Fragment {
 
         Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
         if(isLoggedIn==false)
-        //isLoggedIn==false
         {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage",1);
-            //editor.putBoolean("HistoryLogin",true);
+            editor.putBoolean("HistoryLogin",true);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();

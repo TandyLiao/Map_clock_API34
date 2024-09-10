@@ -18,6 +18,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 
 public class TutorialFragment extends Fragment {
 
@@ -131,6 +134,7 @@ public class TutorialFragment extends Fragment {
         if (id == 0) {
             // 如果資源 ID 為 0，表示圖片不存在，回到上一頁
             getActivity().getSupportFragmentManager().popBackStack();
+            
         } else {
             // 否則，設定 ImageView 顯示該圖片
             // 設定圖片

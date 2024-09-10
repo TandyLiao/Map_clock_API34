@@ -2,8 +2,10 @@ package com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter;
 
 // 引入所需的 Android 和其他庫
 import static android.app.PendingIntent.getActivity;
+import static android.content.Context.MODE_PRIVATE;
 
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -27,12 +29,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
+import com.example.map_clock_api34.TutorialFragment;
 import com.example.map_clock_api34.Weather.WeatherAdviceHelper;
 import com.example.map_clock_api34.Weather.WeatherService;
 import com.example.map_clock_api34.Weather.WheatherFragment;
@@ -133,10 +137,28 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 makeToast("還沒有選擇地點喔",1000);
                 return;
             }
-            busMapsFragment busFragment = new busMapsFragment();
-            fragmentTransaction.replace(R.id.fl_container, busFragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
+            // 檢查是否需要顯示教學頁面
+            SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            boolean isLoggedIn = sharedPreferences.getBoolean("BusLogin", false);
+
+            if (!isLoggedIn) {
+                // 如果第一次進入，顯示教學頁面
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("WhichPage", 0);
+                editor.putBoolean("BusLogin", true);
+                editor.apply();
+
+                TutorialFragment tutorialFragment = new TutorialFragment();
+                fragmentTransaction.replace(R.id.fl_container, tutorialFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }else{
+                busMapsFragment busFragment = new busMapsFragment();
+                fragmentTransaction.replace(R.id.fl_container, busFragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+
 
         } else if (position == 4) {  // 第五個項目 "天氣"
             if (sharedViewModel.getLocationCount() == -1) {

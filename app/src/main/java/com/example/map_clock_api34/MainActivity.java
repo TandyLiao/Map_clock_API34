@@ -85,17 +85,10 @@ public class MainActivity extends AppCompatActivity {
         if (intent != null && intent.hasExtra("show_start_mapping")) {
             boolean showStartMapping = intent.getBooleanExtra("show_start_mapping", false);
             if (showStartMapping) {
-                Log.d("MainActivity", "onCreate: 顯示 StartMapping Fragment");
                 showStartMappingFragment(); // 顯示 StartMapping Fragment
+                Log.d("CHECKCC","ACTiVITYPASS");
             }
         }
-
-        // 頁面首次加載時初始化並顯示 HomeFragment（地圖頁面）
-        if (createLocationFragment == null) {
-            createLocationFragment = new CreateLocationFragment();
-        }
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fl_container, createLocationFragment, "map").commit();
 
         // 檢查是否有保存的狀態，若無則加載 HomeFragment
         if (savedInstanceState == null) {

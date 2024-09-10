@@ -1,5 +1,7 @@
 package com.example.map_clock_api34.setting;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -74,6 +76,20 @@ public class SettingRemind extends Fragment {
             } else {
                 stopRingtone(); // 停止鈴聲
             }
+        });
+
+        Button clearSharePreference = rootView.findViewById(R.id.clear_share_preference);
+        clearSharePreference.setOnClickListener(v ->{
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("BookLogin", false);
+            editor.putBoolean("CreateLogin", false);
+            editor.putBoolean("BusLogin", false);
+            editor.putBoolean("HistoryLogin",false);
+            editor.putBoolean("noteLogin",false);
+            editor.putBoolean("settingLogin", false);
+            editor.putBoolean("WeatherLogin", false);
+            editor.apply();
         });
 
         // 鈴聲選擇按鈕的事件處理

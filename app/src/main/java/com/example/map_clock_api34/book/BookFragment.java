@@ -96,13 +96,12 @@ public class BookFragment extends Fragment {
         // 檢查是否需要顯示教學頁面
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("BookLogin", false);
-
         Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
         if (!isLoggedIn) {
             // 如果第一次進入，顯示教學頁面
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("WhichPage", 2);
-            //editor.putBoolean("BookLogin", true);
+            editor.putBoolean("BookLogin", true);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();

@@ -52,6 +52,10 @@ public class WeatherService {
                 throw new IOException("Unexpected code " + response); // 異常處理
             }
             return response.body().string();
+        } finally {
+            // 清空 OkHttp 連接池並關閉線程池
+            client.connectionPool().evictAll();  // 清空連接池
+            client.dispatcher().executorService().shutdown();  // 關閉線程池
         }
     }
 
