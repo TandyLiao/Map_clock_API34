@@ -120,7 +120,7 @@ public class LocationService extends Service {
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("地圖鬧鐘正在運行")
                 .setContentText("我們正在背景中運行，監控您的位置變化。")
-                .setSmallIcon(R.drawable.appicon_tem6) // 設置通知的小圖示
+                .setSmallIcon(R.drawable.appicon_tem8) // 設置通知的小圖示
                 .setContentIntent(pendingIntent)
                 .build();
 
@@ -365,7 +365,7 @@ public class LocationService extends Service {
 
             String fullMessage = (note[temp] == null) ? "即將抵達: " + destinationName[temp] : "即將抵達：\n" + destinationName[temp] + "\n\n記事內容：\n" + note[temp];
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.appicon_tem6)
+                    .setSmallIcon(R.drawable.appicon_tem8)
                     .setContentTitle("地圖鬧鐘")
                     .setContentText(fullMessage)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)

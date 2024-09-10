@@ -81,6 +81,17 @@ public class TutorialFragment extends Fragment {
                 drawablename = "note_";
                 getImage(); // 載入圖片
                 break;
+            // 5 為直達公車路線
+            case 5:
+                drawablename = "bus_";
+                getImage(); // 載入圖片
+                break;
+            // 6 為天氣頁面
+            case 6:
+                drawablename = "weather_";
+                getImage(); // 載入圖片
+                break;
+
             default:
                 Log.d("tutorial", "Page not found"); // 如果找不到對應的頁面號，則輸出錯誤日誌
                 break;

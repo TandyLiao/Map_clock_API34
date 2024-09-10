@@ -114,6 +114,7 @@ public class CreateLocationFragment extends Fragment {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("CreateLogin", false);
 
+
         Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.fl_container);
         if (!isLoggedIn) {
             // 如果第一次進入，顯示教學頁面
