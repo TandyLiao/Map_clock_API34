@@ -144,7 +144,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             if (!isLoggedIn) {
                 // 如果第一次進入，顯示教學頁面
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt("WhichPage", 0);
+                editor.putInt("WhichPage", 5);
                 editor.putBoolean("BusLogin", true);
                 editor.apply();
 

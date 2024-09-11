@@ -117,7 +117,7 @@ public class CreateLocationFragment extends Fragment {
         if (!isLoggedIn) {
             // 如果第一次進入，顯示教學頁面
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage", 5);
+            editor.putInt("WhichPage", 0);
             editor.putBoolean("CreateLogin", true);
             editor.apply();
             TutorialFragment tutorialFragment = new TutorialFragment();
