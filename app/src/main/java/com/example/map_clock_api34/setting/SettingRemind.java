@@ -5,26 +5,20 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -38,11 +32,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
 import com.example.map_clock_api34.R;
-
-import java.util.Locale;
+import com.example.map_clock_api34.TutorialFragment;
 
 public class SettingRemind extends Fragment {
 
@@ -60,7 +54,7 @@ public class SettingRemind extends Fragment {
         mAudioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE); // 初始化音頻管理器
 
         // 鈴聲選擇按鈕
-        Button chooseButton = rootView.findViewById(R.id.choose_setting);
+        Button chooseButton = rootView.findViewById(R.id.btn_createLocation);
         // 震動測試按鈕
         Button vibrateTest = rootView.findViewById(R.id.vibrate_testt);
 
@@ -102,13 +96,12 @@ public class SettingRemind extends Fragment {
 
         // 震動測試按鈕的事件處理
         vibrateTest.setOnClickListener(v -> {
-            Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE); // 取得震動服務
-            if (vibrator == null || !vibrator.hasVibrator()) {
-                Toast.makeText(requireContext(), "設備不支持震動功能", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            long[] vibrationPattern = {0, 1000, 1000, 1500, 1000, 2000}; // 震動模式
-            vibrator.vibrate(vibrationPattern, -1); // 開始震動
+
+            WhichTutorialFragment whichTutorialFragment = new WhichTutorialFragment();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fl_container, whichTutorialFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         });
 
         // 震動開關

@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:text="@string/creatlocation1"
+            android:text="請按「新增」添加地點"
             android:textColor="@color/lightgreen"
             android:textSize="30sp"
             app:layout_constraintBottom_toBottomOf="@+id/recycleViewRouteBook"

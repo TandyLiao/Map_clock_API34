@@ -361,7 +361,7 @@ public class BookCreateLocation extends Fragment {
     private void changeNotification() {
         if (arrayList.isEmpty()) {
             TextView notification = rootView.findViewById(R.id.textView);
-            notification.setText("@string/creatlocation1");
+            notification.setText("請按「新增」添加地點");
         } else {
             TextView notification = rootView.findViewById(R.id.textView);
             notification.setText("");

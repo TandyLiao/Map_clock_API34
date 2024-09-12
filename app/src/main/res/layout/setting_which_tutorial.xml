@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lightyellow">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Content goes here -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="5dp"
+                app:cardBackgroundColor="@color/darkyellow"
+                app:cardCornerRadius="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- First Card -->
+                    <TextView
+                        android:id="@+id/texttt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="45dp"
+                        android:layout_marginTop="10dp"
+                        android:text="教學頁面"
+                        android:textColor="@color/green"
+                        android:textSize="24dp" />
+
+                    <!-- Second Card -->
+
+                    <!-- Third Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_createLocation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="路線規劃"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_note"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="記事"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_5"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_locationSetting"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="地點設定"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_6"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_findBus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="直達公車查詢"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_7"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_findWeather"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="天氣"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_8"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_book"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="收藏路線"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardView1_9"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="5dp"
+                        app:cardBackgroundColor="@color/darkyellow2"
+                        app:cardCornerRadius="20dp">
+
+                        <Button
+                            android:id="@+id/btn_history"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/transparent"
+                            android:gravity="start"
+                            android:text="歷史紀錄"
+                            android:textColor="@color/green"
+                            android:textSize="25dp"
+
+                            app:backgroundTint="@null" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
