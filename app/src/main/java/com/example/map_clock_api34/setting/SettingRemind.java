@@ -28,9 +28,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
@@ -43,6 +46,9 @@ public class SettingRemind extends Fragment {
     private static final int RINGTONE_PICKER_REQUEST_CODE = 1002;
 
     View rootView;
+    private Toolbar toolbar; // 側邊選單的開關
+    private DrawerLayout drawerLayout;      // 抽屜佈局
+    private ActionBarDrawerToggle toggle;   // 側邊選單的開關
 
     private Ringtone mRingtone; // 用於播放系統鈴聲
     private AudioManager mAudioManager; // 用於管理音頻的 AudioManager
@@ -100,6 +106,11 @@ public class SettingRemind extends Fragment {
                 stopVibrate(); // 停止震動
             }
         });
+
+        if (getActivity() != null) {
+            drawerLayout = getActivity().findViewById(R.id.drawerLayout);
+            toolbar = requireActivity().findViewById(R.id.toolbar);
+        }
 
         setupActionBar(); // 設置自定義 ActionBar
         updateButtonLabels(); // 更新按鈕標籤
@@ -193,66 +204,85 @@ public class SettingRemind extends Fragment {
     private void setupActionBar() {
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.hide(); // 隱藏原有的 ActionBar
-            actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
-        }
+            if (drawerLayout != null) {
+                if (toggle == null) {
+                    toggle = new ActionBarDrawerToggle(requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+                    drawerLayout.addDrawerListener(toggle);
+                    toggle.syncState();
+                }
+                toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
 
-        // 創建自定義的 ActionBar 視圖
-        CardView cardViewTitle = new CardView(requireContext());
-        cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
-        Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewTitle.setBackground(drawable);
 
-        // 創建 LinearLayout 用於存放圖標和標題
-        LinearLayout linearLayout = new LinearLayout(requireContext());
-        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL); // 設置水平排列
+                // 創建自定義的 ActionBar 視圖
+                CardView cardViewTitle = new CardView(requireContext());
+                cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+                Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
+                cardViewTitle.setBackground(drawable);
 
-        // 設置圖標
-        ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.setting1);
-        mark.setPadding(10, 10, 5, 10);
+                // 創建 LinearLayout 用於存放圖標和標題
+                LinearLayout linearLayout = new LinearLayout(requireContext());
+                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT
+                ));
+                linearLayout.setOrientation(LinearLayout.HORIZONTAL); // 設置水平排列
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, 100
-        );
-        params.setMarginStart(10);
-        mark.setLayoutParams(params);
+                // 設置圖標
+                ImageView mark = new ImageView(requireContext());
+                mark.setImageResource(R.drawable.setting1);
+                mark.setPadding(10, 10, 5, 10);
 
-        // 設置標題
-        TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("設定");
-        bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green));
-        bookTitle.setPadding(10, 10, 30, 10);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        100, 100
+                );
+                params.setMarginStart(10);
+                mark.setLayoutParams(params);
 
-        // 將圖標和標題添加到 LinearLayout 中
-        linearLayout.addView(mark);
-        linearLayout.addView(bookTitle);
-        cardViewTitle.addView(linearLayout);
+                // 設置標題
+                TextView bookTitle = new TextView(requireContext());
+                bookTitle.setText("設定");
+                bookTitle.setTextSize(15);
+                bookTitle.setTextColor(getResources().getColor(R.color.green));
+                bookTitle.setPadding(10, 10, 30, 10);
 
-        // 設置自定義的 ActionBar
-        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隱藏原有標題
-            actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    Gravity.END
-            ));
-            actionBar.show(); // 顯示 ActionBar
+                // 將圖標和標題添加到 LinearLayout 中
+                linearLayout.addView(mark);
+                linearLayout.addView(bookTitle);
+                cardViewTitle.addView(linearLayout);
+
+                // 設置自定義的 ActionBar
+                actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+                if (actionBar != null) {
+                    actionBar.setDisplayShowTitleEnabled(false); // 隱藏原有標題
+                    actionBar.setDisplayShowCustomEnabled(true);
+                    actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
+                            ActionBar.LayoutParams.WRAP_CONTENT,
+                            ActionBar.LayoutParams.WRAP_CONTENT,
+                            Gravity.END
+                    ));
+                    actionBar.show(); // 顯示 ActionBar
+                }
+
+            }
         }
     }
+    // 設置側邊欄
+    private void setupNavigationDrawer() {
+        drawerLayout = requireActivity().findViewById(R.id.drawerLayout);
+        toolbar = requireActivity().findViewById(R.id.toolbar);
+        toggle = new ActionBarDrawerToggle(requireActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.green));
+    }
+
 
     @Override
     public void onResume() {
         super.onResume();
         updateButtonLabels();
-        setupActionBar(); // 設置自定義 ActionBar
+        setupActionBar();   // 設置工具列
+        setupNavigationDrawer();    // 設置側邊欄
     }
 
     @Override

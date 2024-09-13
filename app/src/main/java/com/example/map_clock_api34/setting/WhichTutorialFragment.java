@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -30,6 +31,8 @@ import com.example.map_clock_api34.TutorialFragment;
 public class WhichTutorialFragment extends Fragment {
 
     View rootView;
+
+    private ActionBar actionBar;
 
     @Nullable
     @Override
@@ -44,9 +47,9 @@ public class WhichTutorialFragment extends Fragment {
         return rootView;
     }
 
-    private void setupButton(){
+    private void setupButton() {
         Button btn_createLocation = rootView.findViewById(R.id.btn_createLocation);
-        btn_createLocation.setOnClickListener( v -> {
+        btn_createLocation.setOnClickListener(v -> {
 
             // 檢查是否需要顯示教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
@@ -62,12 +65,12 @@ public class WhichTutorialFragment extends Fragment {
         });
 
         Button btn_note = rootView.findViewById(R.id.btn_note);
-        btn_note.setOnClickListener( v -> {
+        btn_note.setOnClickListener(v -> {
             // 檢查使用者是否已經造訪過，未造訪則跳轉到教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage",4);
+            editor.putInt("WhichPage", 4);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();
@@ -78,7 +81,7 @@ public class WhichTutorialFragment extends Fragment {
         });
 
         Button btn_locationSetting = rootView.findViewById(R.id.btn_locationSetting);
-        btn_locationSetting.setOnClickListener( v -> {
+        btn_locationSetting.setOnClickListener(v -> {
             // 檢查是否需要顯示教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -94,12 +97,12 @@ public class WhichTutorialFragment extends Fragment {
         });
 
         Button btn_findBus = rootView.findViewById(R.id.btn_findBus);
-        btn_findBus.setOnClickListener( v -> {
+        btn_findBus.setOnClickListener(v -> {
             // 檢查使用者是否已經造訪過，未造訪則跳轉到教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage",5);
+            editor.putInt("WhichPage", 5);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();
@@ -110,7 +113,7 @@ public class WhichTutorialFragment extends Fragment {
         });
 
         Button btn_findWeather = rootView.findViewById(R.id.btn_findWeather);
-        btn_findWeather.setOnClickListener( v -> {
+        btn_findWeather.setOnClickListener(v -> {
 
             // 檢查是否需要顯示教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
@@ -128,12 +131,12 @@ public class WhichTutorialFragment extends Fragment {
         });
 
         Button btn_book = rootView.findViewById(R.id.btn_book);
-        btn_book.setOnClickListener( v -> {
+        btn_book.setOnClickListener(v -> {
             // 檢查使用者是否已經造訪過，未造訪則跳轉到教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage",2);
+            editor.putInt("WhichPage", 2);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();
@@ -144,12 +147,12 @@ public class WhichTutorialFragment extends Fragment {
         });
 
         Button btn_history = rootView.findViewById(R.id.btn_history);
-        btn_history.setOnClickListener( v-> {
+        btn_history.setOnClickListener(v -> {
             // 檢查使用者是否已經造訪過，未造訪則跳轉到教學頁面
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("WhichPage",1);
+            editor.putInt("WhichPage", 1);
             editor.apply();
 
             TutorialFragment tutorialFragment = new TutorialFragment();
@@ -162,60 +165,82 @@ public class WhichTutorialFragment extends Fragment {
 
     // 設置自定義 ActionBar
     private void setupActionBar() {
-        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
-            actionBar.hide(); // 隱藏原有的 ActionBar
+            actionBar.hide();
             actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.lightgreen)));
         }
 
-        // 創建自定義的 ActionBar 視圖
-        CardView cardViewTitle = new CardView(requireContext());
-        cardViewTitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+        CardView cardViewtitle = new CardView(requireContext());
+        cardViewtitle.setLayoutParams(new CardView.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT));
         Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.cardviewtitle_shape);
-        cardViewTitle.setBackground(drawable);
+        cardViewtitle.setBackground(drawable);
 
-        // 創建 LinearLayout 用於存放圖標和標題
         LinearLayout linearLayout = new LinearLayout(requireContext());
-        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        ));
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL); // 設置水平排列
+        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        // 設置圖標
-        ImageView mark = new ImageView(requireContext());
-        mark.setImageResource(R.drawable.setting1);
-        mark.setPadding(10, 10, 5, 10);
+        // 添加書籤圖標
+        ImageView bookmark = new ImageView(requireContext());
+        bookmark.setImageResource(R.drawable.setting1);
+        bookmark.setPadding(10, 10, 5, 10); // 設置圖標邊距
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 100);
+        params.setMarginStart(10); // 設置左邊距
+        bookmark.setLayoutParams(params);
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                100, 100
-        );
-        params.setMarginStart(10);
-        mark.setLayoutParams(params);
-
-        // 設置標題
+        // 添加標題文字
         TextView bookTitle = new TextView(requireContext());
-        bookTitle.setText("設定");
+        bookTitle.setText("操作說明");
         bookTitle.setTextSize(15);
-        bookTitle.setTextColor(getResources().getColor(R.color.green));
-        bookTitle.setPadding(10, 10, 30, 10);
+        bookTitle.setTextColor(getResources().getColor(R.color.green)); // 設置文字顏色
+        bookTitle.setPadding(10, 10, 30, 10); // 設置內距
 
-        // 將圖標和標題添加到 LinearLayout 中
-        linearLayout.addView(mark);
+        linearLayout.addView(bookmark);
         linearLayout.addView(bookTitle);
-        cardViewTitle.addView(linearLayout);
+        cardViewtitle.addView(linearLayout);
 
-        // 設置自定義的 ActionBar
-        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        // 建立自定義返回按鈕
+        ImageView returnButton = new ImageView(requireContext());
+        returnButton.setImageResource(R.drawable.back);
+        LinearLayout.LayoutParams returnButtonParams = new LinearLayout.LayoutParams(100, 100);
+        returnButton.setLayoutParams(returnButtonParams);
+
+        // 建立 ActionBar 的佈局，包含返回按鈕和標題
+        LinearLayout actionBarLayout = new LinearLayout(requireContext());
+        actionBarLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        actionBarLayout.setOrientation(LinearLayout.HORIZONTAL);
+        actionBarLayout.setWeightSum(1.0f);
+
+        LinearLayout leftLayout = new LinearLayout(requireContext());
+        leftLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 0.1f));
+        leftLayout.setOrientation(LinearLayout.HORIZONTAL);
+        leftLayout.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        leftLayout.addView(returnButton);
+
+        LinearLayout rightLayout = new LinearLayout(requireContext());
+        rightLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 0.9f));
+        rightLayout.setOrientation(LinearLayout.HORIZONTAL);
+        rightLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        rightLayout.addView(cardViewtitle);
+
+        actionBarLayout.addView(leftLayout);
+        actionBarLayout.addView(rightLayout);
+
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(null); // 隱藏漢堡選單
+
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false); // 隱藏原有標題
+            actionBar.setDisplayShowTitleEnabled(false); // 隱藏預設標題
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(cardViewTitle, new ActionBar.LayoutParams(
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    ActionBar.LayoutParams.WRAP_CONTENT,
-                    Gravity.END
-            ));
-            actionBar.show(); // 顯示 ActionBar
+            actionBar.setCustomView(actionBarLayout, new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT));
+            actionBar.show();
         }
+
+        //設置acrionBar上的返回按鈕
+        returnButton.setOnClickListener(v -> {
+
+            getActivity().getSupportFragmentManager().popBackStack(); // 回到上一頁
+        });
+
     }
 }
