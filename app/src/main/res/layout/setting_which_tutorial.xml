@@ -41,6 +41,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="45dp"
                         android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:text="教學頁面"
                         android:textColor="@color/green"
                         android:textSize="24dp" />
@@ -205,7 +206,7 @@
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="5dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginBottom="5dp"
+                        android:layout_marginBottom="20dp"
                         app:cardBackgroundColor="@color/darkyellow2"
                         app:cardCornerRadius="20dp">
 

@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:text="確定刪除此書籤?"
         android:textColor="@color/darkgreen"
-        android:textSize="25sp"
+        android:textSize="25dp"
         android:layout_gravity="center" />
 
     <View

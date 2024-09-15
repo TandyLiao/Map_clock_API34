@@ -28,7 +28,7 @@
             android:padding="5dp"
             android:text="創立時間"
             android:textColor="@color/green"
-            android:textSize="15sp" />
+            android:textSize="15dp" />
 
         <TextView
             android:id="@+id/textViewWord2"
@@ -39,7 +39,7 @@
             android:padding="5dp"
             android:text="路線名稱"
             android:textColor="@color/green"
-            android:textSize="15sp" />
+            android:textSize="15dp" />
     </LinearLayout>
     <!-- RecyclerView -->
 
@@ -62,7 +62,7 @@
         android:gravity="center_horizontal"
         android:text="目前還沒有收藏路線喔"
         android:textColor="@color/lightgreen"
-        android:textSize="25sp"
+        android:textSize="25dp"
         app:layout_constraintBottom_toBottomOf="@+id/recycleView_book"
         app:layout_constraintTop_toTopOf="@+id/recycleView_book"
         tools:layout_editor_absoluteX="176dp" />
@@ -123,7 +123,7 @@
                     android:layout_gravity="center"
                     android:text="建立路線"
                     android:textColor="@color/green"
-                    android:textSize="15sp" />
+                    android:textSize="15dp" />
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -169,7 +169,7 @@
                     android:layout_gravity="center"
                     android:text="修改路線"
                     android:textColor="@color/green"
-                    android:textSize="15sp" />
+                    android:textSize="15dp" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

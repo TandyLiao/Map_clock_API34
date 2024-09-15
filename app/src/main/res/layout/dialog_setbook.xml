@@ -17,7 +17,7 @@
         android:layout_gravity="center"
         android:text="收藏此路線"
         android:textColor="@color/green"
-        android:textSize="25sp" />
+        android:textSize="25dp" />
 
     <View
         android:layout_width="5dp"
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:lines="1"
         android:hint="請在這輸入路線名稱"
-        android:textSize="15sp"
+        android:textSize="15dp"
         android:textColorHint="@color/gray"
         android:textColor="@color/black"
         android:theme="@style/EditText"
@@ -87,7 +87,7 @@
             android:padding="0dp"
             android:background="@drawable/btn_additem"
             android:text="取消"
-            android:textSize="15sp"
+            android:textSize="15dp"
             android:textColor="@color/green"
             app:backgroundTint="@null"
             android:layout_gravity="center" />
@@ -103,7 +103,7 @@
             android:padding="0dp"
             android:background="@drawable/btn_additem"
             android:text="確認"
-            android:textSize="15sp"
+            android:textSize="15dp"
             android:textColor="@color/green"
             app:backgroundTint="@null"
             android:layout_gravity="center" />

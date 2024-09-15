@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:text="正在找尋路線中..."
             android:textColor="@color/green"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:gravity="center"
             android:layout_gravity="center"
             app:layout_constraintBottom_toTopOf="@+id/map"

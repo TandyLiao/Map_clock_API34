@@ -39,7 +39,7 @@
                 android:padding="10dp"
                 android:text="路線已結束，將返回路線規劃"
                 android:textColor="@color/green"
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:gravity="center"
                 android:layout_marginBottom="16dp"/>
 
