@@ -34,6 +34,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
+import com.example.map_clock_api34.MRTStationFinder.MRTStationDistanceCalculator;
+import com.example.map_clock_api34.MRTStationFinder.NearestMRTStationFinder;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
 import com.example.map_clock_api34.TutorialFragment;
@@ -179,6 +181,16 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 makeToast("還沒有選擇地點喔",1000);
                 return;
             }
+            NearestMRTStationFinder userMRTStation = new NearestMRTStationFinder();
+            NearestMRTStationFinder destinationMRTStation = new NearestMRTStationFinder();
+
+            MRTStationDistanceCalculator mrtStationDistanceCalculator = new MRTStationDistanceCalculator(context, sharedViewModel.getNowLantitude(), sharedViewModel.getNowLontitude(), userMRTStation);
+            mrtStationDistanceCalculator.findNearestStation();
+
+            MRTStationDistanceCalculator StationDistanceCalculator = new MRTStationDistanceCalculator(context, sharedViewModel.getLatitude(0), sharedViewModel.getLongitude(0), destinationMRTStation);
+            StationDistanceCalculator.findNearestStation();
+
+            Log.d("MRT",userMRTStation.toString() + destinationMRTStation);
         }
     }
 
