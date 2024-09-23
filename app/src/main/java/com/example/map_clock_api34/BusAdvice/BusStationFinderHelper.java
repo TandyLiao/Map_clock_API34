@@ -425,7 +425,8 @@ public class BusStationFinderHelper {
                             for (BusStation endStation : destinationStops) {
                                 if (isRouteValid(routeLatLngs, startStation, endStation)) {
                                     // 添加目的地站點到目標站點對應的路線
-                                    destinationStopsMap.put(new BusStation.LatLng(endStation.getStopLat(), endStation.getStopLon()), endStation.getStopName());
+                                    destinationStopsMap.put(
+                                            new BusStation.LatLng(endStation.getStopLat(), endStation.getStopLon()), endStation.getStopName());
                                 }
                             }
 

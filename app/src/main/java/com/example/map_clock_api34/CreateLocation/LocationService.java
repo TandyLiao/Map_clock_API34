@@ -363,7 +363,8 @@ public class LocationService extends Service {
             boolean isRingtoneEnabled = ringtone[destinationIndex];
             boolean isVibrationEnabled = vibrate[destinationIndex];
 
-            String fullMessage = (note[temp] == null) ? "即將抵達: " + destinationName[temp] : "即將抵達：\n" + destinationName[temp] + "\n\n記事內容：\n" + note[temp];
+            String fullMessage = (note[temp] == null) ? "即將抵達: "
+                    + destinationName[temp] : "即將抵達：\n" + destinationName[temp] + "\n\n記事內容：\n" + note[temp];
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.appicon_tem8)
                     .setContentTitle("地圖鬧鐘")

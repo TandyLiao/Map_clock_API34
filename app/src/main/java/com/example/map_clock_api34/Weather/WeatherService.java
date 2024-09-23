@@ -196,7 +196,8 @@ public class WeatherService {
                 // 將解析到的資訊存到 result 陣列
                 result[0] = (temperature != -1) ? temperature + "˚C" : "?˚C";
                 result[1] = (rainProbability != -1) ? "降雨概率為" + rainProbability : "未知降雨概率";
-                result[2] = (weatherDescription.contains("雨") && rainProbability >= 40) ? weatherDescription + "\n" + "建議攜帶雨傘" : weatherDescription;
+                result[2] = (weatherDescription.contains("雨") && rainProbability >= 40)
+                        ? weatherDescription + "\n" + "建議攜帶雨傘" : weatherDescription;
                 result[3] = (weatherDescription.contains("雨") && rainProbability >= 40) ? "rain" : "sun";
                 result[4] = cityname;
                 result[5] = "";

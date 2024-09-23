@@ -95,6 +95,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         HashMap<String, String> item5 = new HashMap<>();
         item5.put("data", "天氣");
         arrayList.add(item5);
+
+        HashMap<String, String> item6 = new HashMap<>();
+        item6.put("data", "捷運查詢");
+        arrayList.add(item6);
     }
 
     // 處理圖片的點擊事件，根據不同位置切換到對應的 Fragment 或彈出對話框
@@ -170,6 +174,12 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
+        else if (position == 5) {  // 第六個項目 "捷運查詢"
+            if (sharedViewModel.getLocationCount() == -1) {
+                makeToast("還沒有選擇地點喔",1000);
+                return;
+            }
+        }
     }
 
     // 綁定 ViewHolder，將數據顯示在相應的 UI 元件上
@@ -195,6 +205,9 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 break;
             case "地點設定":
                 holder.horecycleimageView.setImageResource(R.drawable.vibrate);
+                break;
+            case "捷運查詢":
+                holder.horecycleimageView.setImageResource(R.drawable.middle_finger);
                 break;
         }
     }
