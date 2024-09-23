@@ -56,6 +56,9 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 
+    implementation 'org.apache.poi:poi:5.2.3' // 用於處理 .xls 文件
+    implementation 'org.apache.poi:poi-ooxml:5.2.3' // 用於處理 .xlsx 文件
+
     //以下天氣API
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

@@ -4,10 +4,7 @@ import static com.example.map_clock_api34.Distance.getDistanceBetweenPointsNew;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.location.Location;
 import android.util.Log;
-
-import com.example.map_clock_api34.Distance;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,19 +14,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class MRTStationDistanceCalculator {
+public class FindMRTStationStop {
 
     private Context context;  // 用來讀取 assets 資料夾中的 JSON 檔案
     private double userLat;
     private double userLon;
-    private NearestMRTStationFinder nearestMRTStationFinder;
+    private StaionRecord staionRecord;
 
     // 建構子：初始化使用者的經緯度
-    public MRTStationDistanceCalculator(Context context, double userLat, double userLon, NearestMRTStationFinder nearestMRTStationFinder) {
+    public FindMRTStationStop(Context context, double userLat, double userLon, StaionRecord staionRecord) {
         this.context = context;
         this.userLat = userLat;
         this.userLon = userLon;
-        this.nearestMRTStationFinder = nearestMRTStationFinder;
+        this.staionRecord = staionRecord;
     }
 
     /**
@@ -89,7 +86,7 @@ public class MRTStationDistanceCalculator {
 
                 if (distance < minDistance) {
                     minDistance = (float) distance;
-                    nearestMRTStationFinder.setNearestMRTStationFinder(
+                    staionRecord.setNearestMRTStationFinder(
                             station.getJSONObject("properties").getString("NAME"),
                             minDistance, stationLatLon[0], stationLatLon[1]
 
