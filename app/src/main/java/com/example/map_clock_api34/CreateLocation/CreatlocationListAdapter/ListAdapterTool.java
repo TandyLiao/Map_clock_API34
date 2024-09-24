@@ -1,10 +1,7 @@
 package com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter;
 
 // 引入所需的 Android 和其他庫
-import static android.app.PendingIntent.getActivity;
 import static android.content.Context.MODE_PRIVATE;
-import static com.example.map_clock_api34.MRTStationFinder.MRTShortestPath.parseRoutes;
-import static com.example.map_clock_api34.MRTStationFinder.MRTShortestPath.parseTravelTimes;
 
 import android.content.ContentValues;
 import android.content.SharedPreferences;
@@ -36,7 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.MRTStationFinder.FindMRTStationStop;
-import com.example.map_clock_api34.MRTStationFinder.MRTShortestPath;
+import com.example.map_clock_api34.MRTStationFinder.MRTRouteFinder;
 import com.example.map_clock_api34.MRTStationFinder.StaionRecord;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
@@ -48,13 +45,11 @@ import com.example.map_clock_api34.book.BookDatabaseHelper;
 import com.example.map_clock_api34.note.NoteFragment;
 import com.example.map_clock_api34.setting.CreatLocation_setting;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 // 自定義的 RecyclerView Adapter，主要用來處理列表中的數據展示及點擊事件
@@ -197,37 +192,10 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
 
             Log.d("MRT",userMRTStation.toString() +"  "+ destinationMRTStation);
 
-// 讀取捷運路線和時間表
-            try {
-                Map<String, List<String>> routes = parseRoutes(context, "MRT_Route.csv");  // 使用 context 讀取 assets 中的文件
-                Map<String, Map<String, Integer>> travelTimes = parseTravelTimes(context, "MRT_Time.csv");
-
-
-                List<String> shortestPath = MRTShortestPath.findShortestPath(travelTimes, userMRTStation.getName(), destinationMRTStation.getName());
-
-                // 顯示路徑和時間
-                if (!shortestPath.isEmpty()) {
-                    StringBuilder pathBuilder = new StringBuilder();
-                    pathBuilder.append("最短路徑: ");
-                    for (String station : shortestPath) {
-                        pathBuilder.append(station).append(" -> ");
-                    }
-                    pathBuilder.setLength(pathBuilder.length() - 4);  // 移除最後的 " -> "
-                    Log.d("MRT", pathBuilder.toString());
-
-                    // 計算總時間
-                    int totalTime = 0;
-                    for (int i = 0; i < shortestPath.size() - 1; i++) {
-                        String stationA = shortestPath.get(i);
-                        String stationB = shortestPath.get(i + 1);
-                        totalTime += travelTimes.get(stationA).get(stationB);
-                    }
-                    Log.d("MRT", "總時間: " + totalTime + " 秒");
-                } else {
-                    makeToast("找不到有效的捷運路徑", 1000);
-                }
-            } catch (IOException e) {
-                Log.e("MRT", "讀取捷運路線或時間失敗: " + e.getMessage());
+            MRTRouteFinder mrtRouteFinder = new MRTRouteFinder(context);
+            List<String> allRoutes = mrtRouteFinder.findAllRoutesWithTransfer("淡水站", "南港展覽館站");
+            for (String route : allRoutes) {
+                Log.d("MRT_ROUTE", "可能路線: " + route);
             }
         }
     }
