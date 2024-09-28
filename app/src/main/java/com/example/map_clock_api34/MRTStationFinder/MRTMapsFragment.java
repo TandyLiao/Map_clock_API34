@@ -1,11 +1,9 @@
 package com.example.map_clock_api34.MRTStationFinder;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -18,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +30,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.map_clock_api34.BusAdvice.BusStationFinderHelper;
 import com.example.map_clock_api34.CreateLocation.SelectPlaceFragment;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
@@ -44,15 +40,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class MRTMapsFragment extends Fragment {
 
@@ -60,6 +52,11 @@ public class MRTMapsFragment extends Fragment {
     private Location lastLocation; // 儲存最後的定位資訊
     private View rootView, overlayView;
     private DrawerLayout drawerLayout;
+    private TextView MRTTitle1;
+    private TextView MRTTitle2;
+    private TextView MRTTitle3;
+    private TextView MRTtxtTime;
+
 
     private SharedViewModel sharedViewModel;
     private GoogleMap googleMap;
@@ -74,6 +71,11 @@ public class MRTMapsFragment extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        MRTTitle1 = rootView.findViewById(R.id.MRTTitle1);
+        MRTTitle2 = rootView.findViewById(R.id.MRTTitle2);
+        MRTTitle3 = rootView.findViewById(R.id.MRTTitle3);
+
+        MRTtxtTime = rootView.findViewById(R.id.MRTTime);
 
         drawerLayout = getActivity().findViewById(R.id.drawerLayout);
         if (drawerLayout != null) {
@@ -104,11 +106,6 @@ public class MRTMapsFragment extends Fragment {
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
-
-        ImageView information = getActivity().findViewById(R.id.information);
-        information.setOnClickListener(v -> {
-            ShowInformationPopupWindow(shortestRoute, shortestTime);
-        });
     }
     // 當地圖準備好時的回調函數
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -133,6 +130,7 @@ public class MRTMapsFragment extends Fragment {
 
             // 查找最短路線並顯示標記
             findAndDisplayShortestRoute();
+            ShowInformationPopupWindow(shortestRoute, shortestTime);
         }
     };
 
@@ -292,34 +290,14 @@ public class MRTMapsFragment extends Fragment {
     // 顯示彈出視窗，顯示捷運路線資訊
     // 顯示彈出視窗，顯示捷運路線資訊
     private void ShowInformationPopupWindow(List<String> route, int totalTime) {
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_information_button, null, false);
-        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setWidth(800);
-        popupWindow.setFocusable(false);
-        popupWindow.setOutsideTouchable(false);
-
-        // 顯示彈出視窗
-        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        // 疊加透明遮罩，防止點擊其他區域
-        overlayView = new View(getContext());
-        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent_black));
-        overlayView.setClickable(true);
-        ((ViewGroup) rootView).addView(overlayView);
-
-        TextView showNotification = view.findViewById(R.id.txtNote); // 取得彈窗的文字視圖
-        showNotification.setTextSize(20);
 
         // 生成路線資訊
         StringBuilder routeInfo = new StringBuilder();
         String currentLine = route.get(1).trim();  // 起始的路線 (例如 R線)
         String startStation = route.get(0).trim(); // 起點站
         String previousStation = startStation;
+        List<String> transferStations = new ArrayList<>();//放轉乘站
 
-        // 初始化信息，從起點站開始
-        routeInfo.append("從 ").append(startStation).append(" 搭乘").append(currentLine).append("線");
 
         // 從第二站開始迭代，i = 2 是第二站，跳過起點站
         for (int i = 2; i < route.size(); i += 2) {
@@ -336,31 +314,42 @@ public class MRTMapsFragment extends Fragment {
 
                 // 如果路線不同，表示需要轉乘
                 if (!line.equals(currentLine)) {
-                    routeInfo.append(" 到 ").append(station).append("，轉乘").append(line).append("線");
+                    transferStations.add(station);
                     currentLine = line;
                 } else {
                     // 如果路線相同，表示這段路線是連續的
-                    routeInfo.append(" 到 ").append(station);
+                    MRTTitle2.setText("轉乘站: "+station);
                 }
             }
             previousStation = station;
         }
 
+        if (!transferStations.isEmpty()) {
+            StringBuilder transferList = new StringBuilder("轉乘站列表: ");
+            for (String transferStation : transferStations) {
+                transferList.append(transferStation).append("，");
+            }
+            // 移除最後一個逗號
+            if (transferList.length() > 0) {
+                transferList.setLength(transferList.length() - 1); // 刪除最後一個逗號
+            }
+            // 顯示轉乘站列表
+            MRTTitle2.setText(transferList.toString());
+        }
+
         // 終點站處理
-        routeInfo.append(" 到 ").append(previousStation).append(" 下車");
+        MRTTitle3.setText("終點站: "+previousStation);
 
         // 計算乘車時間
         int minutes = totalTime / 60;
-        routeInfo.append("\n乘車時間約 ").append(minutes).append(" 分鐘");
 
-        // 設定彈窗內容
-        showNotification.setText(routeInfo.toString());
-
-        Button BTNPopup = view.findViewById(R.id.Popupsure); // 確認按鈕
-        BTNPopup.setOnClickListener(v -> {
-            popupWindow.dismiss(); // 點擊確認按鈕時關閉彈窗
-            removeOverlayView();   // 移除透明遮罩
-        });
+        // 設定起點+搭乘時間
+        if (MRTTitle1 != null) {
+            MRTTitle1.setText("起點站: "+startStation);
+            MRTtxtTime.setText("\n乘車時間約 "+minutes+" 分鐘");
+        } else {
+            Log.d("MRTTitle", "MRTTitle is null");
+        }
     }
 
 

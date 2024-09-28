@@ -251,7 +251,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 holder.horecycleimageView.setImageResource(R.drawable.vibrate);
                 break;
             case "捷運查詢":
-                holder.horecycleimageView.setImageResource(R.drawable.middle_finger);
+                holder.horecycleimageView.setImageResource(R.drawable.train);
                 break;
         }
     }
