@@ -64,6 +64,9 @@ public class MRTMapsFragment extends Fragment {
     private SharedViewModel sharedViewModel;
     private GoogleMap googleMap;
 
+    List<String> shortestRoute;
+    int shortestTime;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -100,6 +103,11 @@ public class MRTMapsFragment extends Fragment {
                 // 點擊返回按鈕時返回上一頁
                 getActivity().getSupportFragmentManager().popBackStack();
             }
+        });
+
+        ImageView information = getActivity().findViewById(R.id.information);
+        information.setOnClickListener(v -> {
+            ShowInformationPopupWindow(shortestRoute, shortestTime);
         });
     }
     // 當地圖準備好時的回調函數
@@ -164,9 +172,9 @@ public class MRTMapsFragment extends Fragment {
         MRTTime mrtTime = new MRTTime(getActivity());
         mrtTime.readCsvFile();
 
-        List<String> shortestRoute = mrtTime.findShortestRoute(allProcessedRoutes);
+        shortestRoute = mrtTime.findShortestRoute(allProcessedRoutes);
         if (shortestRoute != null) {
-            int shortestTime = mrtTime.calculateRouteTime(shortestRoute);
+            shortestTime = mrtTime.calculateRouteTime(shortestRoute);
             Log.d("MRTShortestRoute", "最短路線: " + shortestRoute + ", 總時間: " + shortestTime + " 秒");
             displayRouteOnMap(shortestRoute);
         } else {
@@ -281,6 +289,81 @@ public class MRTMapsFragment extends Fragment {
             popupWindow.dismiss(); // 關閉彈窗
         });
     }
+    // 顯示彈出視窗，顯示捷運路線資訊
+    // 顯示彈出視窗，顯示捷運路線資訊
+    private void ShowInformationPopupWindow(List<String> route, int totalTime) {
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_information_button, null, false);
+        PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setWidth(800);
+        popupWindow.setFocusable(false);
+        popupWindow.setOutsideTouchable(false);
+
+        // 顯示彈出視窗
+        popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        // 疊加透明遮罩，防止點擊其他區域
+        overlayView = new View(getContext());
+        overlayView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlayView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent_black));
+        overlayView.setClickable(true);
+        ((ViewGroup) rootView).addView(overlayView);
+
+        TextView showNotification = view.findViewById(R.id.txtNote); // 取得彈窗的文字視圖
+        showNotification.setTextSize(20);
+
+        // 生成路線資訊
+        StringBuilder routeInfo = new StringBuilder();
+        String currentLine = route.get(1).trim();  // 起始的路線 (例如 R線)
+        String startStation = route.get(0).trim(); // 起點站
+        String previousStation = startStation;
+
+        // 初始化信息，從起點站開始
+        routeInfo.append("從 ").append(startStation).append(" 搭乘").append(currentLine).append("線");
+
+        // 從第二站開始迭代，i = 2 是第二站，跳過起點站
+        for (int i = 2; i < route.size(); i += 2) {
+            String station = route.get(i).trim(); // 當前站點
+
+            // 如果當前站點和前一站點相同，則跳過，避免重複記錄
+            if (station.equals(previousStation)) {
+                continue; // 忽略重複的站點
+            }
+
+            // 確保 i + 1 不超出範圍，並且獲取下一段的路線
+            if (i + 1 < route.size()) {
+                String line = route.get(i + 1).trim(); // 下一段路線
+
+                // 如果路線不同，表示需要轉乘
+                if (!line.equals(currentLine)) {
+                    routeInfo.append(" 到 ").append(station).append("，轉乘").append(line).append("線");
+                    currentLine = line;
+                } else {
+                    // 如果路線相同，表示這段路線是連續的
+                    routeInfo.append(" 到 ").append(station);
+                }
+            }
+            previousStation = station;
+        }
+
+        // 終點站處理
+        routeInfo.append(" 到 ").append(previousStation).append(" 下車");
+
+        // 計算乘車時間
+        int minutes = totalTime / 60;
+        routeInfo.append("\n乘車時間約 ").append(minutes).append(" 分鐘");
+
+        // 設定彈窗內容
+        showNotification.setText(routeInfo.toString());
+
+        Button BTNPopup = view.findViewById(R.id.Popupsure); // 確認按鈕
+        BTNPopup.setOnClickListener(v -> {
+            popupWindow.dismiss(); // 點擊確認按鈕時關閉彈窗
+            removeOverlayView();   // 移除透明遮罩
+        });
+    }
+
+
     // 移除疊加在底層的透明遮罩
     private void removeOverlayView() {
         if (overlayView != null && overlayView.getParent() != null) {

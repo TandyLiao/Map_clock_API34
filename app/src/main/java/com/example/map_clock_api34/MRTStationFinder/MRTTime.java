@@ -61,7 +61,7 @@ public class MRTTime {
     public void readCsvFile() {
         AssetManager assetManager = context.getAssets();
         try {
-            InputStream is = assetManager.open("MRT_Time.csv");
+            InputStream is = assetManager.open("MRT_TimePAST.csv");
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -83,26 +83,32 @@ public class MRTTime {
     // 計算多段路線的總時間，包括換線等候時間
     public int calculateRouteTime(List<String> stationsWithLines) {
         int totalTime = 0;
-        Log.d("MRT_TEST",stationsWithLines.toString());
+        Log.d("MRT_TEST", stationsWithLines.toString());
+
+        // 逐步處理，每次處理三個元素（起點站、路線、終點站）
         for (int i = 0; i < stationsWithLines.size() - 2; i += 2) {
-            // 正確處理站名和路線標識
-            String startStation = "捷運"+stationsWithLines.get(i).trim();
+            String startStation = "捷運" + stationsWithLines.get(i).trim();
+            startStation = startStation.replaceAll("[\\p{C}]", "").trim(); // 清理字符
+
             String lineId = stationsWithLines.get(i + 1).trim();
-            String endStation = "捷運"+stationsWithLines.get(i + 2).trim();
+            lineId = lineId.replaceAll("[^\\x20-\\x7E]", "").trim();  // 清理字符
 
-            // 檢查是否有連續的相同站名
-            if (startStation.equals(endStation)) {
-                continue;
-            }
+            String endStation = "捷運" + stationsWithLines.get(i + 2).trim();
+            endStation = endStation.replaceAll("[\\p{C}]", "").trim();  // 清理字符
 
-            // 計算這段路線的時間
+            // 計算這段路程的時間
             totalTime += calculateSegmentTime(startStation, endStation, lineId);
 
             // 處理換線等候時間
+            // 如果下一站是相同站名，表示換線
             if (i + 3 < stationsWithLines.size()) {
+                String nextStation = "捷運" + stationsWithLines.get(i + 2).trim();
                 String nextLineId = stationsWithLines.get(i + 3).trim();
-                if (!lineId.equals(nextLineId)) {
-                    totalTime += 300;
+
+                // 如果是相同站名但不同路線，表示換線
+                if (endStation.equals(nextStation)) {
+                    totalTime += 300; // 假設換線等待時間是 300 秒
+                    Log.d("MRT_TEST", "在站點：" + endStation + "換線，增加300秒等候時間");
                 }
             }
         }
@@ -111,16 +117,16 @@ public class MRTTime {
     }
 
 
-
     // 查詢單段時間
     public int calculateSegmentTime(String startStation, String endStation, String lineId) {
         int totalTime = 0;
         boolean startCounting = false;
 
         // 確保去掉站名和路線標識的多餘空格和特殊字符
-        startStation = startStation.trim();
-        endStation = endStation.trim();
-        lineId = lineId.trim();
+        startStation = startStation.trim().replaceAll("[\\s\\p{C}]", "");
+        endStation = endStation.trim().replaceAll("[\\s\\p{C}]", "");
+        lineId = lineId.trim().replaceAll("[\\s\\p{C}]", "");
+
 
         // 優先查找 O1 線
         if (lineId.equals("O")) {
@@ -136,6 +142,7 @@ public class MRTTime {
             // 在匹配的路線上累加時間
             if (startCounting && segment.getLine().equals(lineId)) {
                 totalTime += segment.getTravelTime() + segment.getStopTime();
+                Log.d("MRTTime", "匹配成功: " + startStation + " 到 " + endStation + "，累積時間: " + totalTime);
             }
 
             // 找到終點站時結束計算
@@ -144,14 +151,9 @@ public class MRTTime {
             }
         }
 
-        // 如果 O1 線沒有找到，嘗試查找 O2 線
-        if (!startCounting && lineId.equals("O1")) {
-            Log.d("MRTSegment", "在 O1 線中未找到，嘗試在 O2 線中查找 " + startStation + " 到 " + endStation);
-            return calculateSegmentTimeO2(startStation, endStation);
-        }
-
+        // 如果找不到，打印更詳細的錯誤資訊
         if (!startCounting) {
-            Log.d("MRTSegment", "無法找到起始站 " + startStation + " 和路線 " + lineId);
+            Log.d("MRTSegment", "無法找到起始站：" + startStation + " 和路線：" + lineId);
         }
 
         return totalTime;
@@ -169,7 +171,6 @@ public class MRTTime {
 
             if (startCounting && segment.getLine().equals("O2")) {
                 totalTime += segment.getTravelTime() + segment.getStopTime();
-
             }
 
             if (segment.getEndStation().equals(endStation) && segment.getLine().equals("O2")) {
@@ -183,8 +184,6 @@ public class MRTTime {
 
         return totalTime;
     }
-
-
 
     // 找到最短路線
     public List<String> findShortestRoute(List<List<String>> allProcessedRoutes) {
