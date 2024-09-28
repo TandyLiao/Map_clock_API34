@@ -28,7 +28,6 @@ public class MRTRouteFinder {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = reader.readLine()) != null) {
-                Log.d("MRT", "原始資料: " + line);
                 line = line.replaceAll("'", "");
                 String[] tokens = line.split(",");
 
@@ -38,14 +37,12 @@ public class MRTRouteFinder {
                 }
 
                 String routeId = tokens[0];  // 路線 ID
-                Log.d("MRT", "ID: " + routeId);
                 List<String> stations = new ArrayList<>();
 
                 // 解析站點資料 (從第三個 token 開始)
                 for (int i = 2; i < tokens.length; i++) {
                     String stationName = tokens[i];  // 取得站點名稱
                     stations.add(stationName);  // 將站點加入路線
-                    Log.d("MRT", "stationName: " + stationName);
                 }
 
                 mrtRoutes.put(routeId, stations);
@@ -83,11 +80,10 @@ public class MRTRouteFinder {
             String currentRoute = routeInfo.currentRoute;
 
             // 超過換乘次數限制
-            if (routeInfo.path.size() > 4) continue;
+            if (routeInfo.path.size() > 7) continue;
 
             // 到達終點
             if (currentStation.equals(endStation)) {
-                Log.d("MRT_ROUTE", "找到路線：" + routeInfo.path);
                 allRoutes.add(routeInfo.path.toString());
                 continue;
             }
@@ -98,7 +94,7 @@ public class MRTRouteFinder {
                 if (!localVisitedStations.contains(nextStation)) {
                     localVisitedStations.add(nextStation);
                     RouteInfo newRouteInfo = new RouteInfo(nextStation, currentRoute, new ArrayList<>(routeInfo.path), new HashSet<>(routeInfo.visitedRoutes));
-                    newRouteInfo.path.add("搭乘 " + currentRoute + " 到達 " + nextStation);
+                    newRouteInfo.path.add(currentRoute + "," + nextStation);
                     newRouteInfo.visitedStations = localVisitedStations;  // 更新當前路徑的訪問站點
                     queue.add(newRouteInfo);
                 }
@@ -110,7 +106,7 @@ public class MRTRouteFinder {
                 for (String newRoute : findRoutesByStation(currentStation)) {
                     if (!newRoute.equals(currentRoute)) {
                         RouteInfo newRouteInfo = new RouteInfo(currentStation, newRoute, new ArrayList<>(routeInfo.path), new HashSet<>(routeInfo.visitedRoutes));
-                        newRouteInfo.path.add("換乘 " + newRoute + " 在 " + currentStation);
+                        newRouteInfo.path.add(newRoute+","+currentStation);
                         queue.add(newRouteInfo);
                     }
                 }

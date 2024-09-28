@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
 import com.example.map_clock_api34.MRTStationFinder.FindMRTStationStop;
 import com.example.map_clock_api34.MRTStationFinder.MRTRouteFinder;
+import com.example.map_clock_api34.MRTStationFinder.MRTTime;
 import com.example.map_clock_api34.MRTStationFinder.StaionRecord;
 import com.example.map_clock_api34.R;
 import com.example.map_clock_api34.SharedViewModel;
@@ -47,6 +48,7 @@ import com.example.map_clock_api34.setting.CreatLocation_setting;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -192,13 +194,74 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
 
             Log.d("MRT",userMRTStation.toString() +"  "+ destinationMRTStation);
 
+            // MRTRouteFinder 找到所有路線
             MRTRouteFinder mrtRouteFinder = new MRTRouteFinder(context);
-            List<String> allRoutes = mrtRouteFinder.findAllRoutesWithTransfer("淡水站", "南港展覽館站");
+            List<String> allRoutes = mrtRouteFinder.findAllRoutesWithTransfer(userMRTStation.getName(), destinationMRTStation.getName());
+
+            // 用來保存所有處理後的路線資料
+            List<List<String>> allProcessedRoutes = new ArrayList<>();
+
+            // 遍歷所有路線並處理
             for (String route : allRoutes) {
-                Log.d("MRT_ROUTE", "可能路線: " + route);
+                // 移除不必要的方括號
+                route = route.replace("[", "").replace("]", "");
+
+                // 分割 route 並得到一個 String[]，表示每個站點和路線
+                String[] splitRoute = route.split(",");
+
+                // 創建一個新的陣列，其長度是 splitRoute 的長度加 1，因為我們要把 userMRTStation.getName() 放在第一個
+                String[] clearRoute = new String[splitRoute.length + 1];
+
+                // 將 userMRTStation.getName() 放在陣列的第一個位置
+                clearRoute[0] = userMRTStation.getName();
+
+                // 將 splitRoute 中的元素依次複製到 clearRoute 陣列中，從索引 1 開始
+                System.arraycopy(splitRoute, 0, clearRoute, 1, splitRoute.length);
+
+                // 將字串陣列轉換成 List<String> 並存入 allProcessedRoutes
+                List<String> processedRoute = Arrays.asList(clearRoute);
+                allProcessedRoutes.add(processedRoute);
+
+                // 將處理後的路線轉換為字串並輸出
+                String result = String.join(", ", processedRoute);  // 用逗號分隔每一站
+                Log.d("MRT_ROUTE", "處理後的路線: " + result);
             }
+
+
+            MRTTime mrtTime = new MRTTime(context);
+            mrtTime.readCsvFile();
+
+            // 假設 `allProcessedRoutes` 是已經處理好的路線列表
+            List<String> shortestRoute = mrtTime.findShortestRoute(allProcessedRoutes);
+
+            if (shortestRoute != null) {
+                int shortestTime = mrtTime.calculateRouteTime(shortestRoute);
+                Log.d("MRTShortestRoute", "最短路線: " + shortestRoute + ", 總時間: " + shortestTime + " 秒");
+            } else {
+                Log.d("MRTShortestRoute", "未找到任何路線");
+            }
+
+
         }
     }
+    public List<String> extractPatternedElements(StaionRecord staionRecord, String[] route) {
+        List<String> result = new ArrayList<>();
+        result.add(staionRecord.getName());
+        // 按照您指定的規律，提取數據
+        for (int i = 0; i < route.length; i += 4) {
+            // 確保不會越界
+            if (i < route.length) {
+                result.add(route[i].trim());  // 第 i 位
+            }
+            if (i + 1 < route.length) {
+                result.add(route[i + 1].trim());  // 第 i+1 位
+            }
+        }
+
+        return result;
+    }
+
+
 
     // 綁定 ViewHolder，將數據顯示在相應的 UI 元件上
     @Override
