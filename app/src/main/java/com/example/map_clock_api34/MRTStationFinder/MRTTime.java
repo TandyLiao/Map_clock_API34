@@ -87,15 +87,11 @@ public class MRTTime {
         for (int i = 0; i < stationsWithLines.size() - 2; i += 2) {
             // 正確處理站名和路線標識
             String startStation = "捷運"+stationsWithLines.get(i).trim();
-            Log.d("MRT_TEST",startStation);
             String lineId = stationsWithLines.get(i + 1).trim();
-            Log.d("MRT_TEST",lineId);
             String endStation = "捷運"+stationsWithLines.get(i + 2).trim();
-            Log.d("MRT_TEST",endStation);
 
             // 檢查是否有連續的相同站名
             if (startStation.equals(endStation)) {
-                Log.d("MRTTime", "跳過路段: " + startStation + " 到 " + endStation + "（相同站名）");
                 continue;
             }
 
@@ -106,7 +102,6 @@ public class MRTTime {
             if (i + 3 < stationsWithLines.size()) {
                 String nextLineId = stationsWithLines.get(i + 3).trim();
                 if (!lineId.equals(nextLineId)) {
-                    Log.d("MRTTime", "從 " + lineId + " 轉到 " + nextLineId + "，加上 300 秒等候時間");
                     totalTime += 300;
                 }
             }
@@ -136,18 +131,15 @@ public class MRTTime {
             // 檢查是否匹配到起始站和路線標識
             if (segment.getStartStation().equals(startStation) && segment.getLine().equals(lineId)) {
                 startCounting = true;
-                Log.d("MRTSegment", "開始計算: " + segment.getStartStation() + " 到 " + segment.getEndStation() + " 路線: " + segment.getLine());
             }
 
             // 在匹配的路線上累加時間
             if (startCounting && segment.getLine().equals(lineId)) {
                 totalTime += segment.getTravelTime() + segment.getStopTime();
-                Log.d("MRTSegment", "累計時間: " + totalTime + " 秒 (行車: " + segment.getTravelTime() + ", 停留: " + segment.getStopTime() + ")");
             }
 
             // 找到終點站時結束計算
             if (segment.getEndStation().equals(endStation) && segment.getLine().equals(lineId)) {
-                Log.d("MRTSegment", "到達終點站: " + endStation + " 結束計算");
                 break;
             }
         }
@@ -173,16 +165,14 @@ public class MRTTime {
         for (MRTSegment segment : segments) {
             if (segment.getStartStation().equals(startStation) && segment.getLine().equals("O2")) {
                 startCounting = true;
-                Log.d("MRTSegment", "開始計算 O2 線: " + segment.getStartStation() + " 到 " + segment.getEndStation());
             }
 
             if (startCounting && segment.getLine().equals("O2")) {
                 totalTime += segment.getTravelTime() + segment.getStopTime();
-                Log.d("MRTSegment", "累計時間 O2 線: " + totalTime + " 秒");
+
             }
 
             if (segment.getEndStation().equals(endStation) && segment.getLine().equals("O2")) {
-                Log.d("MRTSegment", "到達終點站: " + endStation + " 結束 O2 線計算");
                 break;
             }
         }

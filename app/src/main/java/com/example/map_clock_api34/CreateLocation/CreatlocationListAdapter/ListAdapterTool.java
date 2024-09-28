@@ -3,6 +3,8 @@ package com.example.map_clock_api34.CreateLocation.CreatlocationListAdapter;
 // 引入所需的 Android 和其他庫
 import static android.content.Context.MODE_PRIVATE;
 
+import static java.security.AccessController.getContext;
+
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -32,7 +34,9 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.map_clock_api34.BusAdvice.busMapsFragment;
+import com.example.map_clock_api34.CreateLocation.SelectPlaceFragment;
 import com.example.map_clock_api34.MRTStationFinder.FindMRTStationStop;
+import com.example.map_clock_api34.MRTStationFinder.MRTMapsFragment;
 import com.example.map_clock_api34.MRTStationFinder.MRTRouteFinder;
 import com.example.map_clock_api34.MRTStationFinder.MRTTime;
 import com.example.map_clock_api34.MRTStationFinder.StaionRecord;
@@ -183,62 +187,21 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
                 makeToast("還沒有選擇地點喔",1000);
                 return;
             }
-            StaionRecord userMRTStation = new StaionRecord();
-            StaionRecord destinationMRTStation = new StaionRecord();
 
-            FindMRTStationStop findMrtStationStop = new FindMRTStationStop(context, sharedViewModel.getNowLantitude(), sharedViewModel.getNowLontitude(), userMRTStation);
-            findMrtStationStop.findNearestStation();
+            SelectPlaceFragment selectPlaceFragment = new SelectPlaceFragment();
+            String busCity = selectPlaceFragment.getCityNameCustom(context, sharedViewModel.getNowLantitude(), sharedViewModel.getNowLontitude());
 
-            FindMRTStationStop StationDistanceCalculator = new FindMRTStationStop(context, sharedViewModel.getLatitude(0), sharedViewModel.getLongitude(0), destinationMRTStation);
-            StationDistanceCalculator.findNearestStation();
-
-            Log.d("MRT",userMRTStation.toString() +"  "+ destinationMRTStation);
-
-            // MRTRouteFinder 找到所有路線
-            MRTRouteFinder mrtRouteFinder = new MRTRouteFinder(context);
-            List<String> allRoutes = mrtRouteFinder.findAllRoutesWithTransfer(userMRTStation.getName(), destinationMRTStation.getName());
-
-            // 用來保存所有處理後的路線資料
-            List<List<String>> allProcessedRoutes = new ArrayList<>();
-
-            // 遍歷所有路線並處理
-            for (String route : allRoutes) {
-                // 移除不必要的方括號
-                route = route.replace("[", "").replace("]", "");
-
-                // 分割 route 並得到一個 String[]，表示每個站點和路線
-                String[] splitRoute = route.split(",");
-
-                // 創建一個新的陣列，其長度是 splitRoute 的長度加 1，因為我們要把 userMRTStation.getName() 放在第一個
-                String[] clearRoute = new String[splitRoute.length + 1];
-
-                // 將 userMRTStation.getName() 放在陣列的第一個位置
-                clearRoute[0] = userMRTStation.getName();
-
-                // 將 splitRoute 中的元素依次複製到 clearRoute 陣列中，從索引 1 開始
-                System.arraycopy(splitRoute, 0, clearRoute, 1, splitRoute.length);
-
-                // 將字串陣列轉換成 List<String> 並存入 allProcessedRoutes
-                List<String> processedRoute = Arrays.asList(clearRoute);
-                allProcessedRoutes.add(processedRoute);
-
-                // 將處理後的路線轉換為字串並輸出
-                String result = String.join(", ", processedRoute);  // 用逗號分隔每一站
-                Log.d("MRT_ROUTE", "處理後的路線: " + result);
-            }
-
-
-            MRTTime mrtTime = new MRTTime(context);
-            mrtTime.readCsvFile();
-
-            // 假設 `allProcessedRoutes` 是已經處理好的路線列表
-            List<String> shortestRoute = mrtTime.findShortestRoute(allProcessedRoutes);
-
-            if (shortestRoute != null) {
-                int shortestTime = mrtTime.calculateRouteTime(shortestRoute);
-                Log.d("MRTShortestRoute", "最短路線: " + shortestRoute + ", 總時間: " + shortestTime + " 秒");
-            } else {
-                Log.d("MRTShortestRoute", "未找到任何路線");
+            if(sharedViewModel.getCapital(0).equals("新北市") || sharedViewModel.getCapital(0).equals("臺北市")){
+                if(busCity.equals("新北市") || busCity.equals("臺北市")){
+                    MRTMapsFragment mrtMapsFragment = new MRTMapsFragment();
+                    fragmentTransaction.replace(R.id.fl_container, mrtMapsFragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }else{
+                    makeToast("這功能只能在大台北使用喔",1000);
+                }
+            }else{
+                makeToast("這功能只能在大台北使用喔",1000);
             }
 
 
