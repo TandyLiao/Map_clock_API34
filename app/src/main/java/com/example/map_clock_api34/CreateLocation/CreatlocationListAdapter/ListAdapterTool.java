@@ -101,11 +101,11 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
         arrayList.add(item4);
 
         HashMap<String, String> item5 = new HashMap<>();
-        item5.put("data", "天氣");
+        item5.put("data", "捷運查詢");
         arrayList.add(item5);
 
         HashMap<String, String> item6 = new HashMap<>();
-        item6.put("data", "捷運查詢");
+        item6.put("data", "天氣");
         arrayList.add(item6);
     }
 
@@ -172,17 +172,7 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             }
 
 
-        } else if (position == 4) {  // 第五個項目 "天氣"
-            if (sharedViewModel.getLocationCount() == -1) {
-                makeToast("還沒有選擇地點喔",1000);
-                return;
-            }
-            WheatherFragment wheatherFragment = new WheatherFragment();
-            fragmentTransaction.replace(R.id.fl_container, wheatherFragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        }
-        else if (position == 5) {  // 第六個項目 "捷運查詢"
+        } else if (position == 4) {  // 第五個項目 "捷運查詢"
             if (sharedViewModel.getLocationCount() == -1) {
                 makeToast("還沒有選擇地點喔",1000);
                 return;
@@ -203,7 +193,16 @@ public class ListAdapterTool extends RecyclerView.Adapter<ListAdapterTool.ViewHo
             }else{
                 makeToast("這功能只能在大台北使用喔",1000);
             }
-
+        }
+        else if (position == 5) {  // 第六個項目 "天氣"
+            if (sharedViewModel.getLocationCount() == -1) {
+                makeToast("還沒有選擇地點喔",1000);
+                return;
+            }
+            WheatherFragment wheatherFragment = new WheatherFragment();
+            fragmentTransaction.replace(R.id.fl_container, wheatherFragment);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
 
         }
     }
