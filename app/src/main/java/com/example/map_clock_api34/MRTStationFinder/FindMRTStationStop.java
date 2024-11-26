@@ -16,12 +16,12 @@ import java.io.InputStreamReader;
 
 public class FindMRTStationStop {
 
-    private Context context;  // 用來讀取 assets 資料夾中的 JSON 檔案
+    private Context context;  // 用來讀取 assets 資料夾中的 JSON 檔案 Used to read JSON files from the assets folder.
     private double userLat;
     private double userLon;
     private StaionRecord staionRecord;
 
-    // 建構子：初始化使用者的經緯度
+    // 建構子：初始化使用者的經緯度 Constructor: Initialize the user's longitude and latitude
     public FindMRTStationStop(Context context, double userLat, double userLon, StaionRecord staionRecord) {
         this.context = context;
         this.userLat = userLat;
@@ -30,7 +30,7 @@ public class FindMRTStationStop {
     }
 
     /**
-     * 從 assets 資料夾讀取捷運站的 JSON 資料。
+     * 從 assets 資料夾讀取捷運站的 JSON 資料。Read the MRT station JSON data from the assets folder.
      */
     private String loadJSONFromAsset() {
         String json;
